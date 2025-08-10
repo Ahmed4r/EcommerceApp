@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/model/product.dart';
-import 'package:shop/screens/category/category.dart';
 import 'package:shop/screens/homepage/products_screen.dart';
 import 'package:shop/widgets/navigationbar.dart';
 
@@ -10,7 +9,14 @@ class HomepageHeaders extends StatelessWidget {
   String title;
   bool ctrl;
   List<Product> products;
-  HomepageHeaders(this.title, this.ctrl, this.products, {super.key});
+  List<Map<String, dynamic>> categoryData;
+  HomepageHeaders(
+    this.title,
+    this.ctrl,
+    this.products,
+    this.categoryData, {
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +31,7 @@ class HomepageHeaders extends StatelessWidget {
         TextButton(
           onPressed: () {
             ctrl
-                ? navBarKey.currentState?.changeTab(1)
+                ? navBarKey.currentState?.changeTab(1, categoryData)
                 : Navigator.pushNamed(
                     context,
                     ShowProductspage.routeName,

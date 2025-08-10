@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shop/model/product.dart';
+import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
+import 'package:shop/screens/wishlist/cubit/wishlist_state.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   final Product product;
@@ -21,11 +24,28 @@ class ProductDetailsPage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildIconButton(
-                    icon: Icons.arrow_back_ios_new,
+                  GestureDetector(
                     onTap: () => Navigator.pop(context),
+                    child: _circleButton(Icons.arrow_back_ios_new),
                   ),
-                  _buildIconButton(icon: Icons.favorite_border, onTap: () {}),
+
+                  BlocBuilder<WishlistCubit, WishlistState>(
+                    builder: (context, state) {
+                      final isFavorite = context
+                          .read<WishlistCubit>()
+                          .isFavorite(product);
+
+                      return GestureDetector(
+                        onTap: () {
+                          context.read<WishlistCubit>().toggleFavorite(product);
+                        },
+                        child: _circleButton(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : Colors.black,
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -79,7 +99,6 @@ class ProductDetailsPage extends StatelessWidget {
                               SizedBox(width: 4.w),
                               Text(
                                 product.rate.toString(),
-
                                 style: GoogleFonts.cairo(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w600,
@@ -115,11 +134,15 @@ class ProductDetailsPage extends StatelessWidget {
                       ),
                       SizedBox(height: 20.h),
 
-                      // Add to Cart Button
+                      // Add to Wishlist Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            context.read<WishlistCubit>().toggleFavorite(
+                              product,
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
                             shape: RoundedRectangleBorder(
@@ -128,7 +151,7 @@ class ProductDetailsPage extends StatelessWidget {
                             padding: EdgeInsets.symmetric(vertical: 14.h),
                           ),
                           child: Text(
-                            "Add to Cart",
+                            "Add to Wishlist",
                             style: GoogleFonts.cairo(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.bold,
@@ -148,27 +171,17 @@ class ProductDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildIconButton({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(8.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Icon(icon, size: 20.r),
+  Widget _circleButton(IconData icon, {Color color = Colors.black}) {
+    return Container(
+      padding: EdgeInsets.all(8.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+        ],
       ),
+      child: Icon(icon, size: 20.r, color: color),
     );
   }
 }

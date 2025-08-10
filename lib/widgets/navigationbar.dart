@@ -8,7 +8,7 @@ import 'package:shop/screens/wishlist/wishlist.dart';
 final GlobalKey<_NavigationbarState> navBarKey = GlobalKey();
 
 class Navigationbar extends StatefulWidget {
-  static const String routeName = '/Navigationbar';
+  static const String routeName = 'Navigationbar';
   const Navigationbar({super.key});
 
   @override
@@ -16,7 +16,7 @@ class Navigationbar extends StatefulWidget {
 }
 
 class _NavigationbarState extends State<Navigationbar> {
-  List<Widget> pages = [Homepage(), Category(), Wishlist(), ProfilePage()];
+  List<Widget> pages = [Homepage(), Category(), WishlistPage(), ProfilePage()];
   int _selectedIndex = 0;
   void _handleIndexChanged(int i) {
     setState(() {
@@ -24,7 +24,7 @@ class _NavigationbarState extends State<Navigationbar> {
     });
   }
 
-  void changeTab(int index) {
+  void changeTab(int index, List<Map<String, dynamic>> categoryData) {
     setState(() {
       _selectedIndex = index;
     });

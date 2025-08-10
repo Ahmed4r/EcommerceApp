@@ -241,20 +241,65 @@ class _HomepageState extends State<Homepage> {
 
   int selectedIndex = -1;
   List<Map<String, dynamic>> categoryData = [
-    {"type": "text", "label": "All", "icon": null},
-    {"type": "icon", "label": "woman", "icon": FontAwesomeIcons.personDress},
-    {"type": "icon", "label": "man", "icon": FontAwesomeIcons.person},
-    {"type": "icon", "label": "child", "icon": FontAwesomeIcons.faceSmile},
-    {"type": "icon", "label": "tools", "icon": FontAwesomeIcons.utensils},
+    {"type": "text", "label": "All", "icon": null, "category": null},
+    {
+      "type": "icon",
+      "label": "Bags",
+      "icon": FontAwesomeIcons.bagShopping,
+      "category": "Bags",
+    },
+    {
+      "type": "icon",
+      "label": "Clothing",
+      "icon": FontAwesomeIcons.shirt,
+      "category": "Clothing",
+    },
+    {
+      "type": "icon",
+      "label": "Electronics",
+      "icon": FontAwesomeIcons.headphones,
+      "category": "Electronics",
+    },
+    {
+      "type": "icon",
+      "label": "Accessories",
+      "icon": FontAwesomeIcons.gem,
+      "category": "Accessories",
+    },
+    {
+      "type": "icon",
+      "label": "Footwear",
+      "icon": FontAwesomeIcons.shoePrints,
+      "category": "Footwear",
+    },
   ];
+  List<Product> filteredItems = [];
+  @override
+  void initState() {
+    super.initState();
+    filteredItems = List.from(products);
+  }
+
+  void applyFilters() {
+    String? selectedCategory = selectedIndex > 0
+        ? categoryData[selectedIndex]["category"]
+        : null;
+
+    setState(() {
+      filteredItems = products.where((item) {
+        final matchesCategory =
+            selectedCategory == null || item.category == selectedCategory;
+
+        return matchesCategory;
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xffEDF1F4),
       appBar: AppBar(
-        actionsPadding: EdgeInsets.all(8),
-
         backgroundColor: Color(0xffEDF1F4),
         leading: Padding(
           padding: EdgeInsets.only(left: 10.0.w),
@@ -286,7 +331,7 @@ class _HomepageState extends State<Homepage> {
               icon: FaIcon(
                 FontAwesomeIcons.bell,
                 color: Colors.black,
-                size: 20,
+                size: 20.r,
               ),
             ),
           ),
@@ -297,13 +342,11 @@ class _HomepageState extends State<Homepage> {
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: IconButton(
-              onPressed: () {
-                
-              },
+              onPressed: () {},
               icon: FaIcon(
                 color: Colors.black,
                 FontAwesomeIcons.cartShopping,
-                size: 20,
+                size: 20.r,
               ),
             ),
           ),
@@ -316,83 +359,83 @@ class _HomepageState extends State<Homepage> {
           child: Column(
             children: [
               SizedBox(height: 20.h),
-              // HomepageHeaders("Prodcut Category", true, products),
+              HomepageHeaders("Prodcut Category", true, products, categoryData),
 
-              // SizedBox(
-              //   height: 50.h,
-              //   child: ListView.separated(
-              //     separatorBuilder: (context, index) => SizedBox(width: 10.w),
-              //     scrollDirection: Axis.horizontal,
-              //     itemCount: categoryData.length,
-              //     itemBuilder: (context, index) {
-              //       bool isSelected = selectedIndex == index;
+              SizedBox(
+                height: 50.h,
+                child: ListView.separated(
+                  separatorBuilder: (context, index) => SizedBox(width: 10.w),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: categoryData.length,
+                  itemBuilder: (context, index) {
+                    bool isSelected = selectedIndex == index;
 
-              //       return GestureDetector(
-              //         onTap: () {
-              //           setState(() {
-              //             selectedIndex = index;
-              //           });
-              //         },
-              //         child: AnimatedContainer(
-              //           duration: const Duration(milliseconds: 250),
-              //           width: isSelected ? 90.w : 60.w,
-              //           decoration: BoxDecoration(
-              //             borderRadius: BorderRadius.circular(60.r),
-              //             color: isSelected ? Colors.blueAccent : Colors.white,
-              //           ),
-              //           child: Center(
-              //             child: categoryData[index]["type"] == "text"
-              //                 ? Text(
-              //                     categoryData[index]["label"],
-              //                     style: GoogleFonts.cairo(
-              //                       color: isSelected
-              //                           ? Colors.white
-              //                           : Colors.black,
-              //                       fontSize: 16.sp,
-              //                     ),
-              //                   )
-              //                 : Flexible(
-              //                     child: isSelected
-              //                         ? Row(
-              //                             mainAxisAlignment:
-              //                                 MainAxisAlignment.spaceAround,
-              //                             children: [
-              //                               FaIcon(
-              //                                 categoryData[index]["icon"],
-              //                                 color: isSelected
-              //                                     ? Colors.white
-              //                                     : Colors.black,
-              //                                 size: 16.r,
-              //                               ),
-              //                               Text(
-              //                                 categoryData[index]["label"],
-              //                                 style: GoogleFonts.cairo(
-              //                                   color: isSelected
-              //                                       ? Colors.white
-              //                                       : Colors.black,
-              //                                   fontSize: 16.sp,
-              //                                 ),
-              //                               ),
-              //                             ],
-              //                           )
-              //                         : FaIcon(
-              //                             categoryData[index]["icon"],
-              //                             color: isSelected
-              //                                 ? Colors.white
-              //                                 : Colors.black,
-              //                             size: 16.r,
-              //                           ),
-              //                   ),
-              //           ),
-              //         ),
-              //       );
-              //     },
-              //   ),
-              // ),
-              // SizedBox(height: 12.h),
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedIndex = index;
+                        });
+                        applyFilters();
+                      },
+
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 22.w,
+                          vertical: 15.h,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(60.r),
+                          color: isSelected ? Colors.blueAccent : Colors.white,
+                        ),
+                        child: categoryData[index]["type"] == "text"
+                            ? Text(
+                                categoryData[index]["label"],
+                                style: GoogleFonts.cairo(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.black,
+                                  fontSize: 16.sp,
+                                ),
+                              )
+                            : isSelected
+                            ? Row(
+                                mainAxisSize:
+                                    MainAxisSize.min, // العرض على قد المحتوى
+                                children: [
+                                  FaIcon(
+                                    categoryData[index]["icon"],
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.black,
+                                    size: 16.r,
+                                  ),
+                                  SizedBox(width: 6.w),
+                                  Text(
+                                    categoryData[index]["label"],
+                                    style: GoogleFonts.cairo(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 16.sp,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : FaIcon(
+                                categoryData[index]["icon"],
+                                color: isSelected ? Colors.white : Colors.black,
+                                size: 16.r,
+                              ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: 12.h),
               sliderWidget(),
               SizedBox(height: 12.h),
-              HomepageHeaders("Popular Product", false, products),
+              HomepageHeaders("Popular Product", false, products, categoryData),
               GridView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
@@ -402,9 +445,9 @@ class _HomepageState extends State<Homepage> {
                   crossAxisSpacing: 10.w,
                   childAspectRatio: 3 / 4, // نسبة العرض للطول حسب شكل الكرت
                 ),
-                itemCount: 6,
+                itemCount: filteredItems.length,
                 itemBuilder: (context, index) {
-                  return buildItemCard(context, products[index]);
+                  return buildItemCard(context, filteredItems[index]);
                 },
               ),
             ],

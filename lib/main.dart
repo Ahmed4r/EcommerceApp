@@ -5,11 +5,13 @@ import 'package:shop/screens/homepage/homepage.dart';
 import 'package:shop/screens/profile/editProfile.dart';
 import 'package:shop/screens/profile/personal_info.dart';
 import 'package:shop/screens/homepage/products_screen.dart';
+import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/wishlist.dart';
 import 'package:shop/widgets/navigationbar.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
-  runApp(const ShopApp());
+  runApp(BlocProvider(create: (_) => WishlistCubit(), child: ShopApp()));
 }
 
 class ShopApp extends StatelessWidget {
@@ -31,7 +33,7 @@ class ShopApp extends StatelessWidget {
           ShowProductspage.routeName: (context) => ShowProductspage(),
           ProfilePage.routeName: (context) => ProfilePage(),
           EditProfilePage.routeName: (context) => EditProfilePage(),
-          Wishlist.routeName: (context) => Wishlist(),
+          WishlistPage.routeName: (context) => WishlistPage(),
         },
       ),
     );

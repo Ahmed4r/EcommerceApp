@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/screens/profile/editProfile.dart';
 
@@ -23,7 +24,7 @@ class ProfilePage extends StatelessWidget {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit, color: Colors.white),
+            icon: FaIcon(FontAwesomeIcons.pen, color: Colors.white),
             onPressed: () {
               Navigator.pushNamed(context, EditProfilePage.routeName);
             },
@@ -76,14 +77,14 @@ class ProfilePage extends StatelessWidget {
                         CircleAvatar(
                           radius: 50,
                           backgroundImage: const AssetImage(
-                            'assets/profile.jpg',
+                            '' ?? 'assets/profile.jpg',
                           ),
                         ),
                         const SizedBox(height: 15),
 
                         // اسم المستخدم
                         Text(
-                          "Ahmed Mohamed",
+                          '' ?? "Ahmed Mohamed",
                           style: GoogleFonts.cairo(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -91,7 +92,7 @@ class ProfilePage extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "ahmed@example.com",
+                          '' ?? "ahmed@example.com",
                           style: GoogleFonts.cairo(
                             fontSize: 14,
                             color: Colors.white.withOpacity(0.8),
@@ -100,11 +101,11 @@ class ProfilePage extends StatelessWidget {
                         const SizedBox(height: 20),
 
                         // معلومات إضافية
-                        _glassInfoTile(Icons.phone, "+20 123 456 7890"),
+                        _glassInfoTile(Icons.phone, "" ?? "+20 123 456 7890"),
                         const SizedBox(height: 10),
-                        _glassInfoTile(Icons.location_on, "Cairo, Egypt"),
+                        _glassInfoTile(Icons.location_on, "" ?? "Cairo, Egypt"),
                         const SizedBox(height: 10),
-                        _glassInfoTile(Icons.shopping_bag, "12 Orders"),
+                        _glassInfoTile(Icons.shopping_bag, "" ?? "12 Orders"),
                       ],
                     ),
                   ),
