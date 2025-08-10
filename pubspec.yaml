@@ -38,6 +38,12 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   font_awesome_flutter: ^10.9.0
+  overlapped_carousel: ^1.0.2
+  flutter_image_slideshow: ^0.1.6
+  carousel_slider_plus: ^7.1.1
+  flutter_screenutil: ^5.9.3
+  shared_preferences: ^2.5.3
+  bloc:  ^9.0.0
 
 dev_dependencies:
   flutter_test:
