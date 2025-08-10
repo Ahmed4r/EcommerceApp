@@ -6,6 +6,6 @@ class Wishlist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(backgroundColor: Color(0xffEDF1F4));
   }
 }

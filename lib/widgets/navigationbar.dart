@@ -1,11 +1,14 @@
 import 'package:crystal_navigation_bar/crystal_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:shop/screens/category.dart';
-import 'package:shop/screens/homepage.dart';
-import 'package:shop/screens/profile.dart';
-import 'package:shop/screens/wishlist.dart';
+import 'package:shop/screens/category/category.dart';
+import 'package:shop/screens/homepage/homepage.dart';
+import 'package:shop/screens/profile/personal_info.dart';
+import 'package:shop/screens/wishlist/wishlist.dart';
+
+final GlobalKey<_NavigationbarState> navBarKey = GlobalKey();
 
 class Navigationbar extends StatefulWidget {
+  static const String routeName = '/Navigationbar';
   const Navigationbar({super.key});
 
   @override
@@ -13,11 +16,17 @@ class Navigationbar extends StatefulWidget {
 }
 
 class _NavigationbarState extends State<Navigationbar> {
-  List<Widget> pages = [Homepage(), Category(), Wishlist(), Profile()];
+  List<Widget> pages = [Homepage(), Category(), Wishlist(), ProfilePage()];
   int _selectedIndex = 0;
   void _handleIndexChanged(int i) {
     setState(() {
       _selectedIndex = i;
+    });
+  }
+
+  void changeTab(int index) {
+    setState(() {
+      _selectedIndex = index;
     });
   }
 
@@ -53,21 +62,21 @@ class _NavigationbarState extends State<Navigationbar> {
               CrystalNavigationBarItem(
                 icon: Icons.category,
                 unselectedIcon: Icons.category,
-                selectedColor: Colors.red,
+                selectedColor: Colors.orange,
               ),
 
               /// wishlist
               CrystalNavigationBarItem(
                 icon: Icons.favorite,
                 unselectedIcon: Icons.favorite,
-                selectedColor: Colors.white,
+                selectedColor: Colors.red,
               ),
 
               /// Profile
               CrystalNavigationBarItem(
                 icon: Icons.person,
                 unselectedIcon: Icons.person,
-                selectedColor: Colors.white,
+                selectedColor: Colors.black,
               ),
             ],
           ),
