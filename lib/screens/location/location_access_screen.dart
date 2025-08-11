@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geocoding/geocoding.dart';
 
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shop/screens/location/address.dart';
+import 'package:shop/screens/location/address_details_Screen.dart';
 import 'package:shop/services/location_service.dart';
 import 'package:shop/widgets/custom_button.dart';
 

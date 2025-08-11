@@ -6,7 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shop/screens/location/location_page.dart';
+import 'package:shop/screens/location/location_access_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   static const String routeName = 'profile';
