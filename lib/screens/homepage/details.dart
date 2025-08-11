@@ -29,23 +29,23 @@ class ProductDetailsPage extends StatelessWidget {
                     child: _circleButton(Icons.arrow_back_ios_new),
                   ),
 
-                  BlocBuilder<WishlistCubit, WishlistState>(
-                    builder: (context, state) {
-                      final isFavorite = context
-                          .read<WishlistCubit>()
-                          .isFavorite(product);
+                  // BlocBuilder<WishlistCubit, WishlistState>(
+                  //   builder: (context, state) {
+                  //     final isFavorite = context
+                  //         .read<WishlistCubit>()
+                  //         .isFavorite(product);
 
-                      return GestureDetector(
-                        onTap: () {
-                          context.read<WishlistCubit>().toggleFavorite(product);
-                        },
-                        child: _circleButton(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorite ? Colors.red : Colors.black,
-                        ),
-                      );
-                    },
-                  ),
+                  //     return GestureDetector(
+                  //       onTap: () {
+                  //         context.read<WishlistCubit>().toggleFavorite(product);
+                  //       },
+                  //       child: _circleButton(
+                  //         isFavorite ? Icons.favorite : Icons.favorite_border,
+                  //         color: isFavorite ? Colors.red : Colors.black,
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
                 ],
               ),
             ),
@@ -135,30 +135,55 @@ class ProductDetailsPage extends StatelessWidget {
                       SizedBox(height: 20.h),
 
                       // Add to Wishlist Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            context.read<WishlistCubit>().toggleFavorite(
-                              product,
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15.r),
+                      BlocBuilder<WishlistCubit, WishlistState>(
+                        builder: (context, state) {
+                          return SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                context.read<WishlistCubit>().toggleFavorite(
+                                  product,
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15.r),
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 14.h),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text(
+                                    "Add to Wishlist",
+                                    style: GoogleFonts.cairo(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+
+                                  Icon(
+                                    context.read<WishlistCubit>().isFavorite(
+                                          product,
+                                        )
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color:
+                                        context
+                                            .read<WishlistCubit>()
+                                            .isFavorite(product)
+                                        ? Colors.red
+                                        : Colors.white,
+                                  ),
+                                ],
+                              ),
                             ),
-                            padding: EdgeInsets.symmetric(vertical: 14.h),
-                          ),
-                          child: Text(
-                            "Add to Wishlist",
-                            style: GoogleFonts.cairo(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
+                          );
+                        },
+                        bloc: context.read<WishlistCubit>(),
                       ),
                     ],
                   ),

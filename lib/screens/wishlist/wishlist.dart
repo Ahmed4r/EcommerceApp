@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_state.dart';
@@ -16,16 +17,41 @@ class WishlistPage extends StatelessWidget {
       builder: (context, state) {
         if (state.favorites.isEmpty) {
           return Scaffold(
-            appBar: AppBar(title: Text("Wishlist")),
-            body: Center(child: Text("No favorite items yet")),
+            backgroundColor: Color(0xffEDF1F4),
+            appBar: AppBar(
+              backgroundColor: Color(0xffEDF1F4),
+              title: Text(
+                "Wishlist",
+                style: GoogleFonts.cairo(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            body: Center(
+              child: Text(
+                "No favorite items yet",
+                style: GoogleFonts.cairo(
+                  fontSize: 20.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           );
         }
 
         return Scaffold(
-          backgroundColor: const Color(0xffEDF1F4),
+          backgroundColor: Color(0xffEDF1F4),
           appBar: AppBar(
-            backgroundColor: const Color(0xffEDF1F4),
-            title: Text("Wishlist"),
+            backgroundColor: Color(0xffEDF1F4),
+            title: Text(
+              "Wishlist",
+              style: GoogleFonts.cairo(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           body: GridView.builder(
             padding: EdgeInsets.all(16),

@@ -1,17 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/screens/category/category.dart';
 import 'package:shop/screens/homepage/homepage.dart';
-import 'package:shop/screens/profile/editProfile.dart';
 import 'package:shop/screens/profile/personal_info.dart';
 import 'package:shop/screens/homepage/products_screen.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/wishlist.dart';
 import 'package:shop/widgets/navigationbar.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shop/widgets/product_card.dart';
 
-void main() {
-  runApp(BlocProvider(create: (_) => WishlistCubit(), child: ShopApp()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final appDocDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDocDir.path);
+
+  runApp(
+    MultiBlocProvider(
+      providers: [BlocProvider(create: (_) => WishlistCubit())],
+      child: ShopApp(),
+    ),
+  );
 }
 
 class ShopApp extends StatelessWidget {
@@ -32,7 +45,7 @@ class ShopApp extends StatelessWidget {
           Category.routeName: (context) => Category(),
           ShowProductspage.routeName: (context) => ShowProductspage(),
           ProfilePage.routeName: (context) => ProfilePage(),
-          EditProfilePage.routeName: (context) => EditProfilePage(),
+          CartScreen.routeName: (context) => CartScreen(),
           WishlistPage.routeName: (context) => WishlistPage(),
         },
       ),

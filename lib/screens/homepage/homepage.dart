@@ -1,11 +1,16 @@
 import 'dart:developer';
+import 'dart:io';
+import 'dart:ui';
 
 import 'package:carousel_slider_plus/carousel_slider_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/model/product.dart';
+import 'package:shop/screens/cart/cart_Screen.dart';
+import 'package:shop/screens/homepage/details.dart';
 import 'package:shop/widgets/homepage_headers.dart';
 import 'package:shop/widgets/product_card.dart';
 
@@ -18,6 +23,19 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  static const String _nameKey = 'user_name';
+  static const String _imageKey = 'user_image';
+
+  String name = '';
+  String? image;
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      name = prefs.getString(_nameKey) ?? '';
+      image = prefs.getString(_imageKey);
+    });
+  }
+
   final List<Product> products = [
     Product(
       id: "1",
@@ -277,6 +295,7 @@ class _HomepageState extends State<Homepage> {
   @override
   void initState() {
     super.initState();
+    _loadUserData();
     filteredItems = List.from(products);
   }
 
@@ -304,8 +323,13 @@ class _HomepageState extends State<Homepage> {
         leading: Padding(
           padding: EdgeInsets.only(left: 10.0.w),
           child: CircleAvatar(
-            radius: 20.r,
-            backgroundImage: AssetImage("assets/profile.jpg"),
+            onBackgroundImageError: (exception, stackTrace) {
+              Image.asset('assets/profile.png');
+            },
+            radius: 50.r,
+            backgroundImage: image != null
+                ? FileImage(File(image!))
+                : AssetImage('assets/profile.png'),
           ),
         ),
         title: Column(
@@ -315,7 +339,7 @@ class _HomepageState extends State<Homepage> {
               style: GoogleFonts.cairo(color: Colors.black, fontSize: 20.sp),
             ),
             Text(
-              "Ahmed Hegazy",
+              name ?? 'user',
               style: GoogleFonts.cairo(color: Colors.black, fontSize: 16.sp),
             ),
           ],
@@ -342,7 +366,9 @@ class _HomepageState extends State<Homepage> {
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, CartScreen.routeName);
+              },
               icon: FaIcon(
                 color: Colors.black,
                 FontAwesomeIcons.cartShopping,
