@@ -2,9 +2,11 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shop/screens/location/location_page.dart';
 
 class ProfilePage extends StatefulWidget {
   static const String routeName = 'profile';
@@ -188,21 +190,19 @@ class _ProfilePageState extends State<ProfilePage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        // actions: [
-        //   IconButton(
-        //     onPressed: () {
-        //       setState(() {
-        //         updateInfo = !updateInfo;
-        //         print(updateInfo);
-        //       });
-        //     },
-        //     icon: Icon(
-        //       updateInfo ? Icons.close : Icons.edit,
-        //       color: Colors.grey,
-        //       size: 30.r,
-        //     ),
-        //   ),
-        // ],
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, LocationAccessPage.routeName);
+            },
+            icon: FaIcon(
+              FontAwesomeIcons.locationArrow,
+
+              color: Colors.grey,
+              size: 30.r,
+            ),
+          ),
+        ],
         elevation: 0,
       ),
       body: Center(

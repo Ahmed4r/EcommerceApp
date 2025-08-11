@@ -56,6 +56,10 @@
 <!-- صلاحية الوصول لمكتبة الصور أثناء حفظ الصورة -->
     <key>NSPhotoLibraryAddUsageDescription</key>
     <string>نحتاج الوصول لحفظ الصور في مكتبة الصور</string>
-
+	<!-- loaction access -->
+ <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to your location while using the app to show nearby restaurants and offers.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>This app needs access to your location even when in the background to track deliveries.</string>
 </dict>
 </plist>

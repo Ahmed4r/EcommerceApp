@@ -5,6 +5,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/screens/category/category.dart';
 import 'package:shop/screens/homepage/homepage.dart';
+import 'package:shop/screens/location/address.dart';
+import 'package:shop/screens/location/location_page.dart';
 import 'package:shop/screens/profile/personal_info.dart';
 import 'package:shop/screens/homepage/products_screen.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
@@ -47,6 +49,8 @@ class ShopApp extends StatelessWidget {
           ProfilePage.routeName: (context) => ProfilePage(),
           CartScreen.routeName: (context) => CartScreen(),
           WishlistPage.routeName: (context) => WishlistPage(),
+          LocationAccessPage.routeName: (context) => LocationAccessPage(),
+          AddressListScreen.routeName: (context) => AddressListScreen(),
         },
       ),
     );
