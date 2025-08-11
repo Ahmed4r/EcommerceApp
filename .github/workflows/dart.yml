@@ -9,16 +9,21 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      # 1- Checkout code
       - uses: actions/checkout@v3
 
+      # 2- Setup Flutter
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           architecture: x64
 
+      # 3- Clean & get dependencies
+      - run: flutter clean
       - run: flutter pub get
+      - run: flutter pub upgrade
 
-      # Force iOS deployment target (even if Podfile doesn't exist)
+      # 4- Force iOS deployment target
       - name: Force iOS deployment target
         run: |
           cd ios
@@ -36,7 +41,7 @@ jobs:
           EOT
           cd ..
 
-      # Clean and reinstall CocoaPods
+      # 5- Update CocoaPods completely
       - name: Clean and update CocoaPods
         run: |
           rm -f ios/Podfile.lock
@@ -46,23 +51,23 @@ jobs:
           pod install
           cd ..
 
-      # Build iOS without codesign
+      # 6- Build iOS without codesign
       - run: flutter build ios --release --no-codesign
 
-      # Prepare Payload folder
+      # 7- Prepare Payload folder
       - run: mkdir Payload
         working-directory: build/ios/iphoneos
 
-      # Move Runner.app to Payload
+      # 8- Move Runner.app to Payload
       - run: mv Runner.app Payload
         working-directory: build/ios/iphoneos
 
-      # Zip to .ipa
+      # 9- Zip to .ipa
       - name: Zip output
         run: zip -qq -r -9 FlutterIpaExport.ipa Payload
         working-directory: build/ios/iphoneos
 
-      # Upload ipa to release
+      # 10- Upload ipa to release
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
