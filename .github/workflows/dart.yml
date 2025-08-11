@@ -9,65 +9,55 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # 1- Checkout code
       - uses: actions/checkout@v3
 
-      # 2- Setup Flutter
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           architecture: x64
 
-      # 3- Clean & get dependencies
+      # 1. Pre-cache iOS artifacts
+      - run: flutter precache --ios
+
+      # 2. Clean & get deps
       - run: flutter clean
       - run: flutter pub get
-      - run: flutter pub upgrade
 
-      # 4- Force iOS deployment target
-      - name: Force iOS deployment target
+      # 3. Build once to auto-generate Podfile
+      - run: flutter build ios --release --no-codesign || true
+
+      # 4. Update iOS target in Podfile
+      - name: Update iOS deployment target
         run: |
           cd ios
-          rm -f Podfile
-          echo "platform :ios, '15.5'" > Podfile
-          echo "" >> Podfile
-          cat <<EOT >> Podfile
-          install! 'cocoapods', :disable_input_output_paths => true
-          target 'Runner' do
-            use_frameworks!
-            use_modular_headers!
-            flutter_application_path = '../'
-            eval(File.read(File.join(flutter_application_path, '.flutter-plugins-dependencies')))
-          end
-          EOT
+          sed -i '' "s/platform :ios, '[0-9.]*'/platform :ios, '15.5'/" Podfile
           cd ..
 
-      # 5- Update CocoaPods completely
-      - name: Clean and update CocoaPods
+      # 5. Reinstall CocoaPods
+      - name: Update CocoaPods
         run: |
-          rm -f ios/Podfile.lock
           cd ios
           pod repo update
           pod deintegrate
           pod install
           cd ..
 
-      # 6- Build iOS without codesign
+      # 6. Final build
       - run: flutter build ios --release --no-codesign
 
-      # 7- Prepare Payload folder
+      # 7. Prepare Payload
       - run: mkdir Payload
         working-directory: build/ios/iphoneos
 
-      # 8- Move Runner.app to Payload
       - run: mv Runner.app Payload
         working-directory: build/ios/iphoneos
 
-      # 9- Zip to .ipa
+      # 8. Zip IPA
       - name: Zip output
         run: zip -qq -r -9 FlutterIpaExport.ipa Payload
         working-directory: build/ios/iphoneos
 
-      # 10- Upload ipa to release
+      # 9. Upload release
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
