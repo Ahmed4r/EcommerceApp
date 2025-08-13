@@ -5,46 +5,34 @@ on:
 
 jobs:
   build-ios:
-    name: 🎉 iOS Build
     runs-on: macos-latest
 
     steps:
-      - name: 🛒 Checkout Repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: 🔧 Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           architecture: x64
 
-      # ✅ تهيئة Flutter للمشروع
-      - name: 📦 Flutter Pub Get
-        run: flutter pub get
+      - run: flutter pub get
 
-      # ✅ مسح الكاش وإعادة التهيئة
-      - name: 🧹 Clean Flutter & iOS
-        run: |
-          flutter clean
-          cd ios
-          pod deintegrate
-          pod cache clean --all
-          cd ..
+      - name: Initial iOS build to generate podhelper.rb
+        run: flutter build ios --no-codesign || true
 
-      # ✅ Install iOS dependencies
-      - name: 📥 Install CocoaPods
+      - name: Install CocoaPods
         run: |
           cd ios
+          sudo gem install cocoapods
+          pod repo update
           pod install
           cd ..
 
-      # ✅ Build IPA
-      - name: 📦 Build iOS IPA
+      - name: Build IPA
         run: flutter build ipa --no-codesign
 
-      # ✅ حفظ ملف IPA الناتج
-      - name: 📂 Upload IPA Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v3
         with:
           name: app-release-ipa
           path: build/ios/ipa/*.ipa
