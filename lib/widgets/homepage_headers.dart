@@ -30,7 +30,7 @@ class HomepageHeaders extends StatelessWidget {
         Spacer(),
         TextButton(
           onPressed: () {
-            ctrl
+            ctrl == true
                 ? navBarKey.currentState?.changeTab(1, categoryData)
                 : Navigator.pushNamed(
                     context,

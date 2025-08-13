@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/app_colors.dart';
 import 'package:shop/model/product.dart';
 
 class CartScreen extends StatefulWidget {
   static const String routeName = '/cart';
 
-  const CartScreen({Key? key}) : super(key: key);
+  const CartScreen({super.key});
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -73,7 +74,7 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
     final totalPrice = CartManager().totalPrice;
 
     return Scaffold(
-      backgroundColor: Color(0xffEDF1F4),
+      backgroundColor: AppColors.primary,
       appBar: _buildAppBar(context),
       body: cartItems.isEmpty
           ? _buildEmptyCart()
@@ -86,7 +87,7 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Color(0xffEDF1F4),
+      backgroundColor: AppColors.primary,
       elevation: 0,
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
@@ -430,11 +431,11 @@ class CartItemCard extends StatefulWidget {
   final VoidCallback onRemove;
 
   const CartItemCard({
-    Key? key,
+    super.key,
     required this.cartItem,
     required this.onQuantityChanged,
     required this.onRemove,
-  }) : super(key: key);
+  });
 
   @override
   State<CartItemCard> createState() => _CartItemCardState();
@@ -496,7 +497,7 @@ class _CartItemCardState extends State<CartItemCard>
                   // Product Image
                   ClipRRect(
                     borderRadius: BorderRadius.circular(15.r),
-                    child: Container(
+                    child: SizedBox(
                       width: 80.w,
                       height: 80.h,
                       child: Image.asset(
@@ -647,6 +648,8 @@ class _CartItemCardState extends State<CartItemCard>
 
 // Checkout Success Dialog
 class CheckoutSuccessDialog extends StatefulWidget {
+  const CheckoutSuccessDialog({super.key});
+
   @override
   State<CheckoutSuccessDialog> createState() => _CheckoutSuccessDialogState();
 }
@@ -776,8 +779,8 @@ class CartManager {
   factory CartManager() => _instance;
   CartManager._internal();
 
-  List<CartItem> _cartItems = [];
-  List<VoidCallback> _listeners = [];
+  final List<CartItem> _cartItems = [];
+  final List<VoidCallback> _listeners = [];
 
   List<CartItem> get cartItems => _cartItems;
   int get itemCount => _cartItems.fold(0, (sum, item) => sum + item.quantity);
@@ -842,4 +845,3 @@ class CartItem {
 
   CartItem({required this.product, required this.quantity});
 }
-

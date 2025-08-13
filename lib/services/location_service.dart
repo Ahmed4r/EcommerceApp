@@ -16,7 +16,7 @@ class LocationService {
     if (!serviceEnabled) {
       return Future.error('Location services are disabled.');
     } else {
-      requestLocationPermission();
+      await requestLocationPermission();
     }
   }
 
@@ -75,6 +75,8 @@ class LocationService {
         if ((place.name ?? '').isNotEmpty) place.name!,
         if ((place.street ?? '').isNotEmpty && place.street != place.name)
           place.street!,
+        if ((place.country ?? '').isNotEmpty) place.country!,
+
         if ((place.subLocality ?? '').isNotEmpty) place.subLocality!,
         if ((place.locality ?? '').isNotEmpty) place.locality!,
         if ((place.administrativeArea ?? '').isNotEmpty)
@@ -88,4 +90,5 @@ class LocationService {
       return 'Address not found';
     }
   }
+  
 }

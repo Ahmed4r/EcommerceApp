@@ -1,6 +1,4 @@
-import 'dart:developer';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:carousel_slider_plus/carousel_slider_plus.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +6,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop/app_colors.dart';
 import 'package:shop/model/product.dart';
 import 'package:shop/screens/cart/cart_Screen.dart';
-import 'package:shop/screens/homepage/details.dart';
 import 'package:shop/widgets/homepage_headers.dart';
 import 'package:shop/widgets/product_card.dart';
 
@@ -26,7 +24,7 @@ class _HomepageState extends State<Homepage> {
   static const String _nameKey = 'user_name';
   static const String _imageKey = 'user_image';
 
-  String name = '';
+  String? name = '';
   String? image;
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -317,19 +315,19 @@ class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffEDF1F4),
+      backgroundColor: AppColors.primary,
       appBar: AppBar(
-        backgroundColor: Color(0xffEDF1F4),
+        backgroundColor: AppColors.primary,
         leading: Padding(
           padding: EdgeInsets.only(left: 10.0.w),
           child: CircleAvatar(
             onBackgroundImageError: (exception, stackTrace) {
-              Image.asset('assets/profile.png');
+              Image.asset('assets/profile.png', width: 50, height: 50);
             },
             radius: 50.r,
             backgroundImage: image != null
                 ? FileImage(File(image!))
-                : AssetImage('assets/profile.png'),
+                : AssetImage('assets/profile.jpg'),
           ),
         ),
         title: Column(

@@ -14,7 +14,7 @@ import 'package:shop/screens/homepage/homepage.dart';
 class ProductItemCard extends StatefulWidget {
   final Product product;
 
-  const ProductItemCard({Key? key, required this.product}) : super(key: key);
+  const ProductItemCard({super.key, required this.product});
 
   @override
   _ProductItemCardState createState() => _ProductItemCardState();
@@ -128,7 +128,12 @@ class _ProductItemCardState extends State<ProductItemCard>
         height: 200.h,
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(widget.product.image),
+            image:
+            //  ResizeImage(
+            //   width: (501.w).toInt(),
+            //   height: (408.h).toInt(),
+              AssetImage(widget.product.image),
+            // ),
             fit: BoxFit.cover,
           ),
           borderRadius: BorderRadius.circular(20.r),

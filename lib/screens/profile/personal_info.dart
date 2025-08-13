@@ -6,11 +6,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shop/app_colors.dart';
 import 'package:shop/screens/location/location_access_screen.dart';
+import 'package:shop/widgets/custom_text_field.dart';
 
 class ProfilePage extends StatefulWidget {
   static const String routeName = 'profile';
-  ProfilePage({super.key});
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -35,6 +37,14 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _loadUserData();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    super.dispose();
   }
 
   // Load user data from SharedPreferences
@@ -179,10 +189,10 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffEDF1F4),
+      backgroundColor: AppColors.primary,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Color(0xffEDF1F4),
+        backgroundColor: AppColors.primary,
         title: Text(
           "My Profile",
           style: GoogleFonts.cairo(
@@ -206,23 +216,126 @@ class _ProfilePageState extends State<ProfilePage> {
         elevation: 0,
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20.r),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  width: 340.w,
-                  height: 380.h, // Increased height slightly
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                      width: 1.5.w,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20.r),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    width: 340.w,
+                    height: 380.h, // Increased height slightly
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1.5.w,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10.r,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        // Profile Image with edit functionality
+                        Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 50.r,
+                              backgroundImage: profileImagePath != null
+                                  ?
+                                    //  ResizeImage(
+                                    //     height: (50.h).toInt(),
+                                    //     width: (50.w).toInt(),
+                                    FileImage(File(profileImagePath!))
+                                  // )
+                                  //  ResizeImage(
+                                  : AssetImage('assets/profile.jpg')
+                                        // width: (50.w).toInt(),
+                                        // height: (50.h).toInt(),
+                                        // )
+                                        as ImageProvider,
+                            ),
+                            if (updateInfo)
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: _pickImage,
+                                  child: Container(
+                                    padding: EdgeInsets.all(6.r),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2.w,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.camera_alt,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        // Name Field
+                        CustomTextField(
+                          controller: nameController,
+                          labelText: 'Name',
+                          icon: Icons.person,
+                        ),
+
+                        // Email Field
+                        CustomTextField(
+                          controller: emailController,
+                          labelText: 'Email',
+                          icon: Icons.email,
+                        ),
+
+                        // Phone Field
+                        CustomTextField(
+                          controller: phoneController,
+                          labelText: 'Phone',
+                          icon: FontAwesomeIcons.phone,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Save Button
+              GestureDetector(
+                onTap: () async {
+                  if (updateInfo) {
+                    await _saveUserData();
+                    FocusScope.of(context).unfocus();
+                  }
+                  setState(() {
+                    updateInfo = !updateInfo;
+                  });
+                },
+                child: Container(
+                  width: 220.w,
+                  height: 40.h,
+                  alignment: Alignment.center,
+                  margin: EdgeInsets.only(top: 20.h),
+                  decoration: BoxDecoration(
+                    color: updateInfo ? Colors.green : Colors.black,
+                    borderRadius: BorderRadius.circular(20.r),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -231,147 +344,13 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ],
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      // Profile Image with edit functionality
-                      Stack(
-                        children: [
-                          CircleAvatar(
-                            radius: 50.r,
-                            backgroundImage: profileImagePath != null
-                                ? FileImage(File(profileImagePath!))
-                                : AssetImage('assets/profile.jpg')
-                                      as ImageProvider,
-                          ),
-                          if (updateInfo)
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: GestureDetector(
-                                onTap: _pickImage,
-                                child: Container(
-                                  padding: EdgeInsets.all(6.r),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 2.w,
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    Icons.camera_alt,
-                                    color: Colors.white,
-                                    size: 16.sp,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-
-                      // Name Field
-                      _buildTextField(
-                        controller: nameController,
-                        labelText: 'Name',
-                        icon: Icons.person,
-                      ),
-
-                      // Email Field
-                      _buildTextField(
-                        controller: emailController,
-                        labelText: 'Email',
-                        icon: Icons.email,
-                      ),
-
-                      // Phone Field
-                      _buildTextField(
-                        controller: phoneController,
-                        labelText: 'Phone',
-                        icon: Icons.phone,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // Save Button
-            GestureDetector(
-              onTap: () async {
-                if (updateInfo) {
-                  await _saveUserData();
-                }
-                setState(() {
-                  updateInfo = !updateInfo;
-                });
-              },
-              child: Container(
-                width: 220.w,
-                height: 40.h,
-                alignment: Alignment.center,
-                margin: EdgeInsets.only(top: 20.h),
-                decoration: BoxDecoration(
-                  color: updateInfo ? Colors.green : Colors.black,
-                  borderRadius: BorderRadius.circular(20.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10.r,
-                      offset: Offset(0, 4),
+                  child: Text(
+                    updateInfo ? "Save Changes" : "Edit Profile",
+                    style: GoogleFonts.cairo(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
-                child: Text(
-                  updateInfo ? "Save Changes" : "Edit Profile",
-                  style: GoogleFonts.cairo(
-                    color: Colors.white,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String labelText,
-    required IconData icon,
-  }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20.r),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: EdgeInsets.all(10),
-          margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.4),
-              width: 1.5.w,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: Colors.black54, size: 20.sp),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: TextField(
-                  enabled: updateInfo,
-                  controller: controller,
-                  style: GoogleFonts.cairo(color: Colors.black87),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    labelText: labelText,
-                    labelStyle: GoogleFonts.cairo(color: Colors.black54),
                   ),
                 ),
               ),

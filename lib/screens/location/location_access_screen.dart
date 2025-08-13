@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:geocoding/geocoding.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/app_colors.dart';
 import 'package:shop/screens/location/address_details_Screen.dart';
 import 'package:shop/services/location_service.dart';
 import 'package:shop/widgets/custom_button.dart';
@@ -64,9 +64,9 @@ class _LocationAccessPageState extends State<LocationAccessPage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Color(0xffEDF1F4),
+      backgroundColor: AppColors.primary,
       appBar: AppBar(
-        backgroundColor: Color(0xffEDF1F4),
+        backgroundColor: AppColors.primary,
         title: Text(
           'location access',
           style: GoogleFonts.cairo(color: isDark ? Colors.black : Colors.white),

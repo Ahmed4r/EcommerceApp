@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/app_colors.dart';
 
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_state.dart';
@@ -42,9 +43,9 @@ class WishlistPage extends StatelessWidget {
         }
 
         return Scaffold(
-          backgroundColor: Color(0xffEDF1F4),
+          backgroundColor: AppColors.primary,
           appBar: AppBar(
-            backgroundColor: Color(0xffEDF1F4),
+            backgroundColor: AppColors.primary,
             title: Text(
               "Wishlist",
               style: GoogleFonts.cairo(

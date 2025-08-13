@@ -11,6 +11,7 @@ import 'dart:convert';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shop/app_colors.dart';
 import 'package:shop/model/address_model.dart';
 import 'package:shop/services/location_service.dart';
 
@@ -202,17 +203,15 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
   String selectedLabel = 'Home';
   final List<String> labels = ['Home', 'Work', 'Other'];
 
-  LatLng selectedLocation = const LatLng(
-    40.7589,
-    -73.9851,
-  ); // Default to New York
   List<Marker> markers = [];
   String currentAddress = 'Loading address...';
   bool isLoadingLocation = false;
+  LatLng selectedLocation = LatLng(0, 0);
 
   @override
   void initState() {
     super.initState();
+    _setCurrentLocation();
     if (widget.address != null) {
       streetController.text = 'Hason Nagar';
       postCodeController.text = '34567';
@@ -225,6 +224,19 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
     }
 
     _initializeLocation();
+  }
+
+  Future<void> _setCurrentLocation() async {
+    Position? position = await LocationService.getCurrentLocation(context);
+    if (position != null) {
+      setState(() {
+        selectedLocation = LatLng(position.latitude, position.longitude);
+      });
+    }
+    currentAddress = await LocationService.getAddressFromCoordinates(
+      selectedLocation.latitude,
+      selectedLocation.longitude,
+    );
   }
 
   Future<void> _initializeLocation() async {
@@ -264,7 +276,11 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
       markers = [
         Marker(
           point: location,
-          child: const Icon(Icons.location_on, color: Colors.red, size: 40),
+          child: const FaIcon(
+            FontAwesomeIcons.locationDot,
+            color: Colors.red,
+            size: 40,
+          ),
         ),
       ];
     });
@@ -312,7 +328,7 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffEDF1F4),
+      backgroundColor: AppColors.primary,
       // resizeToAvoidBottomInset: true,
       body: Column(
         children: [
@@ -359,7 +375,10 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -367,72 +386,14 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
                 Positioned(
                   top: 50,
                   right: 16,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        decoration: const BoxDecoration(shape: BoxShape.circle),
-                        child: IconButton(
-                          icon: const FaIcon(
-                            FontAwesomeIcons.locationArrow,
-                            color: Colors.black,
-                          ),
-                          onPressed: _getCurrentLocation,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'Tap to edit location',
-                          style: GoogleFonts.cairo(
-                            color: Colors.white,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  bottom: 20,
-                  left: 16,
-                  right: 16,
                   child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.location_on, color: Colors.grey[600]),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            currentAddress,
-                            style: GoogleFonts.cairo(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    decoration: const BoxDecoration(shape: BoxShape.circle),
+                    child: IconButton(
+                      icon: const FaIcon(
+                        FontAwesomeIcons.locationArrow,
+                        color: Colors.black,
+                      ),
+                      onPressed: _getCurrentLocation,
                     ),
                   ),
                 ),
