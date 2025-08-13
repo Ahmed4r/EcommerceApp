@@ -49,6 +49,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
               SizedBox(width: 10.w),
               Expanded(
                 child: TextField(
+                  keyboardType: widget.type == "text"
+                      ? TextInputType.text
+                      : TextInputType.visiblePassword,
                   controller: widget.controller,
 
                   obscureText: widget.obscureText,

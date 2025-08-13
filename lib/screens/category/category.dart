@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/app_colors.dart';
 import 'package:shop/model/product.dart';
 import 'package:shop/widgets/product_card.dart';
 
 class Category extends StatefulWidget {
   static const String routeName = 'category';
+
   const Category({super.key});
 
   @override
@@ -313,8 +315,9 @@ class _CategoryState extends State<Category> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffEDF1F4),
+      backgroundColor: AppColors.primary,
       appBar: AppBar(
+        
         elevation: 0,
         title: Text(
           "Category",

@@ -52,7 +52,7 @@ class ShopApp extends StatelessWidget {
           RegisterPage.routeName: (context) => RegisterPage(),
           OtpScreen.routeName: (context) => OtpScreen(),
           ForgotPassword.routeName: (context) => ForgotPassword(),
-          Navigationbar.routeName: (context) => Navigationbar(key: navBarKey),
+          Navigationbar.routeName: (context) => Navigationbar(),
         },
       ),
     );

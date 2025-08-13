@@ -74,7 +74,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   icon: FontAwesomeIcons.user,
                 ),
 
-                SizedBox(height: 20.h),
+                SizedBox(height: 10.h),
 
                 CustomTextField(
                   labelText: 'email',
@@ -82,24 +82,27 @@ class _RegisterPageState extends State<RegisterPage> {
                   icon: FontAwesomeIcons.envelope,
                 ),
 
-                SizedBox(height: 20.h),
+                SizedBox(height: 10.h),
 
                 CustomTextField(
                   labelText: 'password',
                   controller: passwordController,
                   icon: FontAwesomeIcons.lock,
                   type: 'password',
+                  obscureText: true,
                 ),
 
-                SizedBox(height: 20.h),
+                SizedBox(height: 10.h),
                 CustomTextField(
+                  
                   controller: rePasswordController,
                   labelText: 'confirm password',
                   icon: FontAwesomeIcons.lock,
                   type: 'password',
+                  obscureText: true,
                 ),
 
-                SizedBox(height: 20.h),
+                SizedBox(height: 10.h),
 
                 InkWell(
                   onTap: () {

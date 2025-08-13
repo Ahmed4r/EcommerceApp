@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:developer';
+import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/screens/location/location_access_screen.dart';
 import 'package:shop/screens/login/login.dart';
 import 'package:shop/widgets/glass_button.dart';
 
@@ -17,12 +18,11 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  final _otpController = TextEditingController();
   int _seconds = 60;
   bool _isRunning = false;
-  bool is_clicked = false;
   Timer? _timer;
-
+  TextEditingController otpController = TextEditingController();
+  @override
   void _startTimer() {
     _isRunning = true;
     _seconds = 60;
@@ -44,15 +44,30 @@ class _OtpScreenState extends State<OtpScreen> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+    otpController.dispose();
   }
 
   void _verifyOtp() {
-    print(_otpController.text);
+    if (otpController.text.isNotEmpty &&
+        otpController.text.length == 4 &&
+        otpController.text == '1234') {
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, LoginPage.routeName);
+    } else {
+      if (!mounted) return;
+      setState(() {});
+
+      AnimatedSnackBar.rectangle(
+        duration: Duration(milliseconds: 1500),
+        'Incorrect OTP',
+        'Please enter a correct OTP',
+        type: AnimatedSnackBarType.error,
+      ).show(context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, String>;
     final email = args['email'];
@@ -97,6 +112,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 ),
               ),
             ),
+            SizedBox(height: 20.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -106,7 +122,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         'Resend in ${_seconds.toString()}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.orange,
+                          color: Colors.blue,
                         ),
                       )
                     : InkWell(
@@ -123,7 +139,7 @@ class _OtpScreenState extends State<OtpScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            buildPinPut(context),
+            buildPinPut(context, otpController),
             const SizedBox(height: 20),
             GlassButton(title: "Verify", onPressed: _verifyOtp),
           ],
@@ -158,21 +174,19 @@ final submittedPinTheme = defaultPinTheme.copyWith(
   ),
 );
 
-Widget buildPinPut(context) {
+Widget buildPinPut(context, controller) {
   return Pinput(
     autofocus: true,
     defaultPinTheme: defaultPinTheme,
     focusedPinTheme: focusedPinTheme,
     submittedPinTheme: submittedPinTheme,
-    validator: (s) {
-      if (s == '2222') {
-        Navigator.pushReplacementNamed(context, LoginPage.routeName);
-      }
-      return null;
-    },
+    validator: (s) {},
+    hapticFeedbackType: HapticFeedbackType.lightImpact,
+    controller: controller,
     errorTextStyle: const TextStyle(color: Colors.red),
     pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
     showCursor: true,
-    onCompleted: (pin) => print(pin),
+
+    onCompleted: (pin) => log(pin.toString()),
   );
 }

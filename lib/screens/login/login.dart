@@ -1,22 +1,15 @@
 import 'dart:developer';
 import 'dart:ui';
-
-import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/screens/homepage/homepage.dart';
 import 'package:shop/screens/login/forgot_password/forgot_password.dart';
 import 'package:shop/screens/register/signup.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
-import 'package:shop/widgets/glass_button.dart';
 import 'package:shop/widgets/navigationbar.dart';
 
 class LoginPage extends StatefulWidget {
@@ -178,10 +171,7 @@ class _login_pageState extends State<LoginPage> {
                 customButtom(
                   title: 'Log in',
                   onTap: () {
-                    Navigator.pushReplacementNamed(
-                      context,
-                      Navigationbar.routeName,
-                    );
+                    Navigator.pushNamed(context, Navigationbar.routeName);
                   },
                 ),
 

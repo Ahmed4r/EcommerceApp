@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/app_colors.dart';
 import 'package:shop/screens/login/otp/otp_screen.dart';
+import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 
 class ForgotPassword extends StatefulWidget {
@@ -57,25 +58,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 icon: FontAwesomeIcons.envelope,
               ),
               SizedBox(height: 20.h),
-              ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: const WidgetStatePropertyAll(Colors.black),
-                  minimumSize: WidgetStatePropertyAll(Size(327.w, 50.h)),
-                ),
-                onPressed: () {
+              customButtom(
+                title: 'send',
+                onTap: () {
                   Navigator.pushNamed(
                     context,
                     OtpScreen.routeName,
                     arguments: {'email': Emailcontroller.text},
                   );
                 },
-                child: Text(
-                  'sendCode',
-                  style: GoogleFonts.cairo(
-                    fontSize: 20.sp,
-                    color: Colors.white,
-                  ),
-                ),
               ),
             ],
           ),

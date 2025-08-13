@@ -33,6 +33,11 @@ class _AddressListScreenState extends State<AddressListScreen> {
     _loadAddresses();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<void> _loadAddresses() async {
     final prefs = await SharedPreferences.getInstance();
     final List<String>? addressJsonList = prefs.getStringList('addresses');
@@ -228,11 +233,15 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
 
   Future<void> _setCurrentLocation() async {
     Position? position = await LocationService.getCurrentLocation(context);
+
+    if (!mounted) return; // هنا نتأكد إن الصفحة لسه موجودة
+
     if (position != null) {
       setState(() {
         selectedLocation = LatLng(position.latitude, position.longitude);
       });
     }
+
     currentAddress = await LocationService.getAddressFromCoordinates(
       selectedLocation.latitude,
       selectedLocation.longitude,
@@ -246,32 +255,44 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
+    if (!mounted) return; // لو الصفحة مش موجودة من الأول
+
     setState(() {
       isLoadingLocation = true;
     });
 
     try {
       Position? position = await LocationService.getCurrentLocation(context);
+
+      if (!mounted) return; // تحقق بعد الـ await
+
       if (position != null) {
         setState(() {
           selectedLocation = LatLng(position.latitude, position.longitude);
         });
 
-        mapController.move(selectedLocation, 15.0);
-        _updateMarker(selectedLocation);
-        _updateAddress(selectedLocation);
+        if (mounted) {
+          mapController.move(selectedLocation, 15.0);
+          _updateMarker(selectedLocation);
+          _updateAddress(selectedLocation);
+        }
       }
     } catch (e) {
-      print('Error getting current location: $e');
-      _updateAddress(selectedLocation);
+      if (mounted) {
+        print('Error getting current location: $e');
+        _updateAddress(selectedLocation);
+      }
     } finally {
-      setState(() {
-        isLoadingLocation = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoadingLocation = false;
+        });
+      }
     }
   }
 
   void _updateMarker(LatLng location) {
+    if (!mounted) return;
     setState(() {
       markers = [
         Marker(

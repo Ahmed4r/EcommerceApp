@@ -31,7 +31,7 @@ class HomepageHeaders extends StatelessWidget {
         TextButton(
           onPressed: () {
             ctrl == true
-                ? navBarKey.currentState?.changeTab(1, categoryData)
+                ? navBarKey.currentState?.changeTab(1, categoryData ,)
                 : Navigator.pushNamed(
                     context,
                     ShowProductspage.routeName,
