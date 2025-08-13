@@ -23,7 +23,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _login_pageState extends State<LoginPage> {
-  SharedPreferences? sahredPref;
+  SharedPreferences? sharedpref;
+
   @override
   void initState() {
     super.initState();
@@ -61,7 +62,11 @@ class _login_pageState extends State<LoginPage> {
     try {
       await authService.signInWithEmailAndPassword(email, password);
 
-      // بعد تسجيل الدخول بنجاح
+      sharedpref = await SharedPreferences.getInstance();
+
+      bool token = await sharedpref!.setBool('token', true);
+
+      log('token now $token');
       Navigator.pushReplacementNamed(context, Navigationbar.routeName);
     } catch (e) {
       ScaffoldMessenger.of(
@@ -72,7 +77,6 @@ class _login_pageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: AppColors.primary,
       appBar: AppBar(
@@ -100,30 +104,7 @@ class _login_pageState extends State<LoginPage> {
                   style: GoogleFonts.sen(fontSize: 16.sp, color: Colors.black),
                 ),
                 SizedBox(height: 40.h),
-                // ClipRRect(
-                //   borderRadius: BorderRadius.circular(20.r),
-                //   child: BackdropFilter(
-                //     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                //     child: Container(
-                //       width: 360.w,
-                //       height: 200.h,
-                //       decoration: BoxDecoration(
-                //         color: Colors.white.withOpacity(0.2),
-                //         borderRadius: BorderRadius.circular(20),
-                //         border: Border.all(
-                //           color: Colors.white.withOpacity(0.3),
-                //           width: 1.5.w,
-                //         ),
-                //         boxShadow: [
-                //           BoxShadow(
-                //             color: Colors.black.withOpacity(0.1),
-                //             blurRadius: 10.r,
-                //             offset: Offset(0, 4),
-                //           ),
-                //         ],
-                //       ),
 
-                //       child:
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -144,11 +125,8 @@ class _login_pageState extends State<LoginPage> {
                     SizedBox(height: 20.h),
                   ],
                 ),
-                //     ),
-                //   ),
-                // ),
+
                 Row(
-                  // mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Checkbox(
                       value: checkboxvalue,

@@ -383,8 +383,8 @@ class _HomepageState extends State<Homepage> {
           child: Column(
             children: [
               SizedBox(height: 20.h),
-              HomepageHeaders("Prodcut Category", true, products, categoryData ,key: GlobalKey(),),
 
+              // HomepageHeaders("Prodcut Category", true, products, categoryData ,key: GlobalKey(),),
               SizedBox(
                 height: 50.h,
                 child: ListView.separated(

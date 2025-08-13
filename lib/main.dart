@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/screens/category/category.dart';
 import 'package:shop/screens/homepage/homepage.dart';
@@ -20,23 +23,28 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
-    url: 'https://lcbhbensqcotqqyywegd.supabase.co', // رابط المشروع من Supabase
+    url: 'https://lcbhbensqcotqqyywegd.supabase.co',
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjYmhiZW5zcWNvdHFxeXl3ZWdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwOTc5ODQsImV4cCI6MjA3MDY3Mzk4NH0.z0_iRuwLSiCBEbwRPU620JzEr2aRgmF1FlB3q3l5R28', // الـ anon key من Settings -> API
   );
+  final sharedpref = await SharedPreferences.getInstance();
+  final token = await sharedpref.setBool('token', false);
+
   runApp(
     MultiBlocProvider(
       providers: [BlocProvider(create: (_) => WishlistCubit())],
-      child: ShopApp(),
+      child: ShopApp(token: token),
     ),
   );
 }
 
 class ShopApp extends StatelessWidget {
-  const ShopApp({super.key});
+  final bool token;
+  const ShopApp({super.key, required this.token});
 
   @override
   Widget build(BuildContext context) {
+    log(token.toString());
     return ScreenUtilInit(
       designSize: const Size(360, 690),
       minTextAdapt: true,
@@ -44,7 +52,9 @@ class ShopApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Navigationbar(key: navBarKey),
-        initialRoute: LoginPage.routeName,
+        initialRoute: token == true
+            ? Navigationbar.routeName
+            : LoginPage.routeName,
         routes: {
           Homepage.routeName: (context) => Homepage(),
           Category.routeName: (context) => Category(),

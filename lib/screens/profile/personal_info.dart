@@ -63,6 +63,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void logout() async {
     await authservice.signOut();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('token', false);
+
     Navigator.pushReplacementNamed(context, LoginPage.routeName);
   }
 
