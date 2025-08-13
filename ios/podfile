@@ -1,7 +1,8 @@
+platform :ios, '15.5'
 use_frameworks!
 use_modular_headers!
 
 target 'Runner' do
-  # يجيب كل Flutter pods بشكل تلقائي
-  install_all_flutter_pods(File.dirname(File.realpath(__FILE__)))
+  flutter_application_path = '../'
+  eval(File.read(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')))
 end
