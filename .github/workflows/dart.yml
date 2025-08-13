@@ -13,7 +13,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          channel: "stable"
           architecture: x64
 
       # 1. Pre-cache iOS artifacts
@@ -23,36 +23,50 @@ jobs:
       - run: flutter clean
       - run: flutter pub get
 
-      # 3. Install CocoaPods
-      - name: Install CocoaPods
+      # 3. Build once to auto-generate Podfile
+      - run: flutter build ios --release --no-codesign || true
+
+      # 3.1 Install latest CocoaPods to avoid flutter_install_all_ios_pods error
+      - name: Install latest CocoaPods
+        run: sudo gem install cocoapods
+
+      # 4. Update iOS target in Podfile
+      - name: Update iOS deployment target
         run: |
-          sudo gem install cocoapods
+          cd ios
+          sed -i '' "s/platform :ios, '[0-9.]*'/platform :ios, '15.5'/" Podfile
+          cd ..
+
+      # 5. Reinstall CocoaPods
+      - name: Update CocoaPods
+        run: |
           cd ios
           pod repo update
+          pod deintegrate
           pod install
           cd ..
 
-      # 4. Build iOS Release (unsigned)
+      # 6. Final build
       - run: flutter build ios --release --no-codesign
 
-      # 5. Prepare Payload for IPA
+      # 7. Prepare Payload
       - run: mkdir Payload
         working-directory: build/ios/iphoneos
 
       - run: mv Runner.app Payload/
         working-directory: build/ios/iphoneos
 
-      # 6. Zip IPA
+      # 8. Zip IPA
       - name: Zip output
         run: zip -qq -r -9 FlutterIpaExport.ipa Payload
         working-directory: build/ios/iphoneos
 
-      # 7. Upload to GitHub Release
-      - name: Upload binaries
+      # 9. Upload release
+      - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/ios/iphoneos/FlutterIpaExport.ipa
           tag: v1.0
           overwrite: true
-          body: "Supabase build IPA"
+          body: "This is first release"
