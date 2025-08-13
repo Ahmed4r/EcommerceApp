@@ -13,7 +13,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: "stable"
           architecture: x64
 
       # 1. Pre-cache iOS artifacts
@@ -52,11 +52,9 @@ jobs:
       - run: mv Runner.app Payload
         working-directory: build/ios/iphoneos
 
-      # 8. Zip IPA with date-time in name
+      # 8. Zip IPA
       - name: Zip output
-        run: |
-          DATE=$(date +'%Y-%m-%d_%H-%M-%S')
-          zip -qq -r -9 FlutterIpaExport_${DATE}.ipa Payload
+        run: zip -qq -r -9 FlutterIpaExport.ipa Payload
         working-directory: build/ios/iphoneos
 
       # 9. Upload release
@@ -64,7 +62,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/ios/iphoneos/FlutterIpaExport_*.ipa
+          file: build/ios/iphoneos/FlutterIpaExport.ipa
           tag: v1.0
           overwrite: true
-          body: "This is a geolocation & flutter map release"
+          body: "This is first release"
