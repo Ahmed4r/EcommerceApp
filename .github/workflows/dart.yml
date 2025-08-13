@@ -5,47 +5,46 @@ on:
 
 jobs:
   build-ios:
+    name: 🎉 iOS Build
     runs-on: macos-latest
 
     steps:
-      # 1. سحب الكود من GitHub
-      - uses: actions/checkout@v3
+      - name: 🛒 Checkout Repository
+        uses: actions/checkout@v3
 
-      # 2. تثبيت Flutter
-      - uses: subosito/flutter-action@v2
+      - name: 🔧 Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          channel: "stable"
+          channel: 'stable'
           architecture: x64
 
-      # 3. تثبيت الـ CocoaPods
-      - name: Install CocoaPods
-        run: |
-          sudo gem install cocoapods
-          pod repo update
-
-      # 4. تثبيت Dependencies
-      - name: Flutter pub get
+      # ✅ تهيئة Flutter للمشروع
+      - name: 📦 Flutter Pub Get
         run: flutter pub get
 
-      # 5. عمل Pre-cache للـ iOS
-      - name: Flutter precache for iOS
-        run: flutter precache --ios
+      # ✅ مسح الكاش وإعادة التهيئة
+      - name: 🧹 Clean Flutter & iOS
+        run: |
+          flutter clean
+          cd ios
+          pod deintegrate
+          pod cache clean --all
+          cd ..
 
-      # 6. الانتقال لمجلد iOS وتثبيت الـ Pods
-      - name: Install iOS Pods
+      # ✅ Install iOS dependencies
+      - name: 📥 Install CocoaPods
         run: |
           cd ios
           pod install
           cd ..
 
-      # 7. بناء الـ IPA
-      - name: Build IPA
-        run: |
-          flutter build ipa --no-codesign
+      # ✅ Build IPA
+      - name: 📦 Build iOS IPA
+        run: flutter build ipa --no-codesign
 
-      # 8. رفع الـ IPA كـ Artifact
-      - name: Upload IPA
-        uses: actions/upload-artifact@v3
+      # ✅ حفظ ملف IPA الناتج
+      - name: 📂 Upload IPA Artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: app-ipa
+          name: app-release-ipa
           path: build/ios/ipa/*.ipa
