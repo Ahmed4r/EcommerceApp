@@ -8,6 +8,7 @@ import 'package:pinput/pinput.dart';
 import 'package:shop/app_colors.dart';
 import 'package:shop/screens/login/login.dart';
 import 'package:shop/widgets/glass_button.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OtpScreen extends StatefulWidget {
   static const routeName = '/otp-screen';
@@ -22,55 +23,97 @@ class _OtpScreenState extends State<OtpScreen> {
   bool _isRunning = false;
   Timer? _timer;
   TextEditingController otpController = TextEditingController();
+  late String email;
+
+  bool _isInit = true;
+
   @override
-  void _startTimer() {
-    _isRunning = true;
-    _seconds = 60;
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_seconds > 0) {
-        if (mounted) {
-          setState(() {
-            _seconds--;
-          });
-        }
-      } else {
-        _isRunning = false;
-        timer.cancel();
-      }
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isInit) {
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+      email = args['email']!;
+      _sendOtp();
+      _startTimer();
+      _isInit = false;
+    }
   }
 
   @override
   void dispose() {
     _timer?.cancel();
-    super.dispose();
     otpController.dispose();
+    super.dispose();
   }
 
-  void _verifyOtp() {
-    if (otpController.text.isNotEmpty &&
-        otpController.text.length == 4 &&
-        otpController.text == '1234') {
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, LoginPage.routeName);
-    } else {
-      if (!mounted) return;
-      setState(() {});
+  void _startTimer() {
+    setState(() {
+      _isRunning = true;
+      _seconds = 60;
+    });
 
-      AnimatedSnackBar.rectangle(
-        duration: Duration(milliseconds: 1500),
-        'Incorrect OTP',
-        'Please enter a correct OTP',
-        type: AnimatedSnackBarType.error,
-      ).show(context);
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_seconds > 0) {
+        if (mounted) setState(() => _seconds--);
+      } else {
+        if (mounted) setState(() => _isRunning = false);
+        timer.cancel();
+      }
+    });
+  }
+
+  Future<void> _sendOtp() async {
+    try {
+      final res = await Supabase.instance.client.auth.signInWithOtp(
+        email: email,
+      );
+      if (mounted) {
+        AnimatedSnackBar.rectangle(
+          'OTP Sent',
+          'Check your email for the OTP link',
+          type: AnimatedSnackBarType.success,
+          duration: const Duration(seconds: 2),
+        ).show(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        log(e.toString());
+        AnimatedSnackBar.rectangle(
+          'Error',
+          'Failed to send OTP: $e',
+          type: AnimatedSnackBarType.error,
+          duration: const Duration(seconds: 2),
+        ).show(context);
+      }
+    }
+  }
+
+  Future<void> _verifyOtp() async {
+    try {
+      final res = await Supabase.instance.client.auth.verifyOTP(
+        email: email,
+        token: otpController.text,
+        type: OtpType.sms,
+      );
+
+      if (res.user != null && mounted) {
+        Navigator.pushReplacementNamed(context, LoginPage.routeName);
+      }
+    } catch (e) {
+      if (mounted) {
+        AnimatedSnackBar.rectangle(
+          'Incorrect OTP',
+          'Please enter the correct OTP',
+          type: AnimatedSnackBarType.error,
+          duration: const Duration(seconds: 2),
+        ).show(context);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, String>;
-    final email = args['email'];
     return Scaffold(
       backgroundColor: AppColors.primary,
       appBar: AppBar(
@@ -78,7 +121,7 @@ class _OtpScreenState extends State<OtpScreen> {
         centerTitle: true,
         title: RichText(
           text: TextSpan(
-            text: 'verification',
+            text: 'Verification',
             style: GoogleFonts.sen(
               fontSize: 30.sp,
               fontWeight: FontWeight.bold,
@@ -92,24 +135,16 @@ class _OtpScreenState extends State<OtpScreen> {
         child: Column(
           children: [
             SizedBox(height: 10.h),
-            RichText(
-              text: TextSpan(
-                text: 'we have sent a code to your email',
-                style: GoogleFonts.sen(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.black,
-                ),
-              ),
+            Text(
+              'We have sent a code to your email',
+              style: GoogleFonts.sen(fontSize: 16.sp, color: Colors.black),
             ),
-            RichText(
-              text: TextSpan(
-                text: email,
-                style: GoogleFonts.sen(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+            Text(
+              email,
+              style: GoogleFonts.sen(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
             SizedBox(height: 20.h),
@@ -119,17 +154,20 @@ class _OtpScreenState extends State<OtpScreen> {
                 Text('CODE'),
                 _isRunning
                     ? Text(
-                        'Resend in ${_seconds.toString()}',
+                        'Resend in $_seconds',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.blue,
                         ),
                       )
                     : InkWell(
-                        onTap: () => _startTimer(),
-                        child: Text(
+                        onTap: () {
+                          _sendOtp();
+                          _startTimer();
+                        },
+                        child: const Text(
                           'Resend',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             decoration: TextDecoration.underline,
                             color: Colors.grey,
@@ -149,6 +187,7 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 }
 
+// Pinput Themes
 final defaultPinTheme = PinTheme(
   width: 300.w,
   height: 56.h,
@@ -186,7 +225,6 @@ Widget buildPinPut(context, controller) {
     errorTextStyle: const TextStyle(color: Colors.red),
     pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
     showCursor: true,
-
     onCompleted: (pin) => log(pin.toString()),
   );
 }
