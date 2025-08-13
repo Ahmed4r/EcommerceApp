@@ -1,9 +1,11 @@
-platform :ios, '12.0'
+platform :ios, '11.0'
 
 use_frameworks!
 use_modular_headers!
 
+flutter_application_path = File.expand_path('..', __dir__)
+require File.join(flutter_application_path, 'ios', 'Flutter', 'podhelper.rb')
+
 target 'Runner' do
-  flutter_application_path = '../'
-  eval(File.read(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')), binding)
+  install_all_flutter_pods(flutter_application_path)
 end
