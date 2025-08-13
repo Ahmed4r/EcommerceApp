@@ -22,7 +22,7 @@ class Product {
     required this.name,
     required this.description,
     required this.image,
-   
+
     required this.price,
     this.oldPrice,
     this.discount,
@@ -44,7 +44,7 @@ class Product {
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       image: json['image'] ?? '',
-    
+
       price: (json['price'] ?? 0).toDouble(),
       oldPrice: json['oldPrice'] != null ? (json['oldPrice']).toDouble() : null,
       discount: json['discount'] != null ? (json['discount']).toDouble() : null,
@@ -69,7 +69,7 @@ class Product {
       'name': name,
       'description': description,
       'image': image,
-      
+
       'price': price,
       'oldPrice': oldPrice,
       'discount': discount,
@@ -83,5 +83,13 @@ class Product {
       'updatedAt': updatedAt?.toIso8601String(),
       'variations': variations,
     };
+  }
+
+  static Product? findById(List<Product> products, String id) {
+    try {
+      return products.firstWhere((p) => p.id == id);
+    } catch (e) {
+      return null; // product not found
+    }
   }
 }

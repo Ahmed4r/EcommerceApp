@@ -21,25 +21,20 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  TextEditingController nameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-
-  bool updateInfo = false;
+  late TextEditingController nameController = TextEditingController();
+  late TextEditingController emailController = TextEditingController();
+  late TextEditingController phoneController = TextEditingController();
   String? profileImagePath;
+  bool isLoading = true;
+  bool updateInfo = false;
   final ImagePicker _picker = ImagePicker();
 
-  // SharedPreferences keys
-  static const String _nameKey = 'user_name';
-  static const String _emailKey = 'user_email';
-  static const String _phoneKey = 'user_phone';
-  static const String _imageKey = 'user_image';
   final authservice = AuthService();
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _loadProfileData();
   }
 
   @override
@@ -50,36 +45,41 @@ class _ProfilePageState extends State<ProfilePage> {
     super.dispose();
   }
 
-  // Load user data from SharedPreferences
-  Future<void> _loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> _loadProfileData() async {
     setState(() {
-      nameController.text = prefs.getString(_nameKey) ?? '';
-      emailController.text = prefs.getString(_emailKey) ?? '';
-      phoneController.text = prefs.getString(_phoneKey) ?? '';
-      profileImagePath = prefs.getString(_imageKey);
+      isLoading = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+
+    // Load values only if controllers are empty
+    if (nameController.text.isEmpty) {
+      nameController.text = prefs.getString('profile_name') ?? '';
+    }
+    if (emailController.text.isEmpty) {
+      emailController.text = prefs.getString('profile_email') ?? '';
+    }
+    if (phoneController.text.isEmpty) {
+      phoneController.text = prefs.getString('profile_phone') ?? '';
+    }
+    if (profileImagePath == null || profileImagePath!.isEmpty) {
+      profileImagePath = prefs.getString('profile_img') ?? '';
+    }
+
+    setState(() {
+      isLoading = false;
     });
   }
 
-  void logout() async {
-    await authservice.signOut();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('token', false);
-
-    Navigator.pushReplacementNamed(context, LoginPage.routeName);
-  }
-
-  // Save user data to SharedPreferences
   Future<void> _saveUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_nameKey, nameController.text);
-    await prefs.setString(_emailKey, emailController.text);
-    await prefs.setString(_phoneKey, phoneController.text);
+    await prefs.setString('profile_name', nameController.text);
+    await prefs.setString('profile_email', emailController.text);
+    await prefs.setString('profile_phone', phoneController.text);
     if (profileImagePath != null) {
-      await prefs.setString(_imageKey, profileImagePath!);
+      await prefs.setString('profile_img', profileImagePath!);
     }
 
-    // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -92,109 +92,29 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Pick image from gallery or camera
   Future<void> _pickImage() async {
-    if (!updateInfo) return; // Only allow picking when in edit mode
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-              ),
-              child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 50.w,
-                      height: 5.h,
-                      margin: EdgeInsets.only(top: 10.h),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                    ),
-                    SizedBox(height: 20.h),
-                    Text(
-                      'Select Profile Picture',
-                      style: GoogleFonts.cairo(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 20.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildImageSourceOption(
-                          icon: Icons.camera_alt,
-                          label: 'Camera',
-                          source: ImageSource.camera,
-                        ),
-                        _buildImageSourceOption(
-                          icon: Icons.photo_library,
-                          label: 'Gallery',
-                          source: ImageSource.gallery,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 30.h),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
+    if (!updateInfo) return;
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() => profileImagePath = image.path);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('profile_img', profileImagePath!);
+    }
   }
 
-  Widget _buildImageSourceOption({
-    required IconData icon,
-    required String label,
-    required ImageSource source,
-  }) {
-    return GestureDetector(
-      onTap: () async {
-        Navigator.pop(context);
-        final XFile? image = await _picker.pickImage(source: source);
-        if (image != null) {
-          setState(() {
-            profileImagePath = image.path;
-          });
-        }
-      },
-      child: Column(
-        children: [
-          Container(
-            width: 60.w,
-            height: 60.h,
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(15.r),
-              border: Border.all(
-                color: Colors.blue.withOpacity(0.3),
-                width: 1.5.w,
-              ),
-            ),
-            child: Icon(icon, color: Colors.blue, size: 30.sp),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            label,
-            style: GoogleFonts.cairo(fontSize: 14.sp, color: Colors.grey[700]),
-          ),
-        ],
-      ),
-    );
+  ImageProvider _getProfileImageProvider() {
+    const defaultAsset = 'assets/profile.jpg';
+    if (profileImagePath == null || profileImagePath!.isEmpty) {
+      return const AssetImage(defaultAsset);
+    }
+    if (profileImagePath!.startsWith('http://') ||
+        profileImagePath!.startsWith('https://')) {
+      return NetworkImage(profileImagePath!);
+    }
+    if (File(profileImagePath!).existsSync()) {
+      return FileImage(File(profileImagePath!));
+    }
+    return const AssetImage(defaultAsset);
   }
 
   @override
@@ -229,7 +149,6 @@ class _ProfilePageState extends State<ProfilePage> {
             },
             icon: FaIcon(
               FontAwesomeIcons.locationArrow,
-
               color: Colors.grey,
               size: 30.r,
             ),
@@ -237,149 +156,130 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
         elevation: 0,
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20.r),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    width: 340.w,
-                    height: 380.h, // Increased height slightly
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 1.5.w,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10.r,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        // Profile Image with edit functionality
-                        Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: 50.r,
-                              backgroundImage: profileImagePath != null
-                                  ?
-                                    //  ResizeImage(
-                                    //     height: (50.h).toInt(),
-                                    //     width: (50.w).toInt(),
-                                    FileImage(File(profileImagePath!))
-                                  // )
-                                  //  ResizeImage(
-                                  : AssetImage('assets/profile.jpg')
-                                        // width: (50.w).toInt(),
-                                        // height: (50.h).toInt(),
-                                        // )
-                                        as ImageProvider,
+      body: isLoading
+          ? Center(child: CircularProgressIndicator(color: AppColors.primary))
+          : Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20.r),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          width: 340.w,
+                          height: 380.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                              width: 1.5.w,
                             ),
-                            if (updateInfo)
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: GestureDetector(
-                                  onTap: _pickImage,
-                                  child: Container(
-                                    padding: EdgeInsets.all(6.r),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 2.w,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10.r,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Stack(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 50.r,
+                                    backgroundImage: _getProfileImageProvider(),
+                                  ),
+                                  if (updateInfo)
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: GestureDetector(
+                                        onTap: _pickImage,
+                                        child: Container(
+                                          padding: EdgeInsets.all(6.r),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: Colors.white,
+                                              width: 2.w,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            Icons.camera_alt,
+                                            color: Colors.white,
+                                            size: 16.sp,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                    child: Icon(
-                                      Icons.camera_alt,
-                                      color: Colors.white,
-                                      size: 16.sp,
-                                    ),
-                                  ),
-                                ),
+                                ],
                               ),
+                              CustomTextField(
+                                controller: nameController,
+                                labelText: 'Name',
+                                icon: Icons.person,
+                              ),
+                              CustomTextField(
+                                controller: emailController,
+                                labelText: 'Email',
+                                icon: Icons.email,
+                              ),
+                              CustomTextField(
+                                controller: phoneController,
+                                labelText: 'Phone',
+                                icon: FontAwesomeIcons.phone,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+                    GestureDetector(
+                      onTap: () async {
+                        if (updateInfo) {
+                          await _saveUserData();
+                          FocusScope.of(context).unfocus();
+                        }
+                        setState(() {
+                          updateInfo = !updateInfo;
+                        });
+                      },
+                      child: Container(
+                        width: 220.w,
+                        height: 40.h,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: updateInfo ? Colors.green : Colors.black,
+                          borderRadius: BorderRadius.circular(20.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10.r,
+                              offset: Offset(0, 4),
+                            ),
                           ],
                         ),
-
-                        // Name Field
-                        CustomTextField(
-                          controller: nameController,
-                          labelText: 'Name',
-                          icon: Icons.person,
+                        child: Text(
+                          updateInfo ? "Save Changes" : "Edit Profile",
+                          style: GoogleFonts.cairo(
+                            color: Colors.white,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-
-                        // Email Field
-                        CustomTextField(
-                          controller: emailController,
-                          labelText: 'Email',
-                          icon: Icons.email,
-                        ),
-
-                        // Phone Field
-                        CustomTextField(
-                          controller: phoneController,
-                          labelText: 'Phone',
-                          icon: FontAwesomeIcons.phone,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Save Button
-              GestureDetector(
-                onTap: () async {
-                  if (updateInfo) {
-                    await _saveUserData();
-                    FocusScope.of(context).unfocus();
-                  }
-                  setState(() {
-                    updateInfo = !updateInfo;
-                  });
-                },
-                child: Container(
-                  width: 220.w,
-                  height: 40.h,
-                  alignment: Alignment.center,
-                  margin: EdgeInsets.only(top: 20.h),
-                  decoration: BoxDecoration(
-                    color: updateInfo ? Colors.green : Colors.black,
-                    borderRadius: BorderRadius.circular(20.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10.r,
-                        offset: Offset(0, 4),
                       ),
-                    ],
-                  ),
-                  child: Text(
-                    updateInfo ? "Save Changes" : "Edit Profile",
-                    style: GoogleFonts.cairo(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
                     ),
-                  ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

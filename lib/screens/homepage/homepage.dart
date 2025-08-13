@@ -343,21 +343,6 @@ class _HomepageState extends State<Homepage> {
           ],
         ),
         actions: [
-          // Container(
-          //   decoration: BoxDecoration(
-          //     border: Border.all(color: Colors.grey.shade300, width: 1.w),
-          //     borderRadius: BorderRadius.circular(16.r),
-          //   ),
-          //   child: IconButton(
-          //     onPressed: () {},
-          //     icon: FaIcon(
-          //       FontAwesomeIcons.bell,
-          //       color: Colors.black,
-          //       size: 20.r,
-          //     ),
-          //   ),
-          // ),
-          // SizedBox(width: 10.w),
           Container(
             margin: EdgeInsets.only(right: 10.w),
             decoration: BoxDecoration(

@@ -68,22 +68,58 @@ class WishlistPage extends StatelessWidget {
               return Stack(
                 children: [
                   Card(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: Image.asset(product.image, fit: BoxFit.cover),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(12.r),
+                            ),
+                            child: Image.asset(
+                              product.image,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (_, __, ___) => Image.asset(
+                                'assets/images/default_product.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
                         ),
-                        Text(product.name),
-                        Text("\$${product.price}"),
+                        SizedBox(height: 5.h),
+                        Text(
+                          product.name,
+                          style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          "\$${product.price}",
+                          style: TextStyle(color: Colors.green[700]),
+                        ),
+                        SizedBox(height: 5.h),
                       ],
                     ),
                   ),
                   Positioned(
+                    top: 5,
+                    right: 5,
                     child: GestureDetector(
                       onTap: () {
                         context.read<WishlistCubit>().toggleFavorite(product);
                       },
-                      child: FaIcon(FontAwesomeIcons.remove, color: Colors.red),
+                      child: CircleAvatar(
+                        radius: 14.r,
+                        backgroundColor: Colors.white,
+                        child: FaIcon(
+                          FontAwesomeIcons.remove,
+                          color: Colors.red,
+                          size: 14.sp,
+                        ),
+                      ),
                     ),
                   ),
                 ],
