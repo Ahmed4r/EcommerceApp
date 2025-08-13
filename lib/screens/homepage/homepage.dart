@@ -359,6 +359,7 @@ class _HomepageState extends State<Homepage> {
           // ),
           // SizedBox(width: 10.w),
           Container(
+            margin: EdgeInsets.only(right: 10.w),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey.shade300, width: 1.w),
               borderRadius: BorderRadius.circular(16.r),
