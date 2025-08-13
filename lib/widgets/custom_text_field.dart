@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -11,6 +10,7 @@ class CustomTextField extends StatefulWidget {
   final IconData icon;
   bool obscureText;
   final String type;
+  final String? Function(String?)? validator;
 
   CustomTextField({
     super.key,
@@ -19,6 +19,7 @@ class CustomTextField extends StatefulWidget {
     required this.icon,
     this.obscureText = false,
     this.type = "text",
+    this.validator,
   });
 
   @override
@@ -48,22 +49,17 @@ class _CustomTextFieldState extends State<CustomTextField> {
               FaIcon(widget.icon, color: Colors.black54, size: 20.sp),
               SizedBox(width: 10.w),
               Expanded(
-                child: TextField(
+                child: TextFormField(
+                  controller: widget.controller,
+                  validator: widget.validator,
                   keyboardType: widget.type == "text"
                       ? TextInputType.text
                       : TextInputType.visiblePassword,
-                  controller: widget.controller,
-
                   obscureText: widget.obscureText,
                   style: GoogleFonts.cairo(color: Colors.black87),
-                  decoration: widget.type == "text"
-                      ? InputDecoration(
-                          border: InputBorder.none,
-                          labelText: widget.labelText,
-                          labelStyle: GoogleFonts.cairo(color: Colors.black54),
-                        )
-                      : InputDecoration(
-                          suffixIcon: IconButton(
+                  decoration: InputDecoration(
+                    suffixIcon: widget.type == "password"
+                        ? IconButton(
                             onPressed: () {
                               setState(() {
                                 widget.obscureText = !widget.obscureText;
@@ -72,11 +68,12 @@ class _CustomTextFieldState extends State<CustomTextField> {
                             icon: widget.obscureText
                                 ? FaIcon(FontAwesomeIcons.eyeSlash)
                                 : FaIcon(FontAwesomeIcons.eye),
-                          ),
-                          border: InputBorder.none,
-                          labelText: widget.labelText,
-                          labelStyle: GoogleFonts.cairo(color: Colors.black54),
-                        ),
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    labelText: widget.labelText,
+                    labelStyle: GoogleFonts.cairo(color: Colors.black54),
+                  ),
                 ),
               ),
             ],

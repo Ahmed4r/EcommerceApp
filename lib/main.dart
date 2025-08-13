@@ -15,9 +15,15 @@ import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/wishlist.dart';
 import 'package:shop/widgets/navigationbar.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Supabase.initialize(
+    url: 'https://lcbhbensqcotqqyywegd.supabase.co', // رابط المشروع من Supabase
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjYmhiZW5zcWNvdHFxeXl3ZWdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwOTc5ODQsImV4cCI6MjA3MDY3Mzk4NH0.z0_iRuwLSiCBEbwRPU620JzEr2aRgmF1FlB3q3l5R28', // الـ anon key من Settings -> API
+  );
   runApp(
     MultiBlocProvider(
       providers: [BlocProvider(create: (_) => WishlistCubit())],

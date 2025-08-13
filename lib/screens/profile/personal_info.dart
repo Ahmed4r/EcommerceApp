@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shop/app_colors.dart';
 import 'package:shop/screens/location/location_access_screen.dart';
+import 'package:shop/screens/login/login.dart';
+import 'package:shop/services/auth/auth_service.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -32,6 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
   static const String _emailKey = 'user_email';
   static const String _phoneKey = 'user_phone';
   static const String _imageKey = 'user_image';
+  final authservice = AuthService();
 
   @override
   void initState() {
@@ -56,6 +59,11 @@ class _ProfilePageState extends State<ProfilePage> {
       phoneController.text = prefs.getString(_phoneKey) ?? '';
       profileImagePath = prefs.getString(_imageKey);
     });
+  }
+
+  void logout() async {
+    await authservice.signOut();
+    Navigator.pushReplacementNamed(context, LoginPage.routeName);
   }
 
   // Save user data to SharedPreferences
@@ -193,6 +201,17 @@ class _ProfilePageState extends State<ProfilePage> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, LoginPage.routeName);
+          },
+          icon: FaIcon(
+            FontAwesomeIcons.signOut,
+            color: Colors.black,
+            size: 18.sp,
+          ),
+        ),
         title: Text(
           "My Profile",
           style: GoogleFonts.cairo(

@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/app_colors.dart';
 import 'package:shop/screens/login/forgot_password/forgot_password.dart';
 import 'package:shop/screens/register/signup.dart';
+import 'package:shop/services/auth/auth_service.dart';
+
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 import 'package:shop/widgets/navigationbar.dart';
@@ -25,26 +27,48 @@ class _login_pageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    // getPref();
   }
 
-  // Future<void> getPref() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final email = prefs.getString('email');
-  //   final password = prefs.getString('password');
-  //   final remember = prefs.getBool('remember');
+  @override
+  void dispose() {
+    Emailcontroller.dispose();
+    Passwordcontroller.dispose();
+    super.dispose();
+  }
 
-  //   if (remember != null && remember) {
-  //     Emailcontroller.text = email ?? '';
-  //     Passwordcontroller.text = password ?? '';
-  //     checkboxvalue = true;
-  //   }
-  // }
-
-  TextEditingController Emailcontroller = TextEditingController(text: '');
-  TextEditingController Passwordcontroller = TextEditingController(text: '');
+  @override
+  TextEditingController Emailcontroller = TextEditingController(
+    text: 'ahmedrady03@gmail.com',
+  );
+  TextEditingController Passwordcontroller = TextEditingController(
+    text: 'aA123456',
+  );
   bool isobsecured = false;
   bool checkboxvalue = false;
+
+  final authService = AuthService();
+  void login() async {
+    final email = Emailcontroller.text.trim();
+    final password = Passwordcontroller.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter email and password")),
+      );
+      return;
+    }
+
+    try {
+      await authService.signInWithEmailAndPassword(email, password);
+
+      // بعد تسجيل الدخول بنجاح
+      Navigator.pushReplacementNamed(context, Navigationbar.routeName);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +195,7 @@ class _login_pageState extends State<LoginPage> {
                 customButtom(
                   title: 'Log in',
                   onTap: () {
-                    Navigator.pushNamed(context, Navigationbar.routeName);
+                    login();
                   },
                 ),
 
@@ -224,77 +248,4 @@ class _login_pageState extends State<LoginPage> {
       ),
     );
   }
-
-  //   Future<void> _login() async {
-  //     await Firebase.initializeApp(); // 👈 دي مهمة جدًا على iOS
-
-  //     final email = Emailcontroller.text.trim();
-  //     final password = Passwordcontroller.text;
-
-  //     // Validate input
-  //     if (email.isEmpty || password.isEmpty) {
-  //       CustomAlert.error(context, title: 'Please enter email and password');
-  //       return;
-  //     }
-
-  //     try {
-  //       // Use Firebase Auth to sign in
-  //       final userCredential =
-  //           await FirebaseAuth.instance.signInWithEmailAndPassword(
-  //         email: email,
-  //         password: password,
-  //       );
-
-  //       // Fetch user role from Firestore
-  //       final user = userCredential.user;
-  //       if (user != null) {
-  //         final userDoc = await FirebaseFirestore.instance
-  //             .collection('users')
-  //             .doc(user.uid)
-  //             .get();
-  //         if (userDoc.exists && userDoc.data() != null) {
-  //           final userData = userDoc.data() as Map<String, dynamic>;
-  //           final role = userData['role'] as String?;
-
-  //           // Save credentials if "Remember me" is checked
-  //           if (checkboxvalue) {
-  //             await SharedPreferences.getInstance().then((prefs) {
-  //               prefs.setString('email', email);
-  //               prefs.setString('password', password);
-  //               prefs.setBool('remember', true);
-  //               prefs.setBool('authToken', true);
-  //             });
-  //           } else {
-  //             await SharedPreferences.getInstance().then((prefs) {
-  //               prefs.remove('email');
-  //               prefs.remove('password');
-  //               prefs.setBool('remember', false);
-  //             });
-  //           }
-
-  //           // Navigate based on role
-  //           if (role == 'owner') {
-  //             Navigator.pushNamed(context, BottomNav.routeName);
-  //           } else if (role == 'customer') {
-  //             Navigator.pushNamed(context, Homepage.routeName);
-  //           } else {
-  //             CustomAlert.error(context, title: 'Unknown or no role found');
-  //             return;
-  //           }
-  //         } else {
-  //           CustomAlert.error(context, title: 'User data not found');
-  //           return;
-  //         }
-  //       } else {
-  //         CustomAlert.error(context, title: 'User not found');
-  //         return;
-  //       }
-
-  //       CustomAlert.success(context, title: 'Successfully logged in');
-  //     } on FirebaseAuthException catch (e) {
-  //       CustomAlert.error(context, title: 'Error logging in: ${e.message}');
-  //     } catch (e) {
-  //       CustomAlert.error(context, title: 'An error occurred: $e');
-  //     }
-  //   }
 }
