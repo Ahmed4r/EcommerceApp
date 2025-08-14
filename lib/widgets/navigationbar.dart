@@ -1,7 +1,8 @@
 import 'package:crystal_navigation_bar/crystal_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:shop/model/product.dart';
 import 'package:shop/screens/category/category.dart';
-import 'package:shop/screens/homepage/homepage.dart';
+import 'package:shop/screens/homepage/cubit/homepage.dart';
 import 'package:shop/screens/profile/personal_info.dart';
 import 'package:shop/screens/wishlist/wishlist.dart';
 

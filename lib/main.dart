@@ -3,14 +3,16 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop/model/product.dart';
 import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/screens/category/category.dart';
-import 'package:shop/screens/homepage/homepage.dart';
+import 'package:shop/screens/homepage/cubit/homepage.dart';
 import 'package:shop/screens/location/address_details_Screen.dart';
 import 'package:shop/screens/location/location_access_screen.dart';
 import 'package:shop/screens/login/forgot_password/forgot_password.dart';
 import 'package:shop/screens/login/login.dart';
 import 'package:shop/screens/login/otp/otp_screen.dart';
+import 'package:shop/screens/onboarding/onboarding_screen.dart';
 import 'package:shop/screens/profile/personal_info.dart';
 import 'package:shop/screens/homepage/products_screen.dart';
 import 'package:shop/screens/register/signup.dart';
@@ -29,18 +31,20 @@ void main() async {
   );
   final sharedpref = await SharedPreferences.getInstance();
   final token = await sharedpref.setBool('token', false);
+  final onboardingSeen = await sharedpref.getBool('onboarding_seen') ?? false;
 
   runApp(
     MultiBlocProvider(
       providers: [BlocProvider(create: (_) => WishlistCubit())],
-      child: ShopApp(token: token),
+      child: ShopApp(token: token, onboardingSeen: onboardingSeen),
     ),
   );
 }
 
 class ShopApp extends StatelessWidget {
   final bool token;
-  const ShopApp({super.key, required this.token});
+  final bool onboardingSeen;
+  const ShopApp({super.key, required this.token, required this.onboardingSeen});
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +56,12 @@ class ShopApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Navigationbar(key: navBarKey),
-        initialRoute: token == true
-            ? Navigationbar.routeName
-            : LoginPage.routeName,
+        initialRoute: onboardingSeen
+            ? LoginPage.routeName
+            : OnboardingScreen.routeName,
         routes: {
-          Homepage.routeName: (context) => Homepage(),
+          Homepage.routeName: (context) =>
+              Homepage(),
           Category.routeName: (context) => Category(),
           ShowProductspage.routeName: (context) => ShowProductspage(),
           ProfilePage.routeName: (context) => ProfilePage(),
@@ -69,6 +74,7 @@ class ShopApp extends StatelessWidget {
           OtpScreen.routeName: (context) => OtpScreen(),
           ForgotPassword.routeName: (context) => ForgotPassword(),
           Navigationbar.routeName: (context) => Navigationbar(),
+          OnboardingScreen.routeName: (context) => OnboardingScreen(),
         },
       ),
     );

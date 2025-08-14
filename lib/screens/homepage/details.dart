@@ -30,23 +30,6 @@ class ProductDetailsPage extends StatelessWidget {
                     child: _circleButton(Icons.arrow_back_ios_new),
                   ),
 
-                  // BlocBuilder<WishlistCubit, WishlistState>(
-                  //   builder: (context, state) {
-                  //     final isFavorite = context
-                  //         .read<WishlistCubit>()
-                  //         .isFavorite(product);
-
-                  //     return GestureDetector(
-                  //       onTap: () {
-                  //         context.read<WishlistCubit>().toggleFavorite(product);
-                  //       },
-                  //       child: _circleButton(
-                  //         isFavorite ? Icons.favorite : Icons.favorite_border,
-                  //         color: isFavorite ? Colors.red : Colors.black,
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
                 ],
               ),
             ),
