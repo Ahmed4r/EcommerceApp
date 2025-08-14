@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:shop/screens/login/login.dart';
 import 'package:shop/widgets/navigationbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

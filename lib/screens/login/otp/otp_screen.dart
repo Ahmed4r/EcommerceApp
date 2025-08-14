@@ -219,7 +219,9 @@ Widget buildPinPut(context, controller) {
     defaultPinTheme: defaultPinTheme,
     focusedPinTheme: focusedPinTheme,
     submittedPinTheme: submittedPinTheme,
-    validator: (s) {},
+    validator: (s) {
+      return null;
+    },
     hapticFeedbackType: HapticFeedbackType.lightImpact,
     controller: controller,
     errorTextStyle: const TextStyle(color: Colors.red),

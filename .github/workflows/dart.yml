@@ -12,14 +12,23 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: "stable"
           architecture: x64
 
-      - run: flutter pub get
+      # Clean build and ensure dependencies
+      - name: Clean Flutter build
+        run: flutter clean
 
-      # Build once to generate .ios/Flutter/podhelper.rb
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      # Pre-build iOS to generate podhelper.rb
       - name: Pre-build iOS to generate podhelper.rb
-        run: flutter build ios --no-codesign || true
+        run: flutter build ios --no-codesign
+
+      # Debug: List contents of ios/Flutter to check for podhelper.rb
+      - name: Check for podhelper.rb
+        run: ls ios/Flutter
 
       # Ensure the Podfile has the correct platform
       - name: Set iOS deployment target
@@ -39,14 +48,19 @@ jobs:
           pod deintegrate
           pod install
           cd ..
-      - run: flutter pub get
 
-      - run: flutter build ios --release --no-codesign
+      - name: Get Flutter dependencies again
+        run: flutter pub get
 
-      - run: mkdir Payload
+      - name: Build iOS release (no codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Create Payload directory
+        run: mkdir Payload
         working-directory: build/ios/iphoneos
 
-      - run: mv Runner.app Payload/
+      - name: Move Runner.app to Payload
+        run: mv Runner.app Payload/
         working-directory: build/ios/iphoneos
 
       - name: Zip output

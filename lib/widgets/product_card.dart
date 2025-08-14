@@ -9,7 +9,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/model/product.dart';
 import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/screens/homepage/details.dart';
-import 'package:shop/screens/homepage/homepage.dart';
 
 class ProductItemCard extends StatefulWidget {
   final Product product;

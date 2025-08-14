@@ -99,8 +99,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       controller: emailController,
                       icon: FontAwesomeIcons.envelope,
                       validator: (value) {
-                        if (value == null || value.isEmpty)
+                        if (value == null || value.isEmpty) {
                           return 'Email is required';
+                        }
                         if (!value.contains('@')) return 'Invalid email format';
                         return null;
                       },
