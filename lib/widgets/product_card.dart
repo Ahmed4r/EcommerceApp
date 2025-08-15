@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/app_colors.dart';
 import 'package:shop/model/product.dart';
 import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/screens/homepage/details.dart';
@@ -128,7 +129,11 @@ class _ProductItemCardState extends State<ProductItemCard>
         decoration: BoxDecoration(
           image: DecorationImage(
             image: NetworkImage(widget.product.image),
-            fit: BoxFit.contain,
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.3),
+              BlendMode.darken,
+            ),
           ),
           borderRadius: BorderRadius.circular(20.r),
         ),
@@ -145,7 +150,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                     child: Text(
                       widget.product.name,
                       style: GoogleFonts.notoSansRejang(
-                        color: Color(0xff0D47A1),
+                        color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 12.sp,
                       ),
