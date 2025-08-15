@@ -1,77 +1,33 @@
-name: iOS-ipa-build
+name: Build iOS IPA (Flutter + Supabase)
 
 on:
   workflow_dispatch:
 
 jobs:
   build-ios:
-    name: 🎉 iOS Build
-    runs-on: macos-latest
+    runs-on: macos-14
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: "stable"
-          architecture: x64
+          flutter-version: "3.22.3"
+          channel: stable
+          cache: true
 
-      # Clean build and ensure dependencies
-      - name: Clean Flutter build
-        run: flutter clean
+      - run: flutter pub get
 
-      - name: Get Flutter dependencies
-        run: flutter pub get
-
-      # Pre-build iOS to generate podhelper.rb
-      - name: Pre-build iOS to generate podhelper.rb
-        run: flutter build ios --no-codesign
-
-      # Debug: List contents of ios/Flutter to check for podhelper.rb
-      - name: Check for podhelper.rb
-        run: ls ios/Flutter
-
-      # Ensure the Podfile has the correct platform
-      - name: Set iOS deployment target
+      - name: Prepare iOS Pods
         run: |
-          cd ios
-          if ! grep -q "platform :ios, '15.5'" Podfile; then
-            echo "platform :ios, '15.5'" | cat - Podfile > temp && mv temp Podfile
-          fi
-          cd ..
-
-      # Clean and reinstall CocoaPods
-      - name: Clean and update CocoaPods
-        run: |
-          rm -f ios/Podfile.lock
           cd ios
           pod repo update
-          pod deintegrate
           pod install
-          cd ..
 
-      - name: Get Flutter dependencies again
-        run: flutter pub get
+      - run: flutter clean
+      - run: flutter build ipa --release --no-codesign
 
-      - name: Build iOS release (no codesign)
-        run: flutter build ios --release --no-codesign
-
-      - name: Create Payload directory
-        run: mkdir Payload
-        working-directory: build/ios/iphoneos
-
-      - name: Move Runner.app to Payload
-        run: mv Runner.app Payload/
-        working-directory: build/ios/iphoneos
-
-      - name: Zip output
-        run: zip -qq -r -9 FlutterIpaExport.ipa Payload
-        working-directory: build/ios/iphoneos
-
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+      - uses: actions/upload-artifact@v4
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/ios/iphoneos/FlutterIpaExport.ipa
-          tag: v1.0
-          overwrite: true
-          body: "This is first release"
+          name: ios-ipa-unsigned
+          path: build/ios/ipa/*.ipa
