@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shop/widgets/custom_button.dart';
+import 'package:shop/widgets/custom_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditProductPage extends StatefulWidget {
@@ -15,7 +17,6 @@ class _EditProductPageState extends State<EditProductPage> {
   late TextEditingController nameController;
   late TextEditingController priceController;
 
-
   @override
   void initState() {
     super.initState();
@@ -23,7 +24,6 @@ class _EditProductPageState extends State<EditProductPage> {
     priceController = TextEditingController(
       text: widget.product['price'].toString(),
     );
-   
   }
 
   Future<void> updateProduct() async {
@@ -32,7 +32,6 @@ class _EditProductPageState extends State<EditProductPage> {
         .update({
           'name': nameController.text,
           'price': double.tryParse(priceController.text) ?? 0,
-          
         })
         .eq('id', widget.product['id']);
     Navigator.pop(context);
@@ -46,21 +45,20 @@ class _EditProductPageState extends State<EditProductPage> {
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(
+            CustomTextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: 'Name'),
+              labelText: 'Name',
+              icon: Icons.person,
             ),
-            TextField(
+            CustomTextField(
               controller: priceController,
-              decoration: InputDecoration(labelText: 'Price'),
+              labelText: 'Price',
+              icon: Icons.price_change,
               keyboardType: TextInputType.number,
             ),
-            
+
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: updateProduct,
-              child: Text('Update Product'),
-            ),
+            CustomButton(title: 'Update Product', onTap: updateProduct),
           ],
         ),
       ),

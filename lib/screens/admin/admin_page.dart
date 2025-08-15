@@ -179,13 +179,14 @@ class _AdminPageState extends State<AdminPage> {
                           ),
                         ),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.inventory,
                               color: Colors.white,
-                              size: 16,
+                              size: 16.sp,
                             ),
-                            SizedBox(width: 6),
+                            SizedBox(width: 6.w),
                             Text(
                               '${products.length} Products',
                               style: TextStyle(
@@ -197,220 +198,232 @@ class _AdminPageState extends State<AdminPage> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 24),
+                      SizedBox(height: 24.h),
                       Expanded(
-                        child: ListView.builder(
-                          padding: EdgeInsets.only(bottom: 20),
-                          itemCount: products.isEmpty ? 1 : products.length,
-                          itemBuilder: (context, index) {
-                            final product = products.isEmpty
-                                ? null
-                                : products[index];
-                            final isProductEmpty = product == null;
-                            final gradientIndex = index % cardGradients.length;
-                            final emptyColorIndex =
-                                index % emptySlotColors.length;
+                        child: RefreshIndicator(
+                          onRefresh: fetchProducts,
+                          color: Colors.white,
+                          backgroundColor: Color(0xFF667eea),
+                          strokeWidth: 3,
+                          child: ListView.builder(
+                            padding: EdgeInsets.only(bottom: 20),
+                            physics: AlwaysScrollableScrollPhysics(),
+                            itemCount: products.isEmpty ? 1 : products.length,
+                            itemBuilder: (context, index) {
+                              final product = products.isEmpty
+                                  ? null
+                                  : products[index];
+                              final isProductEmpty = product == null;
+                              final gradientIndex =
+                                  index % cardGradients.length;
+                              final emptyColorIndex =
+                                  index % emptySlotColors.length;
 
-                            return AnimatedContainer(
-                              duration: Duration(
-                                milliseconds: 300 + (index * 100),
-                              ),
-                              margin: EdgeInsets.only(bottom: 16),
-                              height: 200.h,
-                              decoration: BoxDecoration(
-                                gradient: isProductEmpty
-                                    ? LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          emptySlotColors[emptyColorIndex]
-                                              .withOpacity(0.8),
-                                          emptySlotColors[emptyColorIndex],
-                                        ],
-                                      )
-                                    : LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: cardGradients[gradientIndex],
-                                      ),
-                                borderRadius: BorderRadius.circular(24),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: isProductEmpty
-                                        ? emptySlotColors[emptyColorIndex]
-                                              .withOpacity(0.4)
-                                        : cardGradients[gradientIndex][0]
-                                              .withOpacity(0.4),
-                                    offset: Offset(0, 12),
-                                    blurRadius: 24,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
-                                  width: 1,
+                              return AnimatedContainer(
+                                duration: Duration(
+                                  milliseconds: 300 + (index * 100),
                                 ),
-                              ),
-                              child: Container(
-                                padding: EdgeInsets.all(18),
-                                child: Row(
-                                  children: [
-                                    // Product Info Section
-                                    Expanded(
-                                      flex: 2,
-                                      child: Container(
-                                        padding: EdgeInsets.all(16),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.25),
-                                          borderRadius: BorderRadius.circular(
-                                            16,
-                                          ),
-                                          border: Border.all(
+                                margin: EdgeInsets.only(bottom: 16),
+                                height: 200.h,
+                                decoration: BoxDecoration(
+                                  gradient: isProductEmpty
+                                      ? LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            emptySlotColors[emptyColorIndex]
+                                                .withOpacity(0.8),
+                                            emptySlotColors[emptyColorIndex],
+                                          ],
+                                        )
+                                      : LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: cardGradients[gradientIndex],
+                                        ),
+                                  borderRadius: BorderRadius.circular(24),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: isProductEmpty
+                                          ? emptySlotColors[emptyColorIndex]
+                                                .withOpacity(0.4)
+                                          : cardGradients[gradientIndex][0]
+                                                .withOpacity(0.4),
+                                      offset: Offset(0, 12),
+                                      blurRadius: 24,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.2),
+                                    width: 1.w,
+                                  ),
+                                ),
+                                child: Container(
+                                  padding: EdgeInsets.all(18),
+                                  child: Row(
+                                    children: [
+                                      // Product Info Section
+                                      Expanded(
+                                        flex: 2,
+                                        child: Container(
+                                          padding: EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
                                             color: Colors.white.withOpacity(
-                                              0.3,
+                                              0.25,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.white.withOpacity(
+                                                0.3,
+                                              ),
                                             ),
                                           ),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                padding: EdgeInsets.all(12),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white
+                                                      .withOpacity(0.2),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  isProductEmpty
+                                                      ? Icons.add_box_outlined
+                                                      : Icons
+                                                            .shopping_bag_outlined,
+                                                  color: isProductEmpty
+                                                      ? Colors.grey[600]
+                                                      : Colors.white,
+                                                  size: 32,
+                                                ),
+                                              ),
+                                              SizedBox(height: 12),
+                                              Text(
+                                                product != null
+                                                    ? product['name'] ??
+                                                          'Unknown Product'
+                                                    : 'Add Your First Product',
+                                                textAlign: TextAlign.center,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.sp,
+                                                  color: isProductEmpty
+                                                      ? Colors.grey[700]
+                                                      : Colors.white,
+                                                  letterSpacing: 0.3,
+                                                ),
+                                              ),
+                                              if (product != null) ...[
+                                                SizedBox(height: 8),
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 6,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white
+                                                        .withOpacity(0.2),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          15,
+                                                        ),
+                                                  ),
+                                                  child: Text(
+                                                    '\$${product['price'] ?? 'N/A'}',
+                                                    style: TextStyle(
+                                                      fontSize: 15.sp,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
                                         ),
+                                      ),
+
+                                      SizedBox(width: 16),
+
+                                      // Action Buttons Section
+                                      Expanded(
+                                        flex: 1,
                                         child: Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            Container(
-                                              padding: EdgeInsets.all(12),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withOpacity(
-                                                  0.2,
-                                                ),
-                                                shape: BoxShape.circle,
+                                            // Add Button
+                                            if (isProductEmpty)
+                                              _buildActionButton(
+                                                icon: Icons.add_circle_outline,
+                                                color: Color(0xFF10b981),
+                                                label: 'Add New',
+                                                onPressed: () {
+                                                  Navigator.pushNamed(
+                                                    context,
+                                                    '/add_product',
+                                                  );
+                                                },
                                               ),
-                                              child: Icon(
-                                                isProductEmpty
-                                                    ? Icons.add_box_outlined
-                                                    : Icons
-                                                          .shopping_bag_outlined,
-                                                color: isProductEmpty
-                                                    ? Colors.grey[600]
-                                                    : Colors.white,
-                                                size: 32,
+
+                                            // Edit Button
+                                            if (product != null)
+                                              _buildActionButton(
+                                                icon: Icons.edit_outlined,
+                                                color: Color(0xFF3b82f6),
+                                                label: 'Edit',
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          EditProductPage(
+                                                            product: product,
+                                                          ),
+                                                    ),
+                                                  );
+                                                },
                                               ),
-                                            ),
-                                            SizedBox(height: 12),
-                                            Text(
-                                              product != null
-                                                  ? product['name'] ??
-                                                        'Unknown Product'
-                                                  : 'Add Your First Product',
-                                              textAlign: TextAlign.center,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16.sp,
-                                                color: isProductEmpty
-                                                    ? Colors.grey[700]
-                                                    : Colors.white,
-                                                letterSpacing: 0.3,
+
+                                            if (product != null)
+                                              SizedBox(height: 12),
+
+                                            // Delete Button
+                                            if (product != null)
+                                              _buildActionButton(
+                                                icon: Icons.delete_outline,
+                                                color: Color(0xFFef4444),
+                                                label: 'Delete',
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          DeleteProductPage(
+                                                            product: product,
+                                                          ),
+                                                    ),
+                                                  );
+                                                },
                                               ),
-                                            ),
-                                            if (product != null) ...[
-                                              SizedBox(height: 8),
-                                              Container(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: 12,
-                                                  vertical: 6,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white
-                                                      .withOpacity(0.2),
-                                                  borderRadius:
-                                                      BorderRadius.circular(15),
-                                                ),
-                                                child: Text(
-                                                  '\$${product['price'] ?? 'N/A'}',
-                                                  style: TextStyle(
-                                                    fontSize: 15.sp,
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
                                           ],
                                         ),
                                       ),
-                                    ),
-
-                                    SizedBox(width: 16),
-
-                                    // Action Buttons Section
-                                    Expanded(
-                                      flex: 1,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          // Add Button
-                                          if (isProductEmpty)
-                                            _buildActionButton(
-                                              icon: Icons.add_circle_outline,
-                                              color: Color(0xFF10b981),
-                                              label: 'Add New',
-                                              onPressed: () {
-                                                Navigator.pushNamed(
-                                                  context,
-                                                  '/add_product',
-                                                );
-                                              },
-                                            ),
-
-                                          // Edit Button
-                                          if (product != null)
-                                            _buildActionButton(
-                                              icon: Icons.edit_outlined,
-                                              color: Color(0xFF3b82f6),
-                                              label: 'Edit',
-                                              onPressed: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (_) =>
-                                                        EditProductPage(
-                                                          product: product,
-                                                        ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-
-                                          if (product != null)
-                                            SizedBox(height: 12),
-
-                                          // Delete Button
-                                          if (product != null)
-                                            _buildActionButton(
-                                              icon: Icons.delete_outline,
-                                              color: Color(0xFFef4444),
-                                              label: 'Delete',
-                                              onPressed: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (_) =>
-                                                        DeleteProductPage(
-                                                          product: product,
-                                                        ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ],
@@ -419,62 +432,63 @@ class _AdminPageState extends State<AdminPage> {
               ),
 
               // Enhanced Bottom Section
-              Container(
-                padding: EdgeInsets.all(20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: fetchProducts,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 14,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.25),
-                              Colors.white.withOpacity(0.15),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              offset: Offset(0, 8),
-                              blurRadius: 20,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.refresh_rounded,
-                              color: Colors.white,
-                              size: 22,
-                            ),
-                            SizedBox(width: 10),
-                            Text(
-                              'Refresh Products',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Container(
+              //   padding: EdgeInsets.all(20),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.center,
+              //     children: [
+              //       GestureDetector(
+              //         onTap: fetchProducts,
+              //         child: Container(
+              //           padding: EdgeInsets.symmetric(
+              //             horizontal: 24,
+              //             vertical: 14,
+              //           ),
+              //           decoration: BoxDecoration(
+              //             gradient: LinearGradient(
+              //               colors: [
+              //                 Colors.white.withOpacity(0.25),
+              //                 Colors.white.withOpacity(0.15),
+              //               ],
+              //             ),
+              //             borderRadius: BorderRadius.circular(30),
+              //             border: Border.all(
+              //               color: Colors.white.withOpacity(0.3),
+              //             ),
+              //             boxShadow: [
+              //               BoxShadow(
+              //                 color: Colors.black.withOpacity(0.1),
+              //                 offset: Offset(0, 8),
+              //                 blurRadius: 20,
+              //               ),
+              //             ],
+              //           ),
+              //           child: Row(
+              //             mainAxisAlignment: MainAxisAlignment.start,
+              //             mainAxisSize: MainAxisSize.min,
+              //             children: [
+              //               Icon(
+              //                 Icons.refresh_rounded,
+              //                 color: Colors.white,
+              //                 size: 22,
+              //               ),
+              //               SizedBox(width: 10.w),
+              //               Text(
+              //                 'Refresh Products',
+              //                 style: TextStyle(
+              //                   color: Colors.white,
+              //                   fontSize: 15.sp,
+              //                   fontWeight: FontWeight.w600,
+              //                   letterSpacing: 0.3,
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
             ],
           ),
         ),

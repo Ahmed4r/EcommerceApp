@@ -5,7 +5,15 @@ import 'package:google_fonts/google_fonts.dart';
 class CustomButton extends StatelessWidget {
   final String title;
   final Function()? onTap;
-  const CustomButton({super.key, required this.title, this.onTap});
+  Color color;
+  Color textColor;
+  CustomButton({
+    super.key,
+    required this.title,
+    this.onTap,
+    this.color = Colors.black,
+    this.textColor = Colors.white,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,12 +24,12 @@ class CustomButton extends StatelessWidget {
         height: 62.h,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: Colors.black,
+          color: color,
         ),
         child: Center(
           child: Text(
             title,
-            style: GoogleFonts.cairo(color: Colors.white, fontSize: 20.sp),
+            style: GoogleFonts.cairo(color: textColor, fontSize: 20.sp),
           ),
         ),
       ),

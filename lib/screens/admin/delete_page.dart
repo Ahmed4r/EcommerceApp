@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/app_colors.dart';
+import 'package:shop/widgets/custom_button.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DeleteProductPage extends StatelessWidget {
@@ -22,13 +26,43 @@ class DeleteProductPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Are you sure you want to delete "${product['name']}"?', textAlign: TextAlign.center),
-            SizedBox(height: 20),
-            Row(
+            RichText(
+              text: TextSpan(
+                text: 'Are you sure you want to delete ',
+                style: GoogleFonts.cairo(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.normal,
+                  color: AppColors.secondary,
+                ),
+                children: [
+                  TextSpan(
+                    text: '"${product['name']}"?',
+                    style: GoogleFonts.cairo(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 100.h),
+            Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(onPressed: () => deleteProduct(context), child: Text('Yes, Delete'), style: ElevatedButton.styleFrom(backgroundColor: Colors.red)),
-                ElevatedButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+                CustomButton(
+                  color: Colors.red,
+                  onTap: () => deleteProduct(context),
+                  title: 'Yes, Delete',
+                ),
+                SizedBox(height: 20.h),
+                CustomButton(
+                  color: Colors.transparent,
+                  onTap: () => Navigator.pop(context),
+                  title: 'Cancel',
+                  textColor: Colors.black,
+                ),
               ],
             ),
           ],
