@@ -61,5 +61,18 @@
     <string>This app needs access to your location while using the app to show nearby restaurants and offers.</string>
     <key>NSLocationAlwaysUsageDescription</key>
     <string>This app needs access to your location even when in the background to track deliveries.</string>
+    
+    <!-- Deep Link URL Schemes -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>shop.auth</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>shop</string>
+            </array>
+        </dict>
+    </array>
 </dict>
 </plist>

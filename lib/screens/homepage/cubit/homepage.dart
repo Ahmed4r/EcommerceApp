@@ -279,6 +279,7 @@ class _HomepageState extends State<Homepage> {
           return Scaffold(
             backgroundColor: AppColors.primary,
             appBar: AppBar(
+              forceMaterialTransparency: true,
               backgroundColor: AppColors.primary,
               leading: Padding(
                 padding: EdgeInsets.only(left: 10.0.w),
@@ -290,7 +291,9 @@ class _HomepageState extends State<Homepage> {
                       : const AssetImage('assets/profile.jpg') as ImageProvider,
                 ),
               ),
+              centerTitle: false,
               title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Hi Welcome', style: GoogleFonts.cairo(fontSize: 20.sp)),
                   Text(
@@ -316,96 +319,102 @@ class _HomepageState extends State<Homepage> {
             ),
             body: state.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    padding: EdgeInsets.all(8.0.r),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 50.h,
-                          child: ListView.separated(
-                            separatorBuilder: (_, __) => SizedBox(width: 10.w),
-                            scrollDirection: Axis.horizontal,
-                            itemCount: categoryData.length,
-                            itemBuilder: (_, index) {
-                              bool isSelected = state.selectedIndex == index;
-                              return GestureDetector(
-                                onTap: () =>
-                                    cubit.selectCategory(index, categoryData),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 250),
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 22.w,
-                                    vertical: 15.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(60.r),
-                                    color: isSelected
-                                        ? Colors.blueAccent
-                                        : Colors.white,
-                                  ),
-                                  child: categoryData[index]["type"] == "text"
-                                      ? Text(
-                                          categoryData[index]["label"],
-                                          style: GoogleFonts.cairo(
-                                            color: isSelected
-                                                ? Colors.white
-                                                : Colors.black,
-                                          ),
-                                        )
-                                      : isSelected
-                                      ? Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            FaIcon(
-                                              categoryData[index]["icon"],
-                                              color: Colors.white,
-                                              size: 16.r,
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      await cubit.fetchProductsFromSupabase();
+                    },
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.all(8.0.r),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 50.h,
+                            child: ListView.separated(
+                              separatorBuilder: (_, __) =>
+                                  SizedBox(width: 10.w),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: categoryData.length,
+                              itemBuilder: (_, index) {
+                                bool isSelected = state.selectedIndex == index;
+                                return GestureDetector(
+                                  onTap: () =>
+                                      cubit.selectCategory(index, categoryData),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 250),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 22.w,
+                                      vertical: 15.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(60.r),
+                                      color: isSelected
+                                          ? Colors.blueAccent
+                                          : Colors.white,
+                                    ),
+                                    child: categoryData[index]["type"] == "text"
+                                        ? Text(
+                                            categoryData[index]["label"],
+                                            style: GoogleFonts.cairo(
+                                              color: isSelected
+                                                  ? Colors.white
+                                                  : Colors.black,
                                             ),
-                                            SizedBox(width: 6.w),
-                                            Text(
-                                              categoryData[index]["label"],
-                                              style: GoogleFonts.cairo(
+                                          )
+                                        : isSelected
+                                        ? Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              FaIcon(
+                                                categoryData[index]["icon"],
                                                 color: Colors.white,
+                                                size: 16.r,
                                               ),
-                                            ),
-                                          ],
-                                        )
-                                      : FaIcon(
-                                          categoryData[index]["icon"],
-                                          color: Colors.black,
-                                          size: 16.r,
-                                        ),
+                                              SizedBox(width: 6.w),
+                                              Text(
+                                                categoryData[index]["label"],
+                                                style: GoogleFonts.cairo(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : FaIcon(
+                                            categoryData[index]["icon"],
+                                            color: Colors.black,
+                                            size: 16.r,
+                                          ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 12.h),
+                          sliderWidget(),
+                          SizedBox(height: 12.h),
+                          HomepageHeaders(
+                            "Popular Product",
+                            false,
+                            state.products,
+                            categoryData,
+                          ),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 10.h,
+                                  crossAxisSpacing: 10.w,
+                                  childAspectRatio: 3 / 4,
                                 ),
-                              );
-                            },
+                            itemCount: state.filteredItems.length,
+                            itemBuilder: (_, index) => buildItemCard(
+                              context,
+                              state.filteredItems[index],
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 12.h),
-                        sliderWidget(),
-                        SizedBox(height: 12.h),
-                        HomepageHeaders(
-                          "Popular Product",
-                          false,
-                          state.products,
-                          categoryData,
-                        ),
-                        GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 10.h,
-                                crossAxisSpacing: 10.w,
-                                childAspectRatio: 3 / 4,
-                              ),
-                          itemCount: state.filteredItems.length,
-                          itemBuilder: (_, index) => buildItemCard(
-                            context,
-                            state.filteredItems[index],
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
           );

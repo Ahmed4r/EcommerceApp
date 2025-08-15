@@ -66,6 +66,13 @@ class _LocationAccessPageState extends State<LocationAccessPage> {
     return Scaffold(
       backgroundColor: AppColors.primary,
       appBar: AppBar(
+        forceMaterialTransparency: true,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
         backgroundColor: AppColors.primary,
         title: Text(
           'location access',

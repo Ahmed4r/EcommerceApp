@@ -24,6 +24,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     return Scaffold(
       backgroundColor: AppColors.primary,
       appBar: AppBar(
+        forceMaterialTransparency: true,
         backgroundColor: AppColors.primary,
         title: RichText(
           text: TextSpan(
@@ -35,6 +36,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             ),
           ),
         ),
+        leading: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios)),
 
         centerTitle: true,
       ),

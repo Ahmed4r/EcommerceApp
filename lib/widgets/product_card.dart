@@ -128,7 +128,11 @@ class _ProductItemCardState extends State<ProductItemCard>
         height: 200.h,
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: NetworkImage(widget.product.image),
+            image: NetworkImage(
+              widget.product.image.isNotEmpty
+                  ? widget.product.image
+                  : 'https://lightwidget.com/wp-content/uploads/localhost-file-not-found.jpg',
+            ),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
               Colors.black.withOpacity(0.3),

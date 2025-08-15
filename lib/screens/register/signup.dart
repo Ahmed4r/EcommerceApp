@@ -64,6 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       backgroundColor: AppColors.primary,
       appBar: AppBar(
+        forceMaterialTransparency: true,
         backgroundColor: AppColors.primary,
         title: Text(
           'Sign Up',
@@ -73,13 +74,19 @@ class _RegisterPageState extends State<RegisterPage> {
             color: Colors.black,
           ),
         ),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
         centerTitle: true,
       ),
       body: Center(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(8.w),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 'Please sign up to get started',

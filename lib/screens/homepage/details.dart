@@ -42,7 +42,11 @@ class ProductDetailsPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
                   image: DecorationImage(
-                    image: NetworkImage(product.image),
+                    image: NetworkImage(
+                      product.image.isNotEmpty
+                          ? product.image
+                          : 'https://lightwidget.com/wp-content/uploads/localhost-file-not-found.jpg',
+                    ),
                     fit: BoxFit.cover,
                   ),
                 ),

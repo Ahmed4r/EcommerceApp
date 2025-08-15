@@ -105,6 +105,7 @@ class _login_pageState extends State<LoginPage> {
           return Scaffold(
             backgroundColor: AppColors.primary,
             appBar: AppBar(
+              forceMaterialTransparency: true,
               backgroundColor: AppColors.primary,
               title: Text(
                 'login',

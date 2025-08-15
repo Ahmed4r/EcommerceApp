@@ -89,6 +89,7 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
     return AppBar(
       backgroundColor: AppColors.primary,
       elevation: 0,
+      forceMaterialTransparency: true,
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
         icon: Container(
@@ -104,7 +105,9 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
               ),
             ],
           ),
-          child: Icon(Icons.arrow_back_ios, color: Colors.black, size: 18.sp),
+          child: Center(
+            child: Icon(Icons.arrow_back_ios, color: Colors.black, size: 18.r),
+          ),
         ),
       ),
       title: Text(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shop/app_colors.dart';
 import 'package:shop/model/product.dart';
 import 'package:shop/widgets/product_card.dart';
 
@@ -11,7 +12,18 @@ class ShowProductspage extends StatelessWidget {
   Widget build(BuildContext context) {
     final obj = ModalRoute.of(context)!.settings.arguments as List<Product>;
     return Scaffold(
-      appBar: AppBar(title: Text("Products")),
+      backgroundColor: AppColors.primary,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
+        forceMaterialTransparency: true,
+        title: Text("Products"),
+        backgroundColor: AppColors.primary,
+      ),
       body: GridView.builder(
         shrinkWrap: true,
         // physics: NeverScrollableScrollPhysics(),

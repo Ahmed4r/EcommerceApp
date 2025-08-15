@@ -16,6 +16,7 @@ class _EditProductPageState extends State<EditProductPage> {
   final supabase = Supabase.instance.client;
   late TextEditingController nameController;
   late TextEditingController priceController;
+  late TextEditingController imageController;
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _EditProductPageState extends State<EditProductPage> {
         .update({
           'name': nameController.text,
           'price': double.tryParse(priceController.text) ?? 0,
+          'image': imageController.text,
         })
         .eq('id', widget.product['id']);
     Navigator.pop(context);
@@ -56,7 +58,11 @@ class _EditProductPageState extends State<EditProductPage> {
               icon: Icons.price_change,
               keyboardType: TextInputType.number,
             ),
-
+            CustomTextField(
+              controller: imageController,
+              labelText: 'Image URL',
+              icon: Icons.image,
+            ),
             SizedBox(height: 20),
             CustomButton(title: 'Update Product', onTap: updateProduct),
           ],

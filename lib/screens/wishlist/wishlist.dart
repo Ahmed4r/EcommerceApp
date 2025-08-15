@@ -92,7 +92,9 @@ class WishlistPage extends StatelessWidget {
                                 top: Radius.circular(12.r),
                               ),
                               child: Image.network(
-                                product.image,
+                                product.image.isNotEmpty
+                                    ? product.image
+                                    : 'https://lightwidget.com/wp-content/uploads/localhost-file-not-found.jpg',
                                 fit: BoxFit.cover,
                                 width: double.infinity,
                                 errorBuilder: (_, __, ___) => Image.asset(
