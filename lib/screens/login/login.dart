@@ -15,6 +15,7 @@ import 'package:shop/services/auth/auth_service.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 import 'package:shop/widgets/navigationbar.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routeName = '/login_page';
@@ -47,6 +48,20 @@ class _login_pageState extends State<LoginPage> {
   bool checkboxvalue = false;
 
   final authService = AuthService();
+
+  Future<void> insertUser(String email, String password) async {
+    final supabase = Supabase.instance.client;
+
+    try {
+      final response = await supabase.from('users').insert({
+        'email': email,
+        'password': password,
+      });
+      log(response.toString());
+    } catch (e) {
+      log(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +179,11 @@ class _login_pageState extends State<LoginPage> {
                       customButtom(
                         title: 'Log in',
                         onTap: () {
+                          insertUser(
+                            Emailcontroller.text,
+                            Passwordcontroller.text,
+                          );
+
                           cubit.login(
                             Emailcontroller.text,
                             Passwordcontroller.text,

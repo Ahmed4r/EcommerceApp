@@ -1,10 +1,23 @@
-import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/model/product.dart';
 import 'homepage_state.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomepageCubit extends Cubit<HomepageState> {
+  static const String _productsKey = 'cached_products';
+  Future<void> loadProductsFromCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cached = prefs.getString(_productsKey);
+    if (cached != null) {
+      final List<dynamic> jsonList = Product.decodeJsonList(cached);
+      final products = jsonList
+          .map((item) => Product.fromJson(item as Map<String, dynamic>))
+          .toList();
+      emit(state.copyWith(products: products, filteredItems: products));
+    }
+  }
+
   static const String _nameKey = 'profile_name';
   static const String _imageKey = 'profile_img';
 
@@ -22,8 +35,36 @@ class HomepageCubit extends Cubit<HomepageState> {
     );
   }
 
-  void loadProducts(List<Product> products) {
-    emit(state.copyWith(products: products, filteredItems: products));
+  Future<void> fetchProductsFromSupabase() async {
+    emit(state.copyWith(isLoading: true, error: null));
+    final supabase = Supabase.instance.client;
+    try {
+      final data = await supabase.from('products').select().then((value) {
+        print('Supabase products response:');
+        print(value);
+        return value as List<dynamic>;
+      });
+      final products = data.map((item) {
+        print('Product item:');
+        print(item);
+        return Product.fromJson(item as Map<String, dynamic>);
+      }).toList();
+      // Save to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString(_productsKey, Product.encodeJsonList(products));
+      emit(
+        state.copyWith(
+          products: products,
+          filteredItems: products,
+          isLoading: false,
+          error: null,
+        ),
+      );
+    } catch (e, stack) {
+      print('Supabase fetch error: $e');
+      print(stack);
+      emit(state.copyWith(isLoading: false, error: e.toString()));
+    }
   }
 
   void selectCategory(int index, List<Map<String, dynamic>> categoryData) {

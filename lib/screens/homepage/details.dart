@@ -29,7 +29,6 @@ class ProductDetailsPage extends StatelessWidget {
                     onTap: () => Navigator.pop(context),
                     child: _circleButton(Icons.arrow_back_ios_new),
                   ),
-
                 ],
               ),
             ),
@@ -43,7 +42,7 @@ class ProductDetailsPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
                   image: DecorationImage(
-                    image: AssetImage(product.image),
+                    image: NetworkImage(product.image),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -107,9 +106,7 @@ class ProductDetailsPage extends StatelessWidget {
 
                       // Description
                       Text(
-                        "This is a premium quality ${product.name} designed with modern style and comfort. "
-                        "Perfect for your daily wear or special occasions. "
-                        "Crafted with high quality materials to ensure durability and style.",
+                        product.description,
                         style: GoogleFonts.cairo(
                           fontSize: 14.sp,
                           color: Colors.grey[700],

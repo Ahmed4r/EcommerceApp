@@ -113,6 +113,16 @@ class _ProductItemCardState extends State<ProductItemCard>
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider getImageProvider(String imagePath) {
+      if (imagePath.isEmpty) {
+        return const AssetImage('assets/profile.jpg'); // fallback
+      }
+      if (imagePath.startsWith('assets/')) {
+        return AssetImage(imagePath);
+      }
+      return NetworkImage(imagePath);
+    }
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -127,12 +137,7 @@ class _ProductItemCardState extends State<ProductItemCard>
         height: 200.h,
         decoration: BoxDecoration(
           image: DecorationImage(
-            image:
-            //  ResizeImage(
-            //   width: (501.w).toInt(),
-            //   height: (408.h).toInt(),
-              AssetImage(widget.product.image),
-            // ),
+            image: getImageProvider(widget.product.image),
             fit: BoxFit.cover,
           ),
           borderRadius: BorderRadius.circular(20.r),
@@ -150,7 +155,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                     child: Text(
                       widget.product.name,
                       style: GoogleFonts.notoSansRejang(
-                        color: Colors.black,
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 12.sp,
                       ),
@@ -163,7 +168,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 10.r, sigmaY: 10.r),
                       child: Container(
-                        width: 70.w,
+                        width: 60.w,
                         height: 40.h,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
@@ -183,21 +188,17 @@ class _ProductItemCardState extends State<ProductItemCard>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            GestureDetector(
-                              onTap: () {
-                                // Handle favorite functionality
-                              },
-                              child: Icon(
-                                Icons.star_border_rounded,
-                                color: Colors.white,
-                                size: 18.sp,
-                              ),
+                            Icon(
+                              Icons.star_border_rounded,
+                              color: Colors.white,
+                              size: 18.sp,
                             ),
                             Text(
                               widget.product.rate.toString(),
                               style: GoogleFonts.cairo(
-                                color: Colors.black,
+                                color: Colors.white,
                                 fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],

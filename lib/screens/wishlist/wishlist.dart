@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/app_colors.dart';
+import 'package:shop/screens/homepage/details.dart';
 
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_state.dart';
@@ -76,17 +77,28 @@ class WishlistPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(12.r),
-                            ),
-                            child: Image.asset(
-                              product.image,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              errorBuilder: (_, __, ___) => Image.asset(
-                                'assets/images/default_product.png',
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ProductDetailsPage(product: product),
+                                ),
+                              );
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(12.r),
+                              ),
+                              child: Image.network(
+                                product.image,
                                 fit: BoxFit.cover,
+                                width: double.infinity,
+                                errorBuilder: (_, __, ___) => Image.asset(
+                                  'assets/images/default_product.png',
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                           ),

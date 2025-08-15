@@ -8,6 +8,7 @@ class HomepageState extends Equatable {
   final List<Product> products;
   final List<Product> filteredItems;
   final bool isLoading;
+  final String? error;
 
   const HomepageState({
     this.name = '',
@@ -16,6 +17,7 @@ class HomepageState extends Equatable {
     this.products = const [],
     this.filteredItems = const [],
     this.isLoading = false,
+    this.error,
   });
 
   HomepageState copyWith({
@@ -25,6 +27,7 @@ class HomepageState extends Equatable {
     List<Product>? products,
     List<Product>? filteredItems,
     bool? isLoading,
+    String? error,
   }) {
     return HomepageState(
       name: name ?? this.name,
@@ -33,6 +36,7 @@ class HomepageState extends Equatable {
       products: products ?? this.products,
       filteredItems: filteredItems ?? this.filteredItems,
       isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
     );
   }
 
@@ -44,5 +48,6 @@ class HomepageState extends Equatable {
     products,
     filteredItems,
     isLoading,
+    error,
   ];
 }
