@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shop/app_colors.dart';
+import 'package:shop/screens/login/login.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -105,7 +107,16 @@ class _AdminPageState extends State<AdminPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin - Add Product')),
+      backgroundColor: AppColors.primary,
+      appBar: AppBar(
+        title: const Text('Admin - Add Product'),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pushNamed(context, LoginPage.routeName);
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
