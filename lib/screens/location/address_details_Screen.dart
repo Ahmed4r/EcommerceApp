@@ -106,18 +106,19 @@ class _AddressListScreenState extends State<AddressListScreen> {
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16),
-                    leading: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: address.iconColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        address.icon,
-                        color: address.iconColor,
-                        size: 24,
-                      ),
+                    leading: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: address.iconColor,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        Icon(address.icon, color: Colors.white, size: 24),
+                      ],
                     ),
                     title: Text(
                       address.label ?? 'no label found',
@@ -332,6 +333,9 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
         }
       }
     } catch (e) {
+      if (!mounted) {
+        return;
+      }
       setState(() {
         currentAddress = 'Address not available';
       });
