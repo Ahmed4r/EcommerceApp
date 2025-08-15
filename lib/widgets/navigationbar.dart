@@ -1,11 +1,11 @@
 import 'package:crystal_navigation_bar/crystal_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:shop/model/product.dart';
 import 'package:shop/screens/category/category.dart';
 import 'package:shop/screens/homepage/cubit/homepage.dart';
 import 'package:shop/screens/profile/personal_info.dart';
 import 'package:shop/screens/wishlist/wishlist.dart';
 
+// ignore: library_private_types_in_public_api
 final GlobalKey<_NavigationbarState> navBarKey = GlobalKey();
 
 class Navigationbar extends StatefulWidget {
@@ -35,53 +35,48 @@ class _NavigationbarState extends State<Navigationbar> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: pages[_selectedIndex], // هنا تعرض الصفحة حسب الاختيار
+      body: pages[_selectedIndex],
 
-      bottomNavigationBar:
-          //  Padding(
-          //        padding: const EdgeInsets.only(bottom: 1),
-          // child:
-          CrystalNavigationBar(
-            curve: Curves.bounceOut,
-            currentIndex: _selectedIndex,
-            // indicatorColor: Colors.white,
-            unselectedItemColor: Colors.white,
-            backgroundColor: Colors.black.withOpacity(0.1),
+      bottomNavigationBar: CrystalNavigationBar(
+        curve: Curves.bounceOut,
+        currentIndex: _selectedIndex,
 
-            borderWidth: 2,
-            outlineBorderColor: Colors.white,
-            onTap: _handleIndexChanged,
-            items: [
-              /// Home
-              CrystalNavigationBarItem(
-                icon: Icons.home,
-                unselectedIcon: Icons.home,
-                selectedColor: Colors.blue,
-              ),
+        unselectedItemColor: Colors.white,
+        backgroundColor: Colors.black.withOpacity(0.1),
 
-              /// category
-              CrystalNavigationBarItem(
-                icon: Icons.category,
-                unselectedIcon: Icons.category,
-                selectedColor: Colors.orange,
-              ),
-
-              /// wishlist
-              CrystalNavigationBarItem(
-                icon: Icons.favorite,
-                unselectedIcon: Icons.favorite,
-                selectedColor: Colors.red,
-              ),
-
-              /// Profile
-              CrystalNavigationBarItem(
-                icon: Icons.person,
-                unselectedIcon: Icons.person,
-                selectedColor: Colors.black,
-              ),
-            ],
+        borderWidth: 2,
+        outlineBorderColor: Colors.white,
+        onTap: _handleIndexChanged,
+        items: <CrystalNavigationBarItem>[
+          // Home
+          CrystalNavigationBarItem(
+            icon: Icons.home,
+            unselectedIcon: Icons.home,
+            selectedColor: Colors.blue,
           ),
-      // ),
+
+          // category
+          CrystalNavigationBarItem(
+            icon: Icons.category,
+            unselectedIcon: Icons.category,
+            selectedColor: Colors.orange,
+          ),
+
+          // wishlist
+          CrystalNavigationBarItem(
+            icon: Icons.favorite,
+            unselectedIcon: Icons.favorite,
+            selectedColor: Colors.red,
+          ),
+
+          // Profile
+          CrystalNavigationBarItem(
+            icon: Icons.person,
+            unselectedIcon: Icons.person,
+            selectedColor: Colors.black,
+          ),
+        ],
+      ),
     );
   }
 }

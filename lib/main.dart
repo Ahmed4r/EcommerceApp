@@ -46,8 +46,6 @@ class ShopApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    log(token.toString());
-    log(onboardingSeen.toString());
     String initialRoute;
     if (onboardingSeen == false) {
       initialRoute = OnboardingScreen.routeName;

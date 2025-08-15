@@ -58,7 +58,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 icon: FontAwesomeIcons.envelope,
               ),
               SizedBox(height: 20.h),
-              customButtom(
+              CustomButton(
                 title: 'send',
                 onTap: () {
                   Navigator.pushNamed(

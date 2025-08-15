@@ -176,7 +176,7 @@ class _login_pageState extends State<LoginPage> {
                         ],
                       ),
                       SizedBox(height: 20.h),
-                      customButtom(
+                      CustomButton(
                         title: 'Log in',
                         onTap: () {
                           insertUser(

@@ -81,7 +81,7 @@ class _LocationAccessPageState extends State<LocationAccessPage> {
               backgroundImage: const AssetImage('assets/location.jpg'),
             ),
             SizedBox(height: 30.h),
-            customButtom(
+            CustomButton(
               title: _locationPermissionGranted
                   ? 'LOCATION IS ENABLED'
                   : 'ACCESS LOCATION',

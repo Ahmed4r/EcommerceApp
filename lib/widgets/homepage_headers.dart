@@ -6,11 +6,11 @@ import 'package:shop/screens/homepage/products_screen.dart';
 import 'package:shop/widgets/navigationbar.dart';
 
 class HomepageHeaders extends StatelessWidget {
-  String title;
-  bool ctrl;
-  List<Product> products;
-  List<Map<String, dynamic>> categoryData;
-  HomepageHeaders(
+  final String title;
+  final bool ctrl;
+  final List<Product> products;
+  final List<Map<String, dynamic>> categoryData;
+  const HomepageHeaders(
     this.title,
     this.ctrl,
     this.products,
@@ -27,11 +27,11 @@ class HomepageHeaders extends StatelessWidget {
           title,
           style: GoogleFonts.cairo(color: Colors.black, fontSize: 16.sp),
         ),
-        Spacer(),
+        const Spacer(),
         TextButton(
           onPressed: () {
             ctrl == true
-                ? navBarKey.currentState?.changeTab(1, categoryData ,)
+                ? navBarKey.currentState?.changeTab(1, categoryData)
                 : Navigator.pushNamed(
                     context,
                     ShowProductspage.routeName,
