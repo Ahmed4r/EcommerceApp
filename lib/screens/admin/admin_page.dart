@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shop/app_colors.dart';
-import 'package:shop/screens/login/login.dart';
-import 'package:shop/widgets/custom_button.dart';
-import 'package:shop/widgets/custom_text_field.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shop/screens/admin/add_page.dart';
+import 'package:shop/screens/admin/delete_page.dart';
+import 'package:shop/screens/admin/edit_page.dart';
+import 'package:shop/widgets/admin_access_widget.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminPage extends StatefulWidget {
@@ -14,177 +15,518 @@ class AdminPage extends StatefulWidget {
 }
 
 class _AdminPageState extends State<AdminPage> {
-  final _formKey = GlobalKey<FormState>();
+  final supabase = Supabase.instance.client;
+  List products = [];
 
-  final TextEditingController _idController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _imageUrlController = TextEditingController();
-  final TextEditingController _categoryController = TextEditingController();
-  final TextEditingController _rateController = TextEditingController();
-
-  bool _loading = false;
-
-  Future<void> _submitProduct() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _loading = true);
-
-    final supabase = Supabase.instance.client;
-
-    // Use provided id or generate one based on timestamp
-    final id = _idController.text.trim().isEmpty
-        ? DateTime.now().millisecondsSinceEpoch.toString()
-        : _idController.text.trim();
-
-    final String name = _nameController.text.trim();
-    final String description = _descriptionController.text.trim();
-    final double? price = double.tryParse(_priceController.text.trim());
-    final String imageUrl = _imageUrlController.text.trim();
-    final String category = _categoryController.text.trim();
-    final double? rate = double.tryParse(_rateController.text.trim());
-    final String createdAt = DateTime.now().toIso8601String();
-
-    final Map<String, dynamic> product = {
-      'id': id,
-      'name': name,
-      'description': description,
-      'price': price,
-      'image_url': imageUrl,
-      'created_at': createdAt,
-      'category': category,
-      'rate': rate,
-    };
-
-    try {
-      final res = await supabase.from('products').insert(product).select();
-
-      if (res.isNotEmpty) {
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          child: const SnackBar(content: Text('Product created successfully')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Product created successfully')),
-        );
-        _formKey.currentState!.reset();
-        _clearControllers();
-      }
-    } catch (e) {
-      print(e);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Unexpected error: $e')));
-    } finally {
-      setState(() => _loading = false);
-    }
-  }
-
-  void _clearControllers() {
-    _idController.clear();
-    _nameController.clear();
-    _descriptionController.clear();
-    _priceController.clear();
-    _imageUrlController.clear();
-    _categoryController.clear();
-    _rateController.clear();
+  Future<void> fetchProducts() async {
+    final response = await supabase.from('products').select().order('id');
+    setState(() {
+      products = response as List;
+    });
   }
 
   @override
-  void dispose() {
-    _idController.dispose();
-    _nameController.dispose();
-    _descriptionController.dispose();
-    _priceController.dispose();
-    _imageUrlController.dispose();
-    _categoryController.dispose();
-    _rateController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    fetchProducts();
   }
 
   @override
   Widget build(BuildContext context) {
+    return AdminGuard(child: _buildAdminContent(context));
+  }
+
+  Widget _buildAdminContent(BuildContext context) {
+    // Enhanced color palette for vibrant UI
+    List<List<Color>> cardGradients = [
+      [Color(0xFF667eea), Color(0xFF764ba2)], // Purple to Blue
+      [Color(0xFFf093fb), Color(0xFFf5576c)], // Pink to Red
+      [Color(0xFF4facfe), Color(0xFF00f2fe)], // Blue to Cyan
+      [Color(0xFF11998e), Color(0xFF38ef7d)], // Teal to Green
+      [Color(0xFFfc466b), Color(0xFF3f5efb)], // Pink to Purple
+      [Color(0xFFffcc70), Color(0xFFc850c0)], // Orange to Pink
+    ];
+
+    List<Color> emptySlotColors = [
+      Color(0xFFe0e7ff), // Light purple
+      Color(0xFFfce7f3), // Light pink
+      Color(0xFFe0f2fe), // Light blue
+      Color(0xFFecfdf5), // Light green
+      Color(0xFFfef3f2), // Light orange
+      Color(0xFFf9fafb), // Light gray
+    ];
+
+    // Background gradient colors
+    List<Color> backgroundGradient = [
+      Color(0xFF6a11cb),
+      Color(0xFF2575fc),
+      Color(0xFF667eea),
+      Color(0xFF764ba2),
+    ];
+
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      appBar: AppBar(
-        title: const Text('Admin - Add Product'),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pushNamed(context, LoginPage.routeName);
-          },
-          icon: const Icon(Icons.arrow_back),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: backgroundGradient,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Enhanced Header with animation
+              Container(
+                padding: EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withOpacity(0.3),
+                            Colors.white.withOpacity(0.1),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.admin_panel_settings,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Admin Dashboard',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 26.sp,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          Text(
+                            'Manage your products with style',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF10b981), Color(0xFF059669)],
+                        ),
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xFF10b981).withOpacity(0.3),
+                            offset: Offset(0, 4),
+                            blurRadius: 12,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.inventory, color: Colors.white, size: 16),
+                          SizedBox(width: 6),
+                          Text(
+                            '${products.length} Products',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Products Grid with enhanced styling
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.dashboard_customize,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Product Management Hub',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      Expanded(
+                        child: ListView.builder(
+                          padding: EdgeInsets.only(bottom: 20),
+                          itemCount: products.isEmpty ? 1 : products.length,
+                          itemBuilder: (context, index) {
+                            final product = products.isEmpty
+                                ? null
+                                : products[index];
+                            final isProductEmpty = product == null;
+                            final gradientIndex = index % cardGradients.length;
+                            final emptyColorIndex =
+                                index % emptySlotColors.length;
+
+                            return AnimatedContainer(
+                              duration: Duration(
+                                milliseconds: 300 + (index * 100),
+                              ),
+                              margin: EdgeInsets.only(bottom: 16),
+                              height: 200.h,
+                              decoration: BoxDecoration(
+                                gradient: isProductEmpty
+                                    ? LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          emptySlotColors[emptyColorIndex]
+                                              .withOpacity(0.8),
+                                          emptySlotColors[emptyColorIndex],
+                                        ],
+                                      )
+                                    : LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: cardGradients[gradientIndex],
+                                      ),
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: isProductEmpty
+                                        ? emptySlotColors[emptyColorIndex]
+                                              .withOpacity(0.4)
+                                        : cardGradients[gradientIndex][0]
+                                              .withOpacity(0.4),
+                                    offset: Offset(0, 12),
+                                    blurRadius: 24,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Container(
+                                padding: EdgeInsets.all(18),
+                                child: Row(
+                                  children: [
+                                    // Product Info Section
+                                    Expanded(
+                                      flex: 2,
+                                      child: Container(
+                                        padding: EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.25),
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(
+                                              0.3,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              padding: EdgeInsets.all(12),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withOpacity(
+                                                  0.2,
+                                                ),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                isProductEmpty
+                                                    ? Icons.add_box_outlined
+                                                    : Icons
+                                                          .shopping_bag_outlined,
+                                                color: isProductEmpty
+                                                    ? Colors.grey[600]
+                                                    : Colors.white,
+                                                size: 32,
+                                              ),
+                                            ),
+                                            SizedBox(height: 12),
+                                            Text(
+                                              product != null
+                                                  ? product['name'] ??
+                                                        'Unknown Product'
+                                                  : 'Add Your First Product',
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16.sp,
+                                                color: isProductEmpty
+                                                    ? Colors.grey[700]
+                                                    : Colors.white,
+                                                letterSpacing: 0.3,
+                                              ),
+                                            ),
+                                            if (product != null) ...[
+                                              SizedBox(height: 8),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: 12,
+                                                  vertical: 6,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white
+                                                      .withOpacity(0.2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(15),
+                                                ),
+                                                child: Text(
+                                                  '\$${product['price'] ?? 'N/A'}',
+                                                  style: TextStyle(
+                                                    fontSize: 15.sp,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+
+                                    SizedBox(width: 16),
+
+                                    // Action Buttons Section
+                                    Expanded(
+                                      flex: 1,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          // Add Button
+                                          if (isProductEmpty)
+                                            _buildActionButton(
+                                              icon: Icons.add_circle_outline,
+                                              color: Color(0xFF10b981),
+                                              label: 'Add New',
+                                              onPressed: () {
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  '/add_product',
+                                                );
+                                              },
+                                            ),
+
+                                          // Edit Button
+                                          if (product != null)
+                                            _buildActionButton(
+                                              icon: Icons.edit_outlined,
+                                              color: Color(0xFF3b82f6),
+                                              label: 'Edit',
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        EditProductPage(
+                                                          product: product,
+                                                        ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+
+                                          if (product != null)
+                                            SizedBox(height: 12),
+
+                                          // Delete Button
+                                          if (product != null)
+                                            _buildActionButton(
+                                              icon: Icons.delete_outline,
+                                              color: Color(0xFFef4444),
+                                              label: 'Delete',
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        DeleteProductPage(
+                                                          product: product,
+                                                        ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Enhanced Bottom Section
+              Container(
+                padding: EdgeInsets.all(20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: fetchProducts,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white.withOpacity(0.25),
+                              Colors.white.withOpacity(0.15),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              offset: Offset(0, 8),
+                              blurRadius: 20,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.refresh_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              'Refresh Products',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                // ID (optional - will be generated if empty)
-                CustomTextField(
-                  controller: _idController,
-                  labelText: 'ID (optional)',
-                  icon: Icons.code,
-                ),
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _nameController,
-                  labelText: 'Name',
-                  icon: Icons.text_fields,
-                ),
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _descriptionController,
-                  labelText: 'Description',
-                  icon: Icons.description,
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _priceController,
-                  labelText: 'Price',
-                  icon: Icons.price_check,
-                ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.pushNamed(context, AddProductPage.routeName);
+        },
+        backgroundColor: Color(0xFF10b981),
+        foregroundColor: Colors.white,
+        elevation: 8,
+        icon: Icon(Icons.add_rounded),
+        label: Text('Quick Add', style: TextStyle(fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
 
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _imageUrlController,
-                  labelText: 'Image URL',
-                  icon: Icons.image,
-                ),
-
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _categoryController,
-                  labelText: 'Category',
-                  icon: Icons.category,
-                ),
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _rateController,
-                  labelText: 'Rate',
-                  icon: Icons.star,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return null;
-                    final parsed = double.tryParse(v.trim());
-                    if (parsed == null) return 'Enter a valid number';
-                    if (parsed < 0 || parsed > 5) return 'Rate 0 - 5';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                CustomButton(
-                  onTap: _loading ? null : _submitProduct,
-                  title: 'Add Product',
-                ),
-              ],
-            ),
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          elevation: 8,
+          shadowColor: color.withOpacity(0.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
           ),
+          padding: EdgeInsets.symmetric(vertical: 12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18),
+            SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600),
+            ),
+          ],
         ),
       ),
     );

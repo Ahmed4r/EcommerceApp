@@ -2,7 +2,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop/screens/admin/add_page.dart';
 import 'package:shop/screens/admin/admin_page.dart';
+import 'package:shop/screens/admin/delete_page.dart';
+import 'package:shop/screens/admin/edit_page.dart';
 import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/screens/category/category.dart';
 import 'package:shop/screens/homepage/cubit/homepage.dart';
@@ -30,30 +33,42 @@ void main() async {
   );
   final sharedpref = await SharedPreferences.getInstance();
   final token = sharedpref.getBool('authToken') ?? false;
+  final isAdmin = sharedpref.getBool('isAdmin') ?? false;
   final onboardingSeen = sharedpref.getBool('onboarding_seen') ?? false;
 
   runApp(
     MultiBlocProvider(
       providers: [BlocProvider(create: (_) => WishlistCubit())],
-      child: ShopApp(token: token, onboardingSeen: onboardingSeen),
+      child: ShopApp(
+        token: token,
+        isAdmin: isAdmin,
+        onboardingSeen: onboardingSeen,
+      ),
     ),
   );
 }
 
 class ShopApp extends StatelessWidget {
   final bool token;
+  final bool isAdmin;
   final bool onboardingSeen;
-  const ShopApp({super.key, required this.token, required this.onboardingSeen});
+  const ShopApp({
+    super.key,
+    required this.token,
+    required this.isAdmin,
+    required this.onboardingSeen,
+  });
 
   @override
   Widget build(BuildContext context) {
-    String initialRoute;
+    log(token.toString());
+    String initialRoute = Navigationbar.routeName;
     if (onboardingSeen == false) {
       initialRoute = OnboardingScreen.routeName;
     } else if (token == false) {
       initialRoute = LoginPage.routeName;
-    } else {
-      initialRoute = Navigationbar.routeName;
+    } else if (isAdmin == true) {
+      initialRoute = AdminPage.routeName;
     }
 
     return ScreenUtilInit(
@@ -65,7 +80,7 @@ class ShopApp extends StatelessWidget {
         initialRoute: initialRoute,
         routes: {
           Homepage.routeName: (context) => Homepage(),
-          AdminPage.routeName: (context) => AdminPage(),
+          AddProductPage.routeName: (context) => AddProductPage(),
           Category.routeName: (context) => Category(),
           ShowProductspage.routeName: (context) => ShowProductspage(),
           ProfilePage.routeName: (context) => ProfilePage(),
@@ -79,6 +94,10 @@ class ShopApp extends StatelessWidget {
           ForgotPassword.routeName: (context) => ForgotPassword(),
           Navigationbar.routeName: (context) => Navigationbar(),
           OnboardingScreen.routeName: (context) => OnboardingScreen(),
+          DeleteProductPage.routeName: (context) =>
+              DeleteProductPage(product: {}),
+          EditProductPage.routeName: (context) => EditProductPage(product: {}),
+          AdminPage.routeName: (context) => AdminPage(),
         },
       ),
     );

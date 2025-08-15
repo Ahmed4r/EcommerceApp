@@ -63,6 +63,7 @@ class HomepageCubit extends Cubit<HomepageState> {
     } catch (e, stack) {
       print('Supabase fetch error: $e');
       print(stack);
+      
       emit(state.copyWith(isLoading: false, error: e.toString()));
     }
   }

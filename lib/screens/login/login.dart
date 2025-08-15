@@ -199,7 +199,7 @@ class _login_pageState extends State<LoginPage> {
                             Emailcontroller.text,
                             Passwordcontroller.text,
                           );
-                          if (checkboxvalue) {
+                          if (checkboxvalue == true) {
                             cubit.updateRemember(
                               checkboxvalue,
                               Emailcontroller.text,
