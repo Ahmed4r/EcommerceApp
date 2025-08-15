@@ -12,29 +12,27 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.32.5"
+          flutter-version: "3.22.3" # تأكد من رقم الإصدار الصحيح
           channel: stable
           cache: true
 
+      # 1) Clean & get packages
+      - run: flutter clean
       - run: flutter pub get
 
-      - name: Prepare iOS Pods
-        run: |
-          cd ios
-          pod repo update
-          pod install
-
-      - run: flutter clean
-    
+      # 2) Precache iOS engine & frameworks
       - run: flutter precache --ios
+
+      # 3) Install iOS Pods
       - run: |
           cd ios
           pod repo update
           pod install
 
-        
+      # 4) Build IPA unsigned
       - run: flutter build ipa --release --no-codesign
 
+      # 5) Upload artifact
       - uses: actions/upload-artifact@v4
         with:
           name: ios-ipa-unsigned
