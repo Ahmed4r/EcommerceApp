@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shop/widgets/custom_button.dart';
+import 'package:shop/widgets/custom_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminPage extends StatefulWidget {
@@ -112,53 +114,49 @@ class _AdminPageState extends State<AdminPage> {
             child: Column(
               children: [
                 // ID (optional - will be generated if empty)
-                TextFormField(
+                CustomTextField(
                   controller: _idController,
-                  decoration: const InputDecoration(
-                    labelText: 'ID (optional)',
-                    hintText: 'Leave empty to auto-generate',
-                  ),
+                  labelText: 'ID (optional)',
+                  icon: Icons.code,
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
+                CustomTextField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Name required' : null,
+                  labelText: 'Name',
+                  icon: Icons.text_fields,
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
+                CustomTextField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  labelText: 'Description',
+                  icon: Icons.description,
                   maxLines: 3,
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
+                CustomTextField(
                   controller: _priceController,
-                  decoration: const InputDecoration(labelText: 'Price'),
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Price required';
-                    if (double.tryParse(v.trim()) == null) {
-                      return 'Enter a valid number';
-                    }
-                    return null;
-                  },
+                  labelText: 'Price',
+                  icon: Icons.price_check,
                 ),
+
                 const SizedBox(height: 12),
-                TextFormField(
+                CustomTextField(
                   controller: _imageUrlController,
-                  decoration: const InputDecoration(labelText: 'Image URL'),
+                  labelText: 'Image URL',
+                  icon: Icons.image,
                 ),
+
                 const SizedBox(height: 12),
-                TextFormField(
+                CustomTextField(
                   controller: _categoryController,
-                  decoration: const InputDecoration(labelText: 'Category'),
+                  labelText: 'Category',
+                  icon: Icons.category,
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
+                CustomTextField(
                   controller: _rateController,
-                  decoration: const InputDecoration(labelText: 'Rate'),
+                  labelText: 'Rate',
+                  icon: Icons.star,
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return null;
@@ -169,18 +167,9 @@ class _AdminPageState extends State<AdminPage> {
                   },
                 ),
                 const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _loading ? null : _submitProduct,
-                    child: _loading
-                        ? const SizedBox(
-                            height: 16,
-                            width: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Create Product'),
-                  ),
+                CustomButton(
+                  onTap: _loading ? null : _submitProduct,
+                  title: 'Add Product',
                 ),
               ],
             ),

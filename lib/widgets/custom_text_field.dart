@@ -11,6 +11,7 @@ class CustomTextField extends StatefulWidget {
   bool obscureText;
   final String type;
   final bool enabled;
+  final int? maxLines;
   final String? Function(String?)? validator;
 
   CustomTextField({
@@ -22,6 +23,8 @@ class CustomTextField extends StatefulWidget {
     this.type = "text",
     this.validator,
     this.enabled = true,
+    this.maxLines = 1,
+    TextInputType keyboardType = TextInputType.emailAddress,
   });
 
   @override
@@ -52,6 +55,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               SizedBox(width: 10.w),
               Expanded(
                 child: TextFormField(
+                  maxLines: widget.maxLines,
                   enabled: widget.enabled,
                   controller: widget.controller,
                   validator: widget.validator,
