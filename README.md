@@ -1,16 +1,57 @@
 # shop
 
-A new Flutter project.
+A simple Flutter e-commerce starter app.
 
-## Getting Started
+## Prerequisites
 
-This project is a starting point for a Flutter application.
+- Flutter (stable) and Dart (bundled)
+- Android Studio / Xcode or VS Code with Flutter plugin
+- A connected device or emulator
 
-A few resources to get you started if this is your first Flutter project:
+## Getting started
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Clone the repository:
+```bash
+git clone <repo-url>
+cd shop
+```
+2. Install dependencies:
+```bash
+flutter pub get
+```
+3. Run on a device or emulator:
+```bash
+flutter run
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Build
+
+- Android (APK):
+```bash
+flutter build apk --release
+```
+- iOS (macOS required):
+```bash
+flutter build ios --release
+```
+
+## Testing
+
+Run unit and widget tests:
+```bash
+flutter test
+```
+
+## Project layout (high level)
+
+- lib/ — application source
+    - main.dart — entry point
+    - screens/ — UI screens
+    - models/ — data models
+    - widgets/ — reusable widgets
+- assets/ — images, fonts, etc.
+
+## Contributing
+
+Contributions welcome. Open issues or pull requests and follow the existing code style.
+
