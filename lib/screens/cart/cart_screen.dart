@@ -500,7 +500,7 @@ class _CartItemCardState extends State<CartItemCard>
                     child: SizedBox(
                       width: 80.w,
                       height: 80.h,
-                      child: Image.asset(
+                      child: Image.network(
                         widget.cartItem.product.image,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {

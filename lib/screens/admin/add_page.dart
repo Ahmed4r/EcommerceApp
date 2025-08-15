@@ -59,13 +59,7 @@ class _AddProductPageState extends State<AddProductPage> {
 
     try {
       final res = await supabase.from('products').insert(product).select();
-
       if (res.isNotEmpty) {
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          child: const SnackBar(content: Text('Product created successfully')),
-        );
-      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Product created successfully')),
         );
@@ -108,15 +102,7 @@ class _AddProductPageState extends State<AddProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primary,
-      appBar: AppBar(
-        title: const Text('Admin - Add Product'),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pushNamed(context, LoginPage.routeName);
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
-      ),
+      appBar: AppBar(title: const Text('Admin - Add Product')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(

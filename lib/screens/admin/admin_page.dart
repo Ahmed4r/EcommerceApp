@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shop/screens/admin/add_page.dart';
 import 'package:shop/screens/admin/delete_page.dart';
 import 'package:shop/screens/admin/edit_page.dart';
+import 'package:shop/screens/login/login.dart';
 import 'package:shop/widgets/admin_access_widget.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -143,20 +144,15 @@ class _AdminPageState extends State<AdminPage> {
                           ),
                         ],
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.inventory, color: Colors.white, size: 16),
-                          SizedBox(width: 6),
-                          Text(
-                            '${products.length} Products',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                      child: IconButton(
+                        onPressed: () {
+                          // Handle logout
+                          Navigator.pushReplacementNamed(
+                            context,
+                            LoginPage.routeName,
+                          );
+                        },
+                        icon: Icon(Icons.logout),
                       ),
                     ),
                   ],
@@ -185,18 +181,17 @@ class _AdminPageState extends State<AdminPage> {
                         child: Row(
                           children: [
                             Icon(
-                              Icons.dashboard_customize,
+                              Icons.inventory,
                               color: Colors.white,
-                              size: 20,
+                              size: 16,
                             ),
-                            SizedBox(width: 8),
+                            SizedBox(width: 6),
                             Text(
-                              'Product Management Hub',
+                              '${products.length} Products',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 18.sp,
+                                fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
-                                letterSpacing: 0.3,
                               ),
                             ),
                           ],
