@@ -25,6 +25,14 @@ jobs:
           pod install
 
       - run: flutter clean
+    
+      - run: flutter precache --ios
+      - run: |
+          cd ios
+          pod repo update
+          pod install
+
+        
       - run: flutter build ipa --release --no-codesign
 
       - uses: actions/upload-artifact@v4
