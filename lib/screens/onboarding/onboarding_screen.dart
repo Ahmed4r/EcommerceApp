@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/app_colors.dart';
+import 'package:shop/screens/login/login.dart';
 
 class OnboardingScreen extends StatefulWidget {
   static const String routeName = '/onboarding';
@@ -70,7 +71,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _finishOnboarding() {
     pref?.setBool('onboarding_seen', true);
-    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacementNamed(LoginPage.routeName);
   }
 
   Widget _buildIndicator() {
