@@ -12,7 +12,7 @@ A simple Flutter e-commerce starter app.
 
 1. Clone the repository:
 ```bash
-git clone <repo-url>
+git clone <https://github.com/Ahmed4r/EcommerceApp.git>
 cd shop
 ```
 2. Install dependencies:
