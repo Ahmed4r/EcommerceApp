@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop/screens/admin/admin_page.dart';
 import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/screens/category/category.dart';
 import 'package:shop/screens/homepage/cubit/homepage.dart';
@@ -64,6 +65,7 @@ class ShopApp extends StatelessWidget {
         initialRoute: initialRoute,
         routes: {
           Homepage.routeName: (context) => Homepage(),
+          AdminPage.routeName: (context) => AdminPage(),
           Category.routeName: (context) => Category(),
           ShowProductspage.routeName: (context) => ShowProductspage(),
           ProfilePage.routeName: (context) => ProfilePage(),

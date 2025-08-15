@@ -113,16 +113,6 @@ class _ProductItemCardState extends State<ProductItemCard>
 
   @override
   Widget build(BuildContext context) {
-    ImageProvider getImageProvider(String imagePath) {
-      if (imagePath.isEmpty) {
-        return const AssetImage('assets/profile.jpg'); // fallback
-      }
-      if (imagePath.startsWith('assets/')) {
-        return AssetImage(imagePath);
-      }
-      return NetworkImage(imagePath);
-    }
-
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -137,8 +127,8 @@ class _ProductItemCardState extends State<ProductItemCard>
         height: 200.h,
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: getImageProvider(widget.product.image),
-            fit: BoxFit.cover,
+            image: NetworkImage(widget.product.image),
+            fit: BoxFit.contain,
           ),
           borderRadius: BorderRadius.circular(20.r),
         ),
@@ -155,7 +145,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                     child: Text(
                       widget.product.name,
                       style: GoogleFonts.notoSansRejang(
-                        color: Colors.white,
+                        color: Color(0xff0D47A1),
                         fontWeight: FontWeight.bold,
                         fontSize: 12.sp,
                       ),

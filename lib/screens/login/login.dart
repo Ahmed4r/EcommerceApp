@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/app_colors.dart';
+import 'package:shop/screens/admin/admin_page.dart';
 import 'package:shop/screens/login/cubit/login_cubit.dart';
 import 'package:shop/screens/login/cubit/login_state.dart';
 import 'package:shop/screens/login/forgot_password/forgot_password.dart';
@@ -49,29 +50,44 @@ class _login_pageState extends State<LoginPage> {
 
   final authService = AuthService();
 
-  Future<void> insertUser(String email, String password) async {
-    final supabase = Supabase.instance.client;
-
-    try {
-      final response = await supabase.from('users').insert({
-        'email': email,
-        'password': password,
-      });
-      log(response.toString());
-    } catch (e) {
-      log(e.toString());
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => LoginCubit(authService),
 
       child: BlocConsumer<LoginCubit, LoginState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is LoginSuccess) {
-            Navigator.pushReplacementNamed(context, Navigationbar.routeName);
+            final supabase = Supabase.instance.client;
+            final userId = supabase.auth.currentUser?.id;
+            final userEmail = supabase.auth.currentUser?.email;
+            if (userId == null) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('User ID is null.')));
+              return;
+            }
+            var profile = await supabase
+                .from('profiles')
+                .select()
+                .eq('id', userId)
+                .maybeSingle();
+
+            if (profile == null) {
+              // Create profile if missing
+              await supabase.from('profiles').insert({
+                'id': userId,
+                'email': userEmail,
+                'role': 'customer', // default role
+              });
+              profile = {'role': 'customer'};
+            }
+
+            if (profile['role'] == 'admin') {
+              Navigator.pushReplacementNamed(context, AdminPage.routeName);
+            } else {
+              Navigator.pushReplacementNamed(context, Navigationbar.routeName);
+            }
           } else if (state is LoginFailure) {
             ScaffoldMessenger.of(
               context,
@@ -179,11 +195,6 @@ class _login_pageState extends State<LoginPage> {
                       CustomButton(
                         title: 'Log in',
                         onTap: () {
-                          insertUser(
-                            Emailcontroller.text,
-                            Passwordcontroller.text,
-                          );
-
                           cubit.login(
                             Emailcontroller.text,
                             Passwordcontroller.text,
