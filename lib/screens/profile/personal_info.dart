@@ -57,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
       nameController.text = prefs.getString('profile_name') ?? '';
     }
     if (emailController.text.isEmpty) {
-      emailController.text = prefs.getString('profile_email') ?? '';
+      emailController.text = prefs.getString('email') ?? '';
     }
     if (phoneController.text.isEmpty) {
       phoneController.text = prefs.getString('profile_phone') ?? '';
@@ -126,7 +126,9 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: AppColors.primary,
         centerTitle: true,
         leading: IconButton(
-          onPressed: () {
+          onPressed: () async {
+            SharedPreferences pref = await SharedPreferences.getInstance();
+            pref.remove('authToken');
             Navigator.pushReplacementNamed(context, LoginPage.routeName);
           },
           icon: FaIcon(
@@ -224,16 +226,19 @@ class _ProfilePageState extends State<ProfilePage> {
                                 controller: nameController,
                                 labelText: 'Name',
                                 icon: Icons.person,
+                                enabled: updateInfo,
                               ),
                               CustomTextField(
                                 controller: emailController,
                                 labelText: 'Email',
                                 icon: Icons.email,
+                                enabled: false,
                               ),
                               CustomTextField(
                                 controller: phoneController,
                                 labelText: 'Phone',
                                 icon: FontAwesomeIcons.phone,
+                                enabled: updateInfo,
                               ),
                             ],
                           ),

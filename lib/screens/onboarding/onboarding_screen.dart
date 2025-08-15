@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop/app_colors.dart';
 
 class OnboardingScreen extends StatefulWidget {
   static const String routeName = '/onboarding';
@@ -46,7 +47,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
   ];
 
-  void _goNext() {
+  void _goNext() async {
     if (_current < _pages.length - 1) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -54,6 +55,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
     } else {
       _finishOnboarding();
+      SharedPreferences pref = await SharedPreferences.getInstance();
+      pref.setBool('onboarding_seen', true);
     }
   }
 
@@ -81,9 +84,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           width: active ? 22 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: active
-                ? Theme.of(context).primaryColor
-                : Colors.grey.shade400,
+            color: active ? Colors.amber : Colors.grey.shade400,
             borderRadius: BorderRadius.circular(8),
           ),
         );
@@ -106,7 +107,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             Align(
               alignment: Alignment.topRight,
-              child: TextButton(onPressed: _skip, child: const Text('Skip')),
+              child: TextButton(
+                onPressed: _skip,
+                child: const Text('Skip'),
+                style: ButtonStyle(
+                  foregroundColor: MaterialStateProperty.all(
+                    AppColors.secondary,
+                  ),
+                ),
+              ),
             ),
             Expanded(
               child: PageView.builder(
@@ -120,14 +129,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(p.image, size: 140, color: theme.primaryColor),
+                        Icon(p.image, size: 140, color: AppColors.secondary),
                         const SizedBox(height: 32),
                         Text(
                           p.title,
                           style: GoogleFonts.cairo(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: theme.primaryColor,
+                            color: Colors.orange,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -136,7 +145,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           p.subtitle,
                           style: GoogleFonts.cairo(
                             fontSize: 16,
-                            color: theme.primaryColor,
+                            color: AppColors.secondary,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -153,6 +162,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   _buildIndicator(),
                   ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                        _current == _pages.length - 1
+                            ? AppColors.secondary
+                            : Colors.grey,
+                      ),
+                      foregroundColor: MaterialStateProperty.all(Colors.white),
+                    ),
                     onPressed: _goNext,
                     child: Text(
                       _current == _pages.length - 1 ? 'Get Started' : 'Next',

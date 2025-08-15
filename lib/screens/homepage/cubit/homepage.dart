@@ -14,8 +14,17 @@ import 'homepage_cubit.dart';
 import 'homepage_state.dart';
 import 'package:shop/model/product.dart';
 
-class Homepage extends StatelessWidget {
+class Homepage extends StatefulWidget {
   static const String routeName = 'home';
+
+  Homepage({super.key});
+
+  @override
+  State<Homepage> createState() => _HomepageState();
+}
+
+class _HomepageState extends State<Homepage> {
+
   List<Product> products = [
     Product(
       id: "1",
@@ -226,6 +235,7 @@ class Homepage extends StatelessWidget {
       },
     ),
   ];
+
   final List<Map<String, dynamic>> categoryData = [
     {"type": "text", "label": "All", "icon": null, "category": null},
     {
@@ -259,8 +269,6 @@ class Homepage extends StatelessWidget {
       "category": "Footwear",
     },
   ];
-
-  Homepage({super.key});
 
   @override
   Widget build(BuildContext context) {

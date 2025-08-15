@@ -1,9 +1,7 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/model/product.dart';
 import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/screens/category/category.dart';
 import 'package:shop/screens/homepage/cubit/homepage.dart';
@@ -30,8 +28,8 @@ void main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjYmhiZW5zcWNvdHFxeXl3ZWdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwOTc5ODQsImV4cCI6MjA3MDY3Mzk4NH0.z0_iRuwLSiCBEbwRPU620JzEr2aRgmF1FlB3q3l5R28', // الـ anon key من Settings -> API
   );
   final sharedpref = await SharedPreferences.getInstance();
-  final token = await sharedpref.setBool('token', false);
-  final onboardingSeen = await sharedpref.getBool('onboarding_seen') ?? false;
+  final token = sharedpref.getBool('authToken') ?? false;
+  final onboardingSeen = sharedpref.getBool('onboarding_seen') ?? false;
 
   runApp(
     MultiBlocProvider(
@@ -49,19 +47,25 @@ class ShopApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     log(token.toString());
+    log(onboardingSeen.toString());
+    String initialRoute;
+    if (onboardingSeen == false) {
+      initialRoute = OnboardingScreen.routeName;
+    } else if (token == false) {
+      initialRoute = LoginPage.routeName;
+    } else {
+      initialRoute = Navigationbar.routeName;
+    }
+
     return ScreenUtilInit(
       designSize: const Size(360, 690),
       minTextAdapt: true,
       splitScreenMode: true,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Navigationbar(key: navBarKey),
-        initialRoute: onboardingSeen
-            ? LoginPage.routeName
-            : OnboardingScreen.routeName,
+        initialRoute: initialRoute,
         routes: {
-          Homepage.routeName: (context) =>
-              Homepage(),
+          Homepage.routeName: (context) => Homepage(),
           Category.routeName: (context) => Category(),
           ShowProductspage.routeName: (context) => ShowProductspage(),
           ProfilePage.routeName: (context) => ProfilePage(),

@@ -32,7 +32,7 @@ class LoginCubit extends Cubit<LoginState> {
     try {
       await authService.signInWithEmailAndPassword(email, password);
       sharedpref ??= await SharedPreferences.getInstance();
-      await sharedpref!.setBool('token', true);
+      await sharedpref!.setBool('authToken', true);
       emit(LoginSuccess());
     } catch (e) {
       if (e is AuthRetryableFetchException) {

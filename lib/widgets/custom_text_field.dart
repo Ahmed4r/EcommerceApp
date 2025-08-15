@@ -10,6 +10,7 @@ class CustomTextField extends StatefulWidget {
   final IconData icon;
   bool obscureText;
   final String type;
+  final bool enabled;
   final String? Function(String?)? validator;
 
   CustomTextField({
@@ -20,6 +21,7 @@ class CustomTextField extends StatefulWidget {
     this.obscureText = false,
     this.type = "text",
     this.validator,
+    this.enabled = true,
   });
 
   @override
@@ -50,6 +52,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               SizedBox(width: 10.w),
               Expanded(
                 child: TextFormField(
+                  enabled: widget.enabled,
                   controller: widget.controller,
                   validator: widget.validator,
                   keyboardType: widget.type == "text"
@@ -57,6 +60,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
                       : TextInputType.visiblePassword,
                   obscureText: widget.obscureText,
                   style: GoogleFonts.cairo(color: Colors.black87),
+
+                  cursorColor: Colors.blueAccent,
                   decoration: InputDecoration(
                     suffixIcon: widget.type == "password"
                         ? IconButton(

@@ -43,6 +43,7 @@ class _login_pageState extends State<LoginPage> {
   TextEditingController Emailcontroller = TextEditingController();
   // ahmedrady03@gmail.com
   TextEditingController Passwordcontroller = TextEditingController();
+  // aA123456
   bool checkboxvalue = false;
 
   final authService = AuthService();
