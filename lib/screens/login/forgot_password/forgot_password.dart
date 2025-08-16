@@ -36,7 +36,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             ),
           ),
         ),
-        leading: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios)),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
 
         centerTitle: true,
       ),

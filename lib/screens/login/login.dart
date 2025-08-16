@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/app_colors.dart';
 import 'package:shop/screens/admin/admin_page.dart';
@@ -12,7 +13,7 @@ import 'package:shop/screens/login/cubit/login_state.dart';
 import 'package:shop/screens/login/forgot_password/forgot_password.dart';
 import 'package:shop/screens/register/signup.dart';
 import 'package:shop/services/auth/auth_service.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 import 'package:shop/widgets/navigationbar.dart';
@@ -248,7 +249,7 @@ class _login_pageState extends State<LoginPage> {
                       SizedBox(height: 20.h),
                       InkWell(
                         onTap: () async {
-                          // signInWithGoogle();
+                        
                         },
                         child: const CircleAvatar(
                           child: FaIcon(
@@ -268,4 +269,6 @@ class _login_pageState extends State<LoginPage> {
       ),
     );
   }
+
+ 
 }

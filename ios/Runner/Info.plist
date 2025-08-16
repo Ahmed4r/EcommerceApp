@@ -57,7 +57,7 @@
     <key>NSPhotoLibraryAddUsageDescription</key>
     <string>نحتاج الوصول لحفظ الصور في مكتبة الصور</string>
 	<!-- loaction access -->
- <key>NSLocationWhenInUseUsageDescription</key>
+    <key>NSLocationWhenInUseUsageDescription</key>
     <string>This app needs access to your location while using the app to show nearby restaurants and offers.</string>
     <key>NSLocationAlwaysUsageDescription</key>
     <string>This app needs access to your location even when in the background to track deliveries.</string>
@@ -74,5 +74,18 @@
             </array>
         </dict>
     </array>
+	<key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+           <key>CFBundleTypeRole</key>
+           <string>Editor</string>
+           <key>CFBundleURLSchemes</key>
+    <array>
+      <!-- TODO Replace this value: -->
+      <!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
+      <string>com.googleusercontent.apps.861823949799-vc35cprkp249096uujjn0vvnmcvjppkn</string>
+    </array>
+  </dict>
+</array>
 </dict>
 </plist>
