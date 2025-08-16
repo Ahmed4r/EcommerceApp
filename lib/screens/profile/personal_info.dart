@@ -11,6 +11,7 @@ import 'package:shop/screens/location/location_access_screen.dart';
 import 'package:shop/screens/login/login.dart';
 import 'package:shop/services/auth/auth_service.dart';
 import 'package:shop/widgets/custom_text_field.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
   static const String routeName = 'profile';
@@ -51,13 +52,14 @@ class _ProfilePageState extends State<ProfilePage> {
     });
 
     final prefs = await SharedPreferences.getInstance();
+    final supabase = Supabase.instance.client;
 
     // Load values only if controllers are empty
     if (nameController.text.isEmpty) {
       nameController.text = prefs.getString('profile_name') ?? '';
     }
     if (emailController.text.isEmpty) {
-      emailController.text = prefs.getString('email') ?? '';
+      emailController.text = supabase.auth.currentUser?.email ?? '';
     }
     if (phoneController.text.isEmpty) {
       phoneController.text = prefs.getString('profile_phone') ?? '';
@@ -74,11 +76,12 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _saveUserData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('profile_name', nameController.text);
-    await prefs.setString('profile_email', emailController.text);
+
     await prefs.setString('profile_phone', phoneController.text);
     if (profileImagePath != null) {
       await prefs.setString('profile_img', profileImagePath!);
     }
+    
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -239,6 +242,16 @@ class _ProfilePageState extends State<ProfilePage> {
                                 labelText: 'Phone',
                                 icon: FontAwesomeIcons.phone,
                                 enabled: updateInfo,
+                                keyboardTypeNumber: true,
+                                validator: (p0) {
+                                  if (p0 == null || p0.isEmpty) {
+                                    return 'Phone number is required';
+                                  }
+                                  if (!RegExp(r'^\d{10}$').hasMatch(p0)) {
+                                    return 'Invalid phone number';
+                                  }
+                                  return null;
+                                },
                               ),
                             ],
                           ),

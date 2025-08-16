@@ -18,6 +18,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 import 'package:shop/widgets/navigationbar.dart';
+import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routeName = '/login_page';
@@ -133,6 +134,10 @@ class _login_pageState extends State<LoginPage> {
 
           // Navigate based on user role
           if (mounted) {
+            // Sync local wishlist to Supabase after successful login
+            final wishlistCubit = context.read<WishlistCubit>();
+            await wishlistCubit.syncLocalToSupabase();
+
             if (profile['role'] == 'admin' || isAdminUser) {
               Navigator.pushReplacementNamed(context, AdminPage.routeName);
             } else {
@@ -201,6 +206,10 @@ class _login_pageState extends State<LoginPage> {
               });
               profile = {'role': userRole};
             }
+
+            // Sync local wishlist to Supabase after successful login
+            final wishlistCubit = context.read<WishlistCubit>();
+            await wishlistCubit.syncLocalToSupabase();
 
             if (profile['role'] == 'admin' || isAdminUser) {
               Navigator.pushReplacementNamed(context, AdminPage.routeName);
@@ -319,13 +328,8 @@ class _login_pageState extends State<LoginPage> {
                             Emailcontroller.text,
                             Passwordcontroller.text,
                           );
-                          if (checkboxvalue == true) {
-                            cubit.updateRemember(
-                              checkboxvalue,
-                              Emailcontroller.text,
-                              Passwordcontroller.text,
-                            );
-                          }
+
+                         
                         },
                       ),
 
