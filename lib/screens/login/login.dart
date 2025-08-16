@@ -353,6 +353,41 @@ class _login_pageState extends State<LoginPage> {
                       InkWell(
                         onTap: () async {
                           await _nativeGoogleSignIn();
+                          // Handle successful sign-in
+                          final supabase = Supabase.instance.client;
+                          final userId = supabase.auth.currentUser?.id;
+                          final userEmail = supabase.auth.currentUser?.email;
+
+                          if (userId != null) {
+                            var profile = await supabase
+                                .from('profiles')
+                                .select()
+                                .eq('id', userId)
+                                .maybeSingle();
+
+                            if (profile == null) {
+                              // Create profile if missing
+                              await supabase.from('profiles').insert({
+                                'id': userId,
+                                'email': userEmail,
+                                'role': 'customer', // default role
+                              });
+                              profile = {'role': 'customer'};
+                            }
+
+                            // Navigate based on user role
+                            if (profile['role'] == 'admin') {
+                              Navigator.pushReplacementNamed(
+                                context,
+                                AdminPage.routeName,
+                              );
+                            } else {
+                              Navigator.pushReplacementNamed(
+                                context,
+                                Navigationbar.routeName,
+                              );
+                            }
+                          }
                         },
                         child: const CircleAvatar(
                           child: FaIcon(
