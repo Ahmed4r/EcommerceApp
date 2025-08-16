@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shop/services/admin_service.dart';
 
 class AuthService {
   final SupabaseClient _supabaseClient = Supabase.instance.client;
@@ -6,6 +7,9 @@ class AuthService {
   //sign out
   Future<void> signOut() async {
     await _supabaseClient.auth.signOut();
+
+    // Clear admin status on logout
+    await AdminService.clearAdminStatus();
   }
 
   //sign in

@@ -6,176 +6,186 @@ import 'package:shop/app_colors.dart';
 import 'package:shop/model/product.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_state.dart';
+import 'package:shop/widgets/animated_page_wrapper.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   final Product product;
+  final String? heroTag;
 
-  const ProductDetailsPage({super.key, required this.product});
+  const ProductDetailsPage({super.key, required this.product, this.heroTag});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ===== AppBar =====
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: _circleButton(Icons.arrow_back_ios_new),
-                  ),
-                ],
-              ),
-            ),
-
-            // ===== Product Image =====
-            Hero(
-              tag: product.name,
-              child: Container(
-                width: double.infinity,
-                height: 280.h,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.r),
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      product.image.isNotEmpty
-                          ? product.image
-                          : 'https://lightwidget.com/wp-content/uploads/localhost-file-not-found.jpg',
+    return AnimatedPageWrapper(
+      child: Scaffold(
+        backgroundColor: AppColors.primary,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // ===== AppBar =====
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: _circleButton(Icons.arrow_back_ios_new),
                     ),
-                    fit: BoxFit.cover,
+                  ],
+                ),
+              ),
+
+              // ===== Product Image =====
+              Hero(
+                tag:
+                    heroTag ??
+                    "product_${product.name}", // Use provided tag or default
+                child: Container(
+                  width: double.infinity,
+                  height: 280.h,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.r),
+                    image: DecorationImage(
+                      image: NetworkImage(
+                        product.image.isNotEmpty
+                            ? product.image
+                            : 'https://lightwidget.com/wp-content/uploads/localhost-file-not-found.jpg',
+                      ),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // ===== Product Info =====
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(20.w),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(25.r),
+              // ===== Product Info =====
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(20.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(25.r),
+                    ),
                   ),
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Name + Rating
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              product.name,
-                              style: GoogleFonts.cairo(
-                                fontSize: 20.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Icon(Icons.star, color: Colors.amber, size: 22.r),
-                              SizedBox(width: 4.w),
-                              Text(
-                                product.rate.toString(),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Name + Rating
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                product.name,
                                 style: GoogleFonts.cairo(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10.h),
-
-                      // Price
-                      Text(
-                        "\$ ${product.price}",
-                        style: GoogleFonts.cairo(
-                          fontSize: 22.sp,
-                          color: Colors.green[700],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 20.h),
-
-                      // Description
-                      Text(
-                        product.description,
-                        style: GoogleFonts.cairo(
-                          fontSize: 14.sp,
-                          color: Colors.grey[700],
-                          height: 1.5,
-                        ),
-                      ),
-                      SizedBox(height: 20.h),
-
-                      // Add to Wishlist Button
-                      BlocBuilder<WishlistCubit, WishlistState>(
-                        builder: (context, state) {
-                          return SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                context.read<WishlistCubit>().toggleFavorite(
-                                  product,
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15.r),
-                                ),
-                                padding: EdgeInsets.symmetric(vertical: 14.h),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Text(
-                                    "Add to Wishlist",
-                                    style: GoogleFonts.cairo(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-
-                                  Icon(
-                                    context.read<WishlistCubit>().isFavorite(
-                                          product,
-                                        )
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color:
-                                        context
-                                            .read<WishlistCubit>()
-                                            .isFavorite(product)
-                                        ? Colors.red
-                                        : Colors.white,
-                                  ),
-                                ],
                               ),
                             ),
-                          );
-                        },
-                        bloc: context.read<WishlistCubit>(),
-                      ),
-                    ],
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                  size: 22.r,
+                                ),
+                                SizedBox(width: 4.w),
+                                Text(
+                                  product.rate.toString(),
+                                  style: GoogleFonts.cairo(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10.h),
+
+                        // Price
+                        Text(
+                          "\$ ${product.price}",
+                          style: GoogleFonts.cairo(
+                            fontSize: 22.sp,
+                            color: Colors.green[700],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
+
+                        // Description
+                        Text(
+                          product.description,
+                          style: GoogleFonts.cairo(
+                            fontSize: 14.sp,
+                            color: Colors.grey[700],
+                            height: 1.5,
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
+
+                        // Add to Wishlist Button
+                        BlocBuilder<WishlistCubit, WishlistState>(
+                          builder: (context, state) {
+                            return SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  context.read<WishlistCubit>().toggleFavorite(
+                                    product,
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15.r),
+                                  ),
+                                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Text(
+                                      "Add to Wishlist",
+                                      style: GoogleFonts.cairo(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+
+                                    Icon(
+                                      context.read<WishlistCubit>().isFavorite(
+                                            product,
+                                          )
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      color:
+                                          context
+                                              .read<WishlistCubit>()
+                                              .isFavorite(product)
+                                          ? Colors.red
+                                          : Colors.white,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                          bloc: context.read<WishlistCubit>(),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

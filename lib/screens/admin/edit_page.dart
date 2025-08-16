@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/screens/homepage/cubit/homepage_cubit.dart';
-import 'package:shop/screens/homepage/cubit/homepage_state.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,7 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class EditProductPage extends StatefulWidget {
   static const String routeName = '/edit-product';
   final Map product;
-  const EditProductPage({Key? key, required this.product}) : super(key: key);
+  const EditProductPage({super.key, required this.product});
 
   @override
   State<EditProductPage> createState() => _EditProductPageState();
@@ -91,8 +88,8 @@ class _EditProductPageState extends State<EditProductPage> {
           .update({
             'name': nameController.text,
             'price': double.tryParse(priceController.text) ?? 0,
-            'image_url': imageController.text ?? '',
-            'category': categoryController.text ?? '',
+            'image_url': imageController.text ,
+            'category': categoryController.text ,
           })
           .eq('id', widget.product['id']);
       if (!mounted) return;

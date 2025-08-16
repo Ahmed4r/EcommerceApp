@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 
 class AddressModel {
   final String? label;
@@ -19,7 +19,7 @@ class AddressModel {
       'label': label,
       'address': address,
       'iconName': iconName,
-      'iconColor': iconColor?.value,
+      'iconColor': iconColor,
     };
   }
 

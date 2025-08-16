@@ -1,12 +1,10 @@
 import 'dart:ui';
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/model/product.dart';
 import 'package:shop/screens/homepage/cubit/homepage_cubit.dart';
 import 'package:shop/screens/homepage/cubit/homepage_state.dart';
 import 'package:shop/widgets/product_card.dart';

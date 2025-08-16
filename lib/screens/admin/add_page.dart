@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/screens/login/login.dart';
+
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AddProductPage extends StatefulWidget {
   static const String routeName = '/AddProductPage';
-  const AddProductPage({Key? key}) : super(key: key);
+  const AddProductPage({super.key});
 
   @override
   State<AddProductPage> createState() => _AddProductPageState();
@@ -60,6 +60,9 @@ class _AddProductPageState extends State<AddProductPage> {
     try {
       final res = await supabase.from('products').insert(product).select();
       if (res.isNotEmpty) {
+        if (!mounted) {
+          return;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Product created successfully')),
         );
@@ -67,7 +70,9 @@ class _AddProductPageState extends State<AddProductPage> {
         _clearControllers();
       }
     } catch (e) {
-      print(e);
+      if (!mounted) {
+        return;
+      }
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Unexpected error: $e')));

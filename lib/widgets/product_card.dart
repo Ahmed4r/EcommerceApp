@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:redacted/redacted.dart';
 import 'package:shop/app_colors.dart';
 import 'package:shop/model/product.dart';
 import 'package:shop/screens/cart/cart_Screen.dart';
@@ -119,7 +120,10 @@ class _ProductItemCardState extends State<ProductItemCard>
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailsPage(product: widget.product),
+            builder: (context) => ProductDetailsPage(
+              product: widget.product,
+              heroTag: "product_${widget.product.id}",
+            ),
           ),
         );
       },
@@ -319,6 +323,12 @@ class _ProductItemCardState extends State<ProductItemCard>
             ],
           ),
         ),
+      ),
+    ).redacted(
+      context: context,
+      redact: true,
+      configuration: RedactedConfiguration(
+        animationDuration: const Duration(milliseconds: 800), //default
       ),
     );
   }
