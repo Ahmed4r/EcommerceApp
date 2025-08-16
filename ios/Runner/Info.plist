@@ -83,9 +83,11 @@
     <array>
       <!-- TODO Replace this value: -->
       <!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
-      <string>com.googleusercontent.apps.861823949799-vc35cprkp249096uujjn0vvnmcvjppkn</string>
+      <string>com.googleusercontent.apps.152853602646-3jpm5kjlfparvi92gf3q0e8nagl42ups.apps.googleusercontent.com</string>
     </array>
-  </dict>
-</array>
+        </dict>
+    </array>
+
+	
 </dict>
 </plist>

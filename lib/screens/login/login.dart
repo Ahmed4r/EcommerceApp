@@ -17,7 +17,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 import 'package:shop/widgets/navigationbar.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routeName = '/login_page';
@@ -42,7 +41,6 @@ class _login_pageState extends State<LoginPage> {
     super.dispose();
   }
 
-  @override
   TextEditingController Emailcontroller = TextEditingController();
   // ahmedrady03@gmail.com
   TextEditingController Passwordcontroller = TextEditingController();
@@ -50,6 +48,91 @@ class _login_pageState extends State<LoginPage> {
   bool checkboxvalue = false;
 
   final authService = AuthService();
+
+  Future<void> _nativeGoogleSignIn() async {
+    try {
+      /// TODO: update the Web client ID with your own.
+      ///
+      /// Web Client ID that you registered with Google Cloud.
+      const webClientId = '152853602646-rm6evrh302a4gunht8k0nqk5jpn2hbob.apps.googleusercontent.com';
+
+      /// TODO: update the iOS client ID with your own.
+      ///
+      /// iOS Client ID that you registered with Google Cloud.
+      const iosClientId = '152853602646-3jpm5kjlfparvi92gf3q0e8nagl42ups.apps.googleusercontent.com';
+
+      // Check if the credentials are still placeholders
+      if (webClientId == 'my-web.apps.googleusercontent.com' ||
+          iosClientId == 'my-ios.apps.googleusercontent.com') {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Google Sign-In not configured. Please add your OAuth credentials.',
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        clientId: iosClientId,
+        serverClientId: webClientId,
+      );
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // User cancelled the sign-in
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Google Sign-In cancelled')),
+          );
+        }
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final String? accessToken = googleAuth.accessToken;
+      final String? idToken = googleAuth.idToken;
+
+      if (accessToken == null) {
+        throw 'No Access Token found.';
+      }
+      if (idToken == null) {
+        throw 'No ID Token found.';
+      }
+
+      final supabase = Supabase.instance.client;
+      await supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Google Sign-In successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      log('Google Sign-In error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Sign-In failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -249,7 +332,7 @@ class _login_pageState extends State<LoginPage> {
                       SizedBox(height: 20.h),
                       InkWell(
                         onTap: () async {
-                        
+                          await _nativeGoogleSignIn();
                         },
                         child: const CircleAvatar(
                           child: FaIcon(
@@ -269,6 +352,4 @@ class _login_pageState extends State<LoginPage> {
       ),
     );
   }
-
- 
 }
