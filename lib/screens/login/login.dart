@@ -13,6 +13,7 @@ import 'package:shop/screens/login/cubit/login_state.dart';
 import 'package:shop/screens/login/forgot_password/forgot_password.dart';
 import 'package:shop/screens/register/signup.dart';
 import 'package:shop/services/auth/auth_service.dart';
+import 'package:shop/services/admin_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
@@ -109,7 +110,10 @@ class _login_pageState extends State<LoginPage> {
         final userId = supabase.auth.currentUser?.id;
         final userEmail = supabase.auth.currentUser?.email;
 
-        if (userId != null) {
+        if (userId != null && userEmail != null) {
+          // Check and set admin status properly
+          bool isAdminUser = await AdminService.checkAdminRole(userEmail);
+
           var profile = await supabase
               .from('profiles')
               .select()
@@ -117,29 +121,32 @@ class _login_pageState extends State<LoginPage> {
               .maybeSingle();
 
           if (profile == null) {
-            // Create profile if missing
+            // Create profile if missing with proper role
+            String userRole = isAdminUser ? 'admin' : 'customer';
             await supabase.from('profiles').insert({
               'id': userId,
               'email': userEmail,
-              'role': 'customer', // default role
+              'role': userRole,
             });
-            profile = {'role': 'customer'};
+            profile = {'role': userRole};
           }
 
           // Navigate based on user role
-          if (profile['role'] == 'admin') {
-            Navigator.pushReplacementNamed(context, AdminPage.routeName);
-          } else {
-            Navigator.pushReplacementNamed(context, Navigationbar.routeName);
+          if (mounted) {
+            if (profile['role'] == 'admin' || isAdminUser) {
+              Navigator.pushReplacementNamed(context, AdminPage.routeName);
+            } else {
+              Navigator.pushReplacementNamed(context, Navigationbar.routeName);
+            }
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Welcome ${isAdminUser ? 'Admin' : 'User'}!'),
+                backgroundColor: Colors.green,
+              ),
+            );
           }
         }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google Sign-In successful!'),
-            backgroundColor: Colors.green,
-          ),
-        );
       }
     } catch (e) {
       log('Google Sign-In error: $e');
@@ -171,6 +178,13 @@ class _login_pageState extends State<LoginPage> {
               ).showSnackBar(const SnackBar(content: Text('User ID is null.')));
               return;
             }
+
+            // Check and set admin status properly for email/password login too
+            bool isAdminUser = false;
+            if (userEmail != null) {
+              isAdminUser = await AdminService.checkAdminRole(userEmail);
+            }
+
             var profile = await supabase
                 .from('profiles')
                 .select()
@@ -178,16 +192,17 @@ class _login_pageState extends State<LoginPage> {
                 .maybeSingle();
 
             if (profile == null) {
-              // Create profile if missing
+              // Create profile if missing with proper role
+              String userRole = isAdminUser ? 'admin' : 'customer';
               await supabase.from('profiles').insert({
                 'id': userId,
                 'email': userEmail,
-                'role': 'customer', // default role
+                'role': userRole,
               });
-              profile = {'role': 'customer'};
+              profile = {'role': userRole};
             }
 
-            if (profile['role'] == 'admin') {
+            if (profile['role'] == 'admin' || isAdminUser) {
               Navigator.pushReplacementNamed(context, AdminPage.routeName);
             } else {
               Navigator.pushReplacementNamed(context, Navigationbar.routeName);
@@ -353,41 +368,6 @@ class _login_pageState extends State<LoginPage> {
                       InkWell(
                         onTap: () async {
                           await _nativeGoogleSignIn();
-                          // Handle successful sign-in
-                          final supabase = Supabase.instance.client;
-                          final userId = supabase.auth.currentUser?.id;
-                          final userEmail = supabase.auth.currentUser?.email;
-
-                          if (userId != null) {
-                            var profile = await supabase
-                                .from('profiles')
-                                .select()
-                                .eq('id', userId)
-                                .maybeSingle();
-
-                            if (profile == null) {
-                              // Create profile if missing
-                              await supabase.from('profiles').insert({
-                                'id': userId,
-                                'email': userEmail,
-                                'role': 'customer', // default role
-                              });
-                              profile = {'role': 'customer'};
-                            }
-
-                            // Navigate based on user role
-                            if (profile['role'] == 'admin') {
-                              Navigator.pushReplacementNamed(
-                                context,
-                                AdminPage.routeName,
-                              );
-                            } else {
-                              Navigator.pushReplacementNamed(
-                                context,
-                                Navigationbar.routeName,
-                              );
-                            }
-                          }
                         },
                         child: const CircleAvatar(
                           child: FaIcon(

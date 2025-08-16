@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop/app_colors.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,6 +26,7 @@ class _EditProductPageState extends State<EditProductPage> {
     priceController = TextEditingController(
       text: widget.product['price'].toString(),
     );
+    imageController = TextEditingController(text: widget.product['image']);
   }
 
   Future<void> updateProduct() async {
@@ -42,7 +44,15 @@ class _EditProductPageState extends State<EditProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Edit Product')),
+      backgroundColor: AppColors.primary,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back_ios),
+        ),
+        title: Text('Edit Product'),
+        backgroundColor: AppColors.primary,
+      ),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
