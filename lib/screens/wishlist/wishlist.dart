@@ -24,6 +24,7 @@ class WishlistPage extends StatelessWidget {
               ? Color(0xffEDF1F4)
               : AppColors.primary,
           appBar: AppBar(
+            forceMaterialTransparency: true,
             backgroundColor: state.favorites.isEmpty
                 ? Color(0xffEDF1F4)
                 : AppColors.primary,

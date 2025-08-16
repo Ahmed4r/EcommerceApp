@@ -9,6 +9,7 @@ import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/widgets/homepage_headers.dart';
 import 'package:shop/widgets/product_card.dart';
 import 'package:carousel_slider_plus/carousel_slider_plus.dart';
+import 'package:shop/screens/orders/orders_page.dart';
 import 'homepage_cubit.dart';
 import 'homepage_state.dart';
 
@@ -279,6 +280,7 @@ class _HomepageState extends State<Homepage> {
           return Scaffold(
             backgroundColor: AppColors.primary,
             appBar: AppBar(
+              toolbarHeight: 50.h,
               forceMaterialTransparency: true,
               backgroundColor: AppColors.primary,
               leading: Padding(
@@ -303,17 +305,43 @@ class _HomepageState extends State<Homepage> {
                 ],
               ),
               actions: [
-                Container(
-                  margin: EdgeInsets.only(right: 10.w),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300, width: 1.w),
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-                  child: IconButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, CartScreen.routeName),
-                    icon: FaIcon(FontAwesomeIcons.cartShopping, size: 20.r),
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(right: 8.w),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                          width: 1.w,
+                        ),
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      child: IconButton(
+                        tooltip: 'My Orders',
+                        onPressed: () =>
+                            Navigator.pushNamed(context, OrdersPage.routeName),
+                        icon: FaIcon(
+                          FontAwesomeIcons.clipboardList,
+                          size: 18.r,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(right: 10.w),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                          width: 1.w,
+                        ),
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      child: IconButton(
+                        onPressed: () =>
+                            Navigator.pushNamed(context, CartScreen.routeName),
+                        icon: FaIcon(FontAwesomeIcons.cartShopping, size: 20.r),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

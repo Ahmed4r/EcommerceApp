@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shop/screens/admin/add_page.dart';
 import 'package:shop/screens/admin/delete_page.dart';
 import 'package:shop/screens/admin/edit_page.dart';
+import 'package:shop/screens/admin/orders_admin_page.dart';
 import 'package:shop/screens/login/login.dart';
 import 'package:shop/widgets/admin_access_widget.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -144,15 +145,30 @@ class _AdminPageState extends State<AdminPage> {
                           ),
                         ],
                       ),
-                      child: IconButton(
-                        onPressed: () {
-                          // Handle logout
-                          Navigator.pushReplacementNamed(
-                            context,
-                            LoginPage.routeName,
-                          );
-                        },
-                        icon: Icon(Icons.logout),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            tooltip: 'Orders',
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                OrdersAdminPage.routeName,
+                              );
+                            },
+                            icon: Icon(Icons.receipt_long),
+                          ),
+                          const SizedBox(width: 6),
+                          IconButton(
+                            tooltip: 'Logout',
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(
+                                context,
+                                LoginPage.routeName,
+                              );
+                            },
+                            icon: Icon(Icons.logout),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -430,7 +446,6 @@ class _AdminPageState extends State<AdminPage> {
                   ),
                 ),
               ),
-
             ],
           ),
         ),

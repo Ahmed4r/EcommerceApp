@@ -689,6 +689,7 @@ class _AddressDetailsScreenState extends State<AddressDetailsScreen> {
                                 : selectedLabel == 'Work'
                                 ? 'work'
                                 : 'location_on',
+                            // Use concrete Color (still fine with MaterialColor, toJson will save .value)
                             iconColor: selectedLabel == 'Home'
                                 ? Colors.blue
                                 : selectedLabel == 'Work'

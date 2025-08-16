@@ -91,6 +91,8 @@ class _CategoryState extends State<Category> {
           return Scaffold(
             backgroundColor: AppColors.primary,
             appBar: AppBar(
+              excludeHeaderSemantics: true,
+
               elevation: 0,
               title: Text(
                 "Category",

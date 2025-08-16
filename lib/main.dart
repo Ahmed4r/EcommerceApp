@@ -4,11 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/screens/admin/add_page.dart';
 import 'package:shop/screens/admin/admin_page.dart';
+import 'package:shop/screens/admin/orders_admin_page.dart';
 import 'package:shop/screens/admin/delete_page.dart';
 import 'package:shop/screens/admin/edit_page.dart';
-import 'package:shop/screens/cart/cart_Screen.dart';
+import 'package:shop/screens/cart/cart_screen.dart';
+import 'package:shop/screens/cart/checkout_screen.dart';
 import 'package:shop/screens/category/category.dart';
 import 'package:shop/screens/homepage/cubit/homepage.dart';
+import 'package:shop/screens/orders/orders_page.dart';
 import 'package:shop/screens/location/address_details_Screen.dart';
 import 'package:shop/screens/location/location_access_screen.dart';
 import 'package:shop/screens/login/forgot_password/forgot_password.dart';
@@ -85,6 +88,7 @@ class ShopApp extends StatelessWidget {
           ShowProductspage.routeName: (context) => ShowProductspage(),
           ProfilePage.routeName: (context) => ProfilePage(),
           CartScreen.routeName: (context) => CartScreen(),
+          CheckoutScreen.routeName: (context) => CheckoutScreen(),
           WishlistPage.routeName: (context) => WishlistPage(),
           LocationAccessPage.routeName: (context) => LocationAccessPage(),
           AddressListScreen.routeName: (context) => AddressListScreen(),
@@ -98,6 +102,8 @@ class ShopApp extends StatelessWidget {
               DeleteProductPage(product: {}),
           EditProductPage.routeName: (context) => EditProductPage(product: {}),
           AdminPage.routeName: (context) => AdminPage(),
+          OrdersAdminPage.routeName: (context) => const OrdersAdminPage(),
+          OrdersPage.routeName: (context) => const OrdersPage(),
         },
       ),
     );

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class AddressModel {
   final String? label;
   final String? address;
@@ -19,16 +18,32 @@ class AddressModel {
       'label': label,
       'address': address,
       'iconName': iconName,
-      'iconColor': iconColor,
+      // Store as ARGB int to keep it JSON-encodable
+      'iconColor': iconColor?.value,
     };
   }
 
   factory AddressModel.fromJson(Map<String, dynamic> json) {
+    final dynamic colorRaw = json['iconColor'];
+    Color? parsedColor;
+    if (colorRaw is int) {
+      parsedColor = Color(colorRaw);
+    } else if (colorRaw is String) {
+      // Try parse hex or int in string form
+      try {
+        final cleaned = colorRaw.startsWith('#')
+            ? colorRaw.replaceFirst('#', '')
+            : colorRaw;
+        final intVal =
+            int.tryParse(cleaned, radix: 16) ?? int.tryParse(cleaned);
+        if (intVal != null) parsedColor = Color(intVal);
+      } catch (_) {}
+    }
     return AddressModel(
       label: json['label'],
       address: json['address'],
       iconName: json['iconName'],
-      iconColor: json['iconColor'] != null ? Color(json['iconColor']) : null,
+      iconColor: parsedColor,
     );
   }
   static IconData _iconFromName(String? name) {
