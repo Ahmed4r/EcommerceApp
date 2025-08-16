@@ -12,6 +12,7 @@ class CustomTextField extends StatefulWidget {
   final String type;
   final bool enabled;
   final int? maxLines;
+  final bool? keyboardTypeNumber;
   final String? Function(String?)? validator;
 
   CustomTextField({
@@ -24,6 +25,7 @@ class CustomTextField extends StatefulWidget {
     this.validator,
     this.enabled = true,
     this.maxLines = 1,
+    this.keyboardTypeNumber,
     TextInputType keyboardType = TextInputType.emailAddress,
   });
 
@@ -60,7 +62,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   controller: widget.controller,
                   validator: widget.validator,
                   keyboardType: widget.type == "text"
-                      ? TextInputType.text
+                      ? (widget.keyboardTypeNumber == true
+                            ? TextInputType.phone
+                            : TextInputType.text)
                       : TextInputType.visiblePassword,
                   obscureText: widget.obscureText,
                   style: GoogleFonts.cairo(color: Colors.black87),

@@ -428,9 +428,9 @@ Widget sliderWidget() {
   return CarouselSlider(
     items:
         [
-          "assets/classic watch.jpg",
-          "assets/shoes.jpg",
-          "assets/handbag.jpg",
+          "assets/banners/banner1.png",
+          "assets/banners/banner2.png",
+          "assets/banners/banner3.avif",
         ].map((i) {
           return Builder(
             builder: (context) => Container(
@@ -450,6 +450,7 @@ Widget sliderWidget() {
       height: 130.h,
       autoPlay: true,
       enlargeCenterPage: true,
+      autoPlayCurve: Curves.easeInOut,
       autoPlayInterval: const Duration(seconds: 3),
     ),
   );

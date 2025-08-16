@@ -431,64 +431,6 @@ class _AdminPageState extends State<AdminPage> {
                 ),
               ),
 
-              // Enhanced Bottom Section
-              // Container(
-              //   padding: EdgeInsets.all(20),
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.center,
-              //     children: [
-              //       GestureDetector(
-              //         onTap: fetchProducts,
-              //         child: Container(
-              //           padding: EdgeInsets.symmetric(
-              //             horizontal: 24,
-              //             vertical: 14,
-              //           ),
-              //           decoration: BoxDecoration(
-              //             gradient: LinearGradient(
-              //               colors: [
-              //                 Colors.white.withOpacity(0.25),
-              //                 Colors.white.withOpacity(0.15),
-              //               ],
-              //             ),
-              //             borderRadius: BorderRadius.circular(30),
-              //             border: Border.all(
-              //               color: Colors.white.withOpacity(0.3),
-              //             ),
-              //             boxShadow: [
-              //               BoxShadow(
-              //                 color: Colors.black.withOpacity(0.1),
-              //                 offset: Offset(0, 8),
-              //                 blurRadius: 20,
-              //               ),
-              //             ],
-              //           ),
-              //           child: Row(
-              //             mainAxisAlignment: MainAxisAlignment.start,
-              //             mainAxisSize: MainAxisSize.min,
-              //             children: [
-              //               Icon(
-              //                 Icons.refresh_rounded,
-              //                 color: Colors.white,
-              //                 size: 22,
-              //               ),
-              //               SizedBox(width: 10.w),
-              //               Text(
-              //                 'Refresh Products',
-              //                 style: TextStyle(
-              //                   color: Colors.white,
-              //                   fontSize: 15.sp,
-              //                   fontWeight: FontWeight.w600,
-              //                   letterSpacing: 0.3,
-              //                 ),
-              //               ),
-              //             ],
-              //           ),
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              // ),
             ],
           ),
         ),
