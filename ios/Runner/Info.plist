@@ -73,18 +73,14 @@
                 <string>shop</string>
             </array>
         </dict>
-    </array>
-	<key>CFBundleURLTypes</key>
-    <array>
         <dict>
-           <key>CFBundleTypeRole</key>
-           <string>Editor</string>
-           <key>CFBundleURLSchemes</key>
-    <array>
-      <!-- TODO Replace this value: -->
-      <!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
-      <string>com.googleusercontent.apps.152853602646-3jpm5kjlfparvi92gf3q0e8nagl42ups.apps.googleusercontent.com</string>
-    </array>
+            <key>CFBundleURLName</key>
+            <string>google</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <!-- Reversed client ID for Google Sign-In -->
+                <string>com.googleusercontent.apps.152853602646-3jpm5kjlfparvi92gf3q0e8nagl42ups</string>
+            </array>
         </dict>
     </array>
 

@@ -51,36 +51,26 @@ class _login_pageState extends State<LoginPage> {
 
   Future<void> _nativeGoogleSignIn() async {
     try {
-      /// TODO: update the Web client ID with your own.
-      ///
       /// Web Client ID that you registered with Google Cloud.
-      const webClientId = '152853602646-rm6evrh302a4gunht8k0nqk5jpn2hbob.apps.googleusercontent.com';
+      const webClientId =
+          '152853602646-rm6evrh302a4gunht8k0nqk5jpn2hbob.apps.googleusercontent.com';
 
-      /// TODO: update the iOS client ID with your own.
-      ///
       /// iOS Client ID that you registered with Google Cloud.
-      const iosClientId = '152853602646-3jpm5kjlfparvi92gf3q0e8nagl42ups.apps.googleusercontent.com';
+      const iosClientId =
+          '152853602646-3jpm5kjlfparvi92gf3q0e8nagl42ups.apps.googleusercontent.com';
 
-      // Check if the credentials are still placeholders
-      if (webClientId == 'my-web.apps.googleusercontent.com' ||
-          iosClientId == 'my-ios.apps.googleusercontent.com') {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Google Sign-In not configured. Please add your OAuth credentials.',
-              ),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
-        return;
-      }
-
+      // Initialize Google Sign-In with proper configuration for Supabase
       final GoogleSignIn googleSignIn = GoogleSignIn(
+        // For iOS, only use clientId
         clientId: iosClientId,
+        // For web/server authentication with Supabase
         serverClientId: webClientId,
+        // Request scopes needed for Supabase
+        scopes: ['email', 'profile'],
       );
+
+      // Clear any previous sign-in to ensure fresh authentication
+      await googleSignIn.signOut();
 
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
@@ -106,6 +96,7 @@ class _login_pageState extends State<LoginPage> {
         throw 'No ID Token found.';
       }
 
+      // Sign in with Supabase using Google tokens
       final supabase = Supabase.instance.client;
       await supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
@@ -114,6 +105,35 @@ class _login_pageState extends State<LoginPage> {
       );
 
       if (mounted) {
+        // Handle successful sign-in
+        final userId = supabase.auth.currentUser?.id;
+        final userEmail = supabase.auth.currentUser?.email;
+
+        if (userId != null) {
+          var profile = await supabase
+              .from('profiles')
+              .select()
+              .eq('id', userId)
+              .maybeSingle();
+
+          if (profile == null) {
+            // Create profile if missing
+            await supabase.from('profiles').insert({
+              'id': userId,
+              'email': userEmail,
+              'role': 'customer', // default role
+            });
+            profile = {'role': 'customer'};
+          }
+
+          // Navigate based on user role
+          if (profile['role'] == 'admin') {
+            Navigator.pushReplacementNamed(context, AdminPage.routeName);
+          } else {
+            Navigator.pushReplacementNamed(context, Navigationbar.routeName);
+          }
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Google Sign-In successful!'),
