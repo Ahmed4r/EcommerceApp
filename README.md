@@ -47,11 +47,11 @@ flutter build apk --release
 
 - iOS (macOS required):
 
-## you can download ipa file from release section and try it with altstore ❤️
 
 ```bash
 flutter build ios --release
 ```
+## you can download ipa file from release section and try it with altstore ❤️
 
 ## 🖼️ Screenshots
 
