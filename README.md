@@ -43,24 +43,23 @@ flutter build apk --release
 flutter build ios --release
 ```
 
-## App Images
+## 🖼️ Screenshots
 
-![Homepage](assets/screenshorts/homepage.jpg)
-![Product Card](assets/screenshorts/add_product.jpg)
-![Admin Dashboard](assets/screenshorts/admin_dashboard.jpg)
-![Cart](assets/screenshorts/cart.jpg)
-![Category](assets/screenshorts/category.jpg)
-![Checkout](assets/screenshorts/checkout.jpg)
-![Confirm Products](assets/screenshorts/confirm_products.jpg)
-![Details](assets/screenshorts/details.jpg)
-![Forget Password](assets/screenshorts/forgetPassword.jpg)
-![Login](assets/screenshorts/login.jpg)
-![Maps](assets/screenshorts/maps.jpg)
-![Profile](assets/screenshorts/profile.jpg)
-![Signup](assets/screenshorts/signup.jpg)
-![User Orders](assets/screenshorts/user_ordes.jpg)
-![Wishlist](assets/screenshorts/wishlist.jpg)
-![Address](assets/screenshorts/address.jpg)
+| Homepage                                     | Product Card                                        | Admin Dashboard                                            | Cart                                 | Category                                     |
+| -------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------ | -------------------------------------------- |
+| ![Homepage](assets/screenshots/homepage.jpg) | ![Product Card](assets/screenshots/add_product.jpg) | ![Admin Dashboard](assets/screenshots/admin_dashboard.jpg) | ![Cart](assets/screenshots/cart.jpg) | ![Category](assets/screenshots/category.jpg) |
+
+| Checkout                                     | Confirm Products                                             | Details                                    | Forget Password                                           | Login                                  |
+| -------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------ | --------------------------------------------------------- | -------------------------------------- |
+| ![Checkout](assets/screenshots/checkout.jpg) | ![Confirm Products](assets/screenshots/confirm_products.jpg) | ![Details](assets/screenshots/details.jpg) | ![Forget Password](assets/screenshots/forgetPassword.jpg) | ![Login](assets/screenshots/login.jpg) |
+
+| Maps                                 | Profile                                    | Signup                                   | User Orders                                       | Wishlist                                     |
+| ------------------------------------ | ------------------------------------------ | ---------------------------------------- | ------------------------------------------------- | -------------------------------------------- |
+| ![Maps](assets/screenshots/maps.jpg) | ![Profile](assets/screenshots/profile.jpg) | ![Signup](assets/screenshots/signup.jpg) | ![User Orders](assets/screenshots/user_ordes.jpg) | ![Wishlist](assets/screenshots/wishlist.jpg) |
+
+| Address                                    |
+| ------------------------------------------ |
+| ![Address](assets/screenshots/address.jpg) |
 
 ## Project layout (high level)
 
