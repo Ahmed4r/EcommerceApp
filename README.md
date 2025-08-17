@@ -65,9 +65,6 @@ flutter build ios --release
 | ------------------------------------ | ------------------------------------------ | ---------------------------------------- | ------------------------------------------------- | -------------------------------------------- |
 | ![Maps](assets/screenshots/maps.jpg) | ![Profile](assets/screenshots/profile.jpg) | ![Signup](assets/screenshots/signup.jpg) | ![User Orders](assets/screenshots/user_ordes.jpg) | ![Wishlist](assets/screenshots/wishlist.jpg) |
 
-| Address                                    |
-| ------------------------------------------ |
-| ![Address](assets/screenshots/address.jpg) |
 
 ## Project layout (high level)
 
