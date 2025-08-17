@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/model/product.dart';
@@ -60,11 +62,8 @@ class HomepageCubit extends Cubit<HomepageState> {
           error: null,
         ),
       );
-    } catch (e, stack) {
-      print('Supabase fetch error: $e');
-      print(stack);
-
-      emit(state.copyWith(isLoading: false, error: e.toString()));
+    } catch (e) {
+      log(e.toString());
     }
   }
 

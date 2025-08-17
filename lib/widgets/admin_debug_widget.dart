@@ -4,7 +4,7 @@ import 'package:shop/utils/auth_utils.dart';
 
 /// Debug widget to test admin functionality
 class AdminDebugWidget extends StatefulWidget {
-  const AdminDebugWidget({Key? key}) : super(key: key);
+  const AdminDebugWidget({super.key});
 
   @override
   State<AdminDebugWidget> createState() => _AdminDebugWidgetState();

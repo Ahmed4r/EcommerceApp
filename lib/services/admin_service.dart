@@ -28,11 +28,7 @@ class AdminService {
     try {
       // Method 1: Check by predefined admin emails (Primary method)
       List<String> adminEmails = [
-        'ahmedrady03@gmail.com',
-        'admin@example.com',
-        'ahmed@admin.com',
-        'superadmin@shop.com',
-        'admin@shop.com',
+        'ahmedrady@gmail.com',
         // Add your admin emails here
       ];
 
@@ -74,13 +70,7 @@ class AdminService {
     } catch (e) {
       print('Error checking admin role: $e');
       // If there's any error, fall back to email-only checking
-      List<String> adminEmails = [
-        'ahmedrady03@gmail.com',
-        'admin@example.com',
-        'ahmed@admin.com',
-        'superadmin@shop.com',
-        'admin@shop.com',
-      ];
+      List<String> adminEmails = ['ahmedrady@gmail.com'];
 
       bool isAdminByEmail = adminEmails.contains(email.toLowerCase());
       await setAdminStatus(isAdminByEmail);
@@ -91,14 +81,7 @@ class AdminService {
   /// Simple email-based admin check (no database queries)
   static Future<bool> checkAdminRoleSimple(String email) async {
     try {
-      List<String> adminEmails = [
-        'ahmedrady03@gmail.com',
-        'admin@example.com',
-        'ahmed@admin.com',
-        'superadmin@shop.com',
-        'admin@shop.com',
-        // Add your admin emails here
-      ];
+      List<String> adminEmails = ['ahmedrady@gmail.com'];
 
       bool isAdminByEmail = adminEmails.contains(email.toLowerCase());
       await setAdminStatus(isAdminByEmail);

@@ -3,7 +3,7 @@ import 'package:shop/screens/admin/admin_page.dart';
 import 'package:shop/services/admin_service.dart';
 
 class AdminAccessWidget extends StatelessWidget {
-  const AdminAccessWidget({Key? key}) : super(key: key);
+  const AdminAccessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +27,12 @@ class AdminAccessWidget extends StatelessWidget {
                 );
               }
             },
+            heroTag: "admin_access",
             child: Icon(
               Icons.admin_panel_settings,
               color: Colors.white,
               size: 20,
             ),
-            heroTag: "admin_access",
           );
         }
         return SizedBox.shrink(); // Hide if not admin
@@ -45,8 +45,7 @@ class AdminGuard extends StatelessWidget {
   final Widget child;
   final Widget? fallback;
 
-  const AdminGuard({Key? key, required this.child, this.fallback})
-    : super(key: key);
+  const AdminGuard({super.key, required this.child, this.fallback});
 
   @override
   Widget build(BuildContext context) {

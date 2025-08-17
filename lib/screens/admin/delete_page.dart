@@ -10,7 +10,7 @@ class DeleteProductPage extends StatelessWidget {
   final Map product;
   final supabase = Supabase.instance.client;
 
-  DeleteProductPage({Key? key, required this.product}) : super(key: key);
+  DeleteProductPage({super.key, required this.product});
 
   Future<void> deleteProduct(BuildContext context) async {
     await supabase.from('products').delete().eq('id', product['id']);

@@ -29,11 +29,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(
-    url: 'https://lcbhbensqcotqqyywegd.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjYmhiZW5zcWNvdHFxeXl3ZWdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwOTc5ODQsImV4cCI6MjA3MDY3Mzk4NH0.z0_iRuwLSiCBEbwRPU620JzEr2aRgmF1FlB3q3l5R28', // الـ anon key من Settings -> API
-  );
+  String url = 'https://lcbhbensqcotqqyywegd.supabase.co';
+  String anonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjYmhiZW5zcWNvdHFxeXl3ZWdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwOTc5ODQsImV4cCI6MjA3MDY3Mzk4NH0.z0_iRuwLSiCBEbwRPU620JzEr2aRgmF1FlB3q3l5R28';
+  await Supabase.initialize(debug: true, url: url, anonKey: anonKey);
   final sharedpref = await SharedPreferences.getInstance();
   final token = sharedpref.getBool('authToken') ?? false;
   final isAdmin = sharedpref.getBool('isAdmin') ?? false;
@@ -82,6 +81,7 @@ class ShopApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         initialRoute: initialRoute,
         routes: {
+          OrderDetailsPage.routeName: (context) => const OrderDetailsPage(),
           Homepage.routeName: (context) => Homepage(),
           AddProductPage.routeName: (context) => AddProductPage(),
           Category.routeName: (context) => Category(),

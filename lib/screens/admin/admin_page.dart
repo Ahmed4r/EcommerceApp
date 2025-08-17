@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/screens/admin/add_page.dart';
 import 'package:shop/screens/admin/delete_page.dart';
 import 'package:shop/screens/admin/edit_page.dart';
@@ -10,7 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminPage extends StatefulWidget {
   static const String routeName = '/admin';
-  const AdminPage({Key? key}) : super(key: key);
+  const AdminPage({super.key});
 
   @override
   State<AdminPage> createState() => _AdminPageState();
@@ -27,10 +28,12 @@ class _AdminPageState extends State<AdminPage> {
     });
   }
 
+
   @override
   void initState() {
     super.initState();
     fetchProducts();
+
   }
 
   @override
@@ -469,7 +472,7 @@ class _AdminPageState extends State<AdminPage> {
     required String label,
     required VoidCallback onPressed,
   }) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: onPressed,

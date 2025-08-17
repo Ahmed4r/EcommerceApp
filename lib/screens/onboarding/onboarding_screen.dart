@@ -6,7 +6,7 @@ import 'package:shop/screens/login/login.dart';
 
 class OnboardingScreen extends StatefulWidget {
   static const String routeName = '/onboarding';
-  const OnboardingScreen({Key? key}) : super(key: key);
+  const OnboardingScreen({super.key});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -110,12 +110,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               alignment: Alignment.topRight,
               child: TextButton(
                 onPressed: _skip,
-                child: const Text('Skip'),
                 style: ButtonStyle(
-                  foregroundColor: MaterialStateProperty.all(
+                  foregroundColor: WidgetStateProperty.all(
                     AppColors.secondary,
                   ),
                 ),
+                child: const Text('Skip'),
               ),
             ),
             Expanded(
@@ -164,12 +164,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   _buildIndicator(),
                   ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
+                      backgroundColor: WidgetStateProperty.all(
                         _current == _pages.length - 1
                             ? AppColors.secondary
                             : Colors.grey,
                       ),
-                      foregroundColor: MaterialStateProperty.all(Colors.white),
+                      foregroundColor: WidgetStateProperty.all(Colors.white),
                     ),
                     onPressed: _goNext,
                     child: Text(

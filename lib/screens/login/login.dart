@@ -114,6 +114,9 @@ class _login_pageState extends State<LoginPage> {
         if (userId != null && userEmail != null) {
           // Check and set admin status properly
           bool isAdminUser = await AdminService.checkAdminRole(userEmail);
+          // save token
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('adminToken', isAdminUser);
 
           var profile = await supabase
               .from('profiles')
@@ -210,6 +213,7 @@ class _login_pageState extends State<LoginPage> {
             // Sync local wishlist to Supabase after successful login
             final wishlistCubit = context.read<WishlistCubit>();
             await wishlistCubit.syncLocalToSupabase();
+            SharedPreferences pref = await SharedPreferences.getInstance();
 
             if (profile['role'] == 'admin' || isAdminUser) {
               Navigator.pushReplacementNamed(context, AdminPage.routeName);
@@ -328,8 +332,6 @@ class _login_pageState extends State<LoginPage> {
                             Emailcontroller.text,
                             Passwordcontroller.text,
                           );
-
-                         
                         },
                       ),
 

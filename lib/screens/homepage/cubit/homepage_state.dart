@@ -51,3 +51,4 @@ class HomepageState extends Equatable {
     error,
   ];
 }
+class HomepageLoading extends HomepageState{}
