@@ -22,7 +22,8 @@ class Homepage extends StatefulWidget {
   State<Homepage> createState() => _HomepageState();
 }
 
-class _HomepageState extends State<Homepage> with AutomaticKeepAliveClientMixin {
+class _HomepageState extends State<Homepage>
+    with AutomaticKeepAliveClientMixin {
   final List<Map<String, dynamic>> categoryData = [
     {"type": "text", "label": "All", "icon": null, "category": null},
     {
@@ -142,9 +143,9 @@ class _HomepageState extends State<Homepage> with AutomaticKeepAliveClientMixin 
             ),
             body: state.isLoading
                 ? const Center(child: CircularProgressIndicator())
-        : RefreshIndicator(
+                : RefreshIndicator(
                     onRefresh: () async {
-          await cubit.fetchProductsFromSupabase(force: true);
+                      await cubit.fetchProductsFromSupabase(force: true);
                     },
                     child: SingleChildScrollView(
                       padding: EdgeInsets.all(8.0.r),

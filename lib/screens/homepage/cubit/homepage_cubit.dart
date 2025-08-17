@@ -58,12 +58,14 @@ class HomepageCubit extends Cubit<HomepageState> {
       // Save to SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       prefs.setString(_productsKey, Product.encodeJsonList(products));
-      emit(state.copyWith(
-        products: products,
-        filteredItems: products,
-        isLoading: false,
-        error: null,
-      ));
+      emit(
+        state.copyWith(
+          products: products,
+          filteredItems: products,
+          isLoading: false,
+          error: null,
+        ),
+      );
     } catch (e) {
       log(e.toString());
       emit(state.copyWith(isLoading: false, error: e.toString()));

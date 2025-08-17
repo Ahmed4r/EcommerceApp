@@ -40,15 +40,15 @@ class _ProductItemCardState extends State<ProductItemCard>
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
     );
-  _quantityNotifier = ValueNotifier<int>(_getQuantityFor(widget.product.id));
-  _cartManager.addListener(_onCartChanged);
+    _quantityNotifier = ValueNotifier<int>(_getQuantityFor(widget.product.id));
+    _cartManager.addListener(_onCartChanged);
   }
 
   @override
   void dispose() {
-  _cartManager.removeListener(_onCartChanged);
-  _animationController.dispose();
-  _quantityNotifier.dispose();
+    _cartManager.removeListener(_onCartChanged);
+    _animationController.dispose();
+    _quantityNotifier.dispose();
     super.dispose();
   }
 
@@ -272,8 +272,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                                             ),
                                           )
                                         : ValueListenableBuilder<int>(
-                                            valueListenable:
-                                                _quantityNotifier,
+                                            valueListenable: _quantityNotifier,
                                             builder: (context, qty, _) {
                                               return Stack(
                                                 alignment: Alignment.center,
@@ -293,10 +292,10 @@ class _ProductItemCardState extends State<ProductItemCard>
                                                         height: 10.h,
                                                         decoration:
                                                             const BoxDecoration(
-                                                          color: Colors.red,
-                                                          shape:
-                                                              BoxShape.circle,
-                                                        ),
+                                                              color: Colors.red,
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                            ),
                                                         child: Center(
                                                           child: Text(
                                                             qty.toString(),
