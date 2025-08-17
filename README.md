@@ -47,6 +47,8 @@ flutter build apk --release
 
 - iOS (macOS required):
 
+## you can download ipa file from release section and try it with altstore ❤️
+
 ```bash
 flutter build ios --release
 ```
@@ -64,7 +66,6 @@ flutter build ios --release
 | Maps                                 | Profile                                    | Signup                                   | User Orders                                       | Wishlist                                     |
 | ------------------------------------ | ------------------------------------------ | ---------------------------------------- | ------------------------------------------------- | -------------------------------------------- |
 | ![Maps](assets/screenshots/maps.jpg) | ![Profile](assets/screenshots/profile.jpg) | ![Signup](assets/screenshots/signup.jpg) | ![User Orders](assets/screenshots/user_ordes.jpg) | ![Wishlist](assets/screenshots/wishlist.jpg) |
-
 
 ## Project layout (high level)
 
