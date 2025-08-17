@@ -1,6 +1,14 @@
 # shop
 
-A simple Flutter e-commerce starter app.
+E-Commerce App Prototype with Flutter & Supabase
+The app includes:
+• Modern and responsive UI with product browsing
+• Authentication and database powered by Supabase
+• State management with Cubit for clean and scalable code
+• Cart and wishlist features for a smooth shopping experience
+• Cool animations for better UX
+• Location services and Flutter Maps integration
+• An Admin page with full functionality to add, edit, delete, and confirm orders
 
 ## Prerequisites
 
