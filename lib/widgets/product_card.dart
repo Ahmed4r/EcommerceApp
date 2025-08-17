@@ -10,7 +10,7 @@ import 'package:redacted/redacted.dart';
 import 'package:shop/app_colors.dart';
 import 'package:shop/model/product.dart';
 import 'package:shop/screens/cart/cart_screen.dart';
-import 'package:shop/screens/homepage/details.dart';
+import 'package:shop/screens/homepage/product_details.dart';
 
 class ProductItemCard extends StatefulWidget {
   final Product product;
@@ -27,6 +27,8 @@ class _ProductItemCardState extends State<ProductItemCard>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   bool _isAddingToCart = false;
+  // Only rebuild the small cart badge when quantity changes for this product
+  late final ValueNotifier<int> _quantityNotifier;
 
   @override
   void initState() {
@@ -38,22 +40,16 @@ class _ProductItemCardState extends State<ProductItemCard>
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
     );
-
-    // Listen to cart changes
-    _cartManager.addListener(_onCartChanged);
+  _quantityNotifier = ValueNotifier<int>(_getQuantityFor(widget.product.id));
+  _cartManager.addListener(_onCartChanged);
   }
 
   @override
   void dispose() {
-    _cartManager.removeListener(_onCartChanged);
-    _animationController.dispose();
+  _cartManager.removeListener(_onCartChanged);
+  _animationController.dispose();
+  _quantityNotifier.dispose();
     super.dispose();
-  }
-
-  void _onCartChanged() {
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   void _addToCart() async {
@@ -99,15 +95,17 @@ class _ProductItemCardState extends State<ProductItemCard>
     }
   }
 
-  bool get _isInCart {
-    return _cartManager.cartItems.any(
-      (item) => item.product.id == widget.product.id,
-    );
+  // Update only the notifier on cart changes, not the whole card
+  void _onCartChanged() {
+    final newQty = _getQuantityFor(widget.product.id);
+    if (_quantityNotifier.value != newQty) {
+      _quantityNotifier.value = newQty;
+    }
   }
 
-  int get _quantityInCart {
+  int _getQuantityFor(String productId) {
     final cartItem = _cartManager.cartItems.firstWhere(
-      (item) => item.product.id == widget.product.id,
+      (item) => item.product.id == productId,
       orElse: () => CartItem(product: widget.product, quantity: 0),
     );
     return cartItem.quantity;
@@ -273,41 +271,50 @@ class _ProductItemCardState extends State<ProductItemCard>
                                                   ),
                                             ),
                                           )
-                                        : Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              FaIcon(
-                                                FontAwesomeIcons.bagShopping,
-                                                color: Colors.white,
-                                                size: 16.sp,
-                                              ),
-                                              if (_isInCart &&
-                                                  _quantityInCart > 0)
-                                                Positioned(
-                                                  top: -2.h,
-                                                  right: -2.w,
-                                                  child: Container(
-                                                    width: 10.w,
-                                                    height: 10.h,
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.red,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: Center(
-                                                      child: Text(
-                                                        _quantityInCart
-                                                            .toString(),
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 8.sp,
-                                                          fontWeight:
-                                                              FontWeight.bold,
+                                        : ValueListenableBuilder<int>(
+                                            valueListenable:
+                                                _quantityNotifier,
+                                            builder: (context, qty, _) {
+                                              return Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  FaIcon(
+                                                    FontAwesomeIcons
+                                                        .bagShopping,
+                                                    color: Colors.white,
+                                                    size: 16.sp,
+                                                  ),
+                                                  if (qty > 0)
+                                                    Positioned(
+                                                      top: -2.h,
+                                                      right: -2.w,
+                                                      child: Container(
+                                                        width: 10.w,
+                                                        height: 10.h,
+                                                        decoration:
+                                                            const BoxDecoration(
+                                                          color: Colors.red,
+                                                          shape:
+                                                              BoxShape.circle,
+                                                        ),
+                                                        child: Center(
+                                                          child: Text(
+                                                            qty.toString(),
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 8.sp,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ),
-                                            ],
+                                                ],
+                                              );
+                                            },
                                           ),
                                   ),
                                 ),

@@ -35,7 +35,11 @@ class _NavigationbarState extends State<Navigationbar> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: pages[_selectedIndex],
+      // Keep state of each page alive and avoid refetching on tab switch
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: pages,
+      ),
 
       bottomNavigationBar: CrystalNavigationBar(
         curve: Curves.bounceOut,

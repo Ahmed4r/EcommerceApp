@@ -37,7 +37,11 @@ class HomepageCubit extends Cubit<HomepageState> {
     );
   }
 
-  Future<void> fetchProductsFromSupabase() async {
+  Future<void> fetchProductsFromSupabase({bool force = false}) async {
+    // If we already have products and not forced, skip network call
+    if (!force && state.products.isNotEmpty) {
+      return;
+    }
     emit(state.copyWith(isLoading: true, error: null));
     final supabase = Supabase.instance.client;
     try {
@@ -54,16 +58,15 @@ class HomepageCubit extends Cubit<HomepageState> {
       // Save to SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       prefs.setString(_productsKey, Product.encodeJsonList(products));
-      emit(
-        state.copyWith(
-          products: products,
-          filteredItems: products,
-          isLoading: false,
-          error: null,
-        ),
-      );
+      emit(state.copyWith(
+        products: products,
+        filteredItems: products,
+        isLoading: false,
+        error: null,
+      ));
     } catch (e) {
       log(e.toString());
+      emit(state.copyWith(isLoading: false, error: e.toString()));
     }
   }
 

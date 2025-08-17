@@ -1,12 +1,17 @@
+import 'dart:developer';
+
+import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shop/app_colors.dart';
 import 'package:shop/model/product.dart';
+import 'package:shop/screens/cart/cart_screen.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_state.dart';
 import 'package:shop/widgets/animated_page_wrapper.dart';
+import 'package:shop/widgets/product_card.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   final Product product;
@@ -31,6 +36,24 @@ class ProductDetailsPage extends StatelessWidget {
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: _circleButton(Icons.arrow_back_ios_new),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        CartManager().addToCart(product);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          snackBarAnimationStyle: AnimationStyle(
+                            curve: Curves.fastOutSlowIn,
+                            duration: Duration(milliseconds: 500),
+                          ),
+                          SnackBar(
+                            backgroundColor: Colors.green,
+                            content: Text('${product.name} added to cart'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      child: _circleButton(Icons.add_shopping_cart),
                     ),
                   ],
                 ),

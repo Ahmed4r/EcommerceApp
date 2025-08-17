@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shop/screens/homepage/details.dart';
+import 'package:shop/screens/homepage/product_details.dart';
 
 class SmoothPageRoute<T> extends PageRouteBuilder<T> {
   final Widget child;

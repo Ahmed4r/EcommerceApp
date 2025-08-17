@@ -22,7 +22,7 @@ class Homepage extends StatefulWidget {
   State<Homepage> createState() => _HomepageState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _HomepageState extends State<Homepage> with AutomaticKeepAliveClientMixin {
   final List<Map<String, dynamic>> categoryData = [
     {"type": "text", "label": "All", "icon": null, "category": null},
     {
@@ -58,11 +58,16 @@ class _HomepageState extends State<Homepage> {
   ];
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocProvider(
       create: (_) => HomepageCubit()
         ..loadUserData()
-        ..fetchProductsFromSupabase(),
+        ..loadProductsFromCache()
+        ..fetchProductsFromSupabase(force: false),
       child: BlocBuilder<HomepageCubit, HomepageState>(
         builder: (context, state) {
           final cubit = context.read<HomepageCubit>();
@@ -137,9 +142,9 @@ class _HomepageState extends State<Homepage> {
             ),
             body: state.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : RefreshIndicator(
+        : RefreshIndicator(
                     onRefresh: () async {
-                      await cubit.fetchProductsFromSupabase();
+          await cubit.fetchProductsFromSupabase(force: true);
                     },
                     child: SingleChildScrollView(
                       padding: EdgeInsets.all(8.0.r),

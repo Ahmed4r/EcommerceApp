@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/screens/homepage/details.dart';
+import 'package:shop/screens/homepage/product_details.dart';
 import 'package:shop/utils/custom_page_routes.dart';
 
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';

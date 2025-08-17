@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/screens/admin/orders_admin_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shop/app_colors.dart';
 import 'package:shop/services/orders_service.dart';
@@ -126,6 +127,7 @@ class _OrdersPageState extends State<OrdersPage> {
                   status: status,
                   total: total,
                   itemCount: items.length,
+                  items: items,
                 );
               },
               separatorBuilder: (_, __) => SizedBox(height: 8.h),
@@ -143,11 +145,13 @@ class _OrderTile extends StatelessWidget {
   final String status;
   final double total;
   final int itemCount;
+  final List<dynamic> items;
   const _OrderTile({
     required this.orderId,
     required this.status,
     required this.total,
     required this.itemCount,
+    required this.items,
   });
 
   Color _colorFor(String s) {
@@ -211,8 +215,6 @@ class _OrderTile extends StatelessWidget {
           ),
         ),
         trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
               '\$${total.toStringAsFixed(2)}',
@@ -228,7 +230,18 @@ class _OrderTile extends StatelessWidget {
             ),
           ],
         ),
-        onTap: () {},
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            OrderDetailsPage.routeName,
+            arguments: {
+              'id': orderId,
+              'items': items,
+              'total_amount': total,
+              'status': status,
+            },
+          );
+        },
       ),
     );
   }
