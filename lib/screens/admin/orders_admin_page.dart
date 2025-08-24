@@ -87,15 +87,15 @@ class _OrdersAdminPageState extends State<OrdersAdminPage> {
                           ? ElevatedButton(
                               style: ButtonStyle(
                                 backgroundColor:
-                                    MaterialStateProperty.all<Color>(
+                                    WidgetStateProperty.all<Color>(
                                       Colors.green,
                                     ),
                                 foregroundColor:
-                                    MaterialStateProperty.all<Color>(
+                                    WidgetStateProperty.all<Color>(
                                       Colors.white,
                                     ),
                                 shape:
-                                    MaterialStateProperty.all<
+                                    WidgetStateProperty.all<
                                       RoundedRectangleBorder
                                     >(
                                       RoundedRectangleBorder(

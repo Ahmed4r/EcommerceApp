@@ -1,6 +1,4 @@
-import 'dart:developer';
 
-import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,7 +9,6 @@ import 'package:shop/screens/cart/cart_screen.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_state.dart';
 import 'package:shop/widgets/animated_page_wrapper.dart';
-import 'package:shop/widgets/product_card.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   final Product product;

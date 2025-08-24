@@ -18,6 +18,7 @@ import 'package:shop/screens/login/forgot_password/forgot_password.dart';
 import 'package:shop/screens/login/login.dart';
 import 'package:shop/screens/login/otp/otp_screen.dart';
 import 'package:shop/screens/onboarding/onboarding_screen.dart';
+import 'package:shop/screens/splash/welcome_screen.dart';
 import 'package:shop/screens/profile/personal_info.dart';
 import 'package:shop/screens/homepage/products_screen.dart';
 import 'package:shop/screens/register/signup.dart';
@@ -68,7 +69,8 @@ class ShopApp extends StatelessWidget {
     if (onboardingSeen == false) {
       initialRoute = OnboardingScreen.routeName;
     } else if (token == false) {
-      initialRoute = LoginPage.routeName;
+      // show the welcome screen when user is not authenticated
+      initialRoute = WelcomeScreen.routeName;
     } else if (isAdmin == true) {
       initialRoute = AdminPage.routeName;
     }
@@ -98,6 +100,7 @@ class ShopApp extends StatelessWidget {
           ForgotPassword.routeName: (context) => ForgotPassword(),
           Navigationbar.routeName: (context) => Navigationbar(),
           OnboardingScreen.routeName: (context) => OnboardingScreen(),
+          WelcomeScreen.routeName: (context) => const WelcomeScreen(),
           DeleteProductPage.routeName: (context) =>
               DeleteProductPage(product: {}),
           EditProductPage.routeName: (context) => EditProductPage(product: {}),
