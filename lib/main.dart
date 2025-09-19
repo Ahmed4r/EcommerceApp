@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -14,13 +13,16 @@ import 'package:shop/screens/location/location_access_screen.dart';
 import 'package:shop/screens/login/forgot_password/forgot_password.dart';
 import 'package:shop/screens/login/login.dart';
 import 'package:shop/screens/onboarding/onboarding_screen.dart';
+import 'package:shop/screens/profile/profile_cubit.dart';
+import 'package:shop/screens/register/cubit/signup_cubit.dart';
 import 'package:shop/screens/splash/welcome_screen.dart';
-import 'package:shop/screens/profile/personal_info.dart';
+import 'package:shop/screens/profile/profile.dart';
 import 'package:shop/screens/homepage/products_screen.dart';
 import 'package:shop/screens/register/signup.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/wishlist.dart';
 import 'package:shop/services/auth/auth_service.dart';
+import 'package:shop/services/store/firestore_service.dart';
 import 'package:shop/widgets/navigationbar.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -33,6 +35,10 @@ void main() async {
       providers: [
         BlocProvider(create: (_) => WishlistCubit()),
         BlocProvider(create: (_) => HomepageCubit()),
+        BlocProvider(create: (_) => ProfileCubit()),
+        BlocProvider(
+          create: (_) => SignupCubit(FirebaseAuthService(), FirestoreService()),
+        ),
         BlocProvider(create: (_) => LoginCubit(FirebaseAuthService())),
       ],
       child: ShopApp(),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/services/auth/auth_service.dart';
+import 'package:shop/screens/register/cubit/signup_cubit.dart';
+import 'package:shop/screens/register/cubit/signup_state.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 import 'package:shop/widgets/navigationbar.dart';
 
@@ -24,7 +26,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController rePasswordController = TextEditingController();
 
   bool isObscured = true;
-  bool checkboxValue = false;
 
   @override
   void dispose() {
@@ -35,29 +36,33 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  final authService = FirebaseAuthService();
-  void register() async {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
-
-    try {
-      await authService.signUpWithEmailAndPassword(email, password);
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, Navigationbar.routeName);
-      }
-    } catch (e) {
-      // if (e is AuthException) {
-      //   if (mounted) {
-      //     ScaffoldMessenger.of(
-      //       context,
-      //     ).showSnackBar(SnackBar(content: Text(e.toString())));
-      //   }
-      // }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    return BlocListener<SignupCubit, SignUpState>(
+      listener: (context, state) {
+        if (state is SignUpFailureState) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.error), backgroundColor: Colors.red),
+          );
+        }
+        // RegisterSuccessState will be handled by AuthWrapper automatically
+      },
+      child: BlocBuilder<SignupCubit, SignUpState>(
+        builder: (context, state) {
+          if (state is SignUpLoadingState) {
+            return Scaffold(
+              backgroundColor: AppColors.primary,
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          return _buildSignUpForm(context, state);
+        },
+      ),
+    );
+  }
+
+  Widget _buildSignUpForm(BuildContext context, SignUpState state) {
     return Scaffold(
       backgroundColor: AppColors.primary,
       appBar: AppBar(
@@ -163,7 +168,13 @@ class _RegisterPageState extends State<RegisterPage> {
               InkWell(
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
-                    register();
+                    context.read<SignupCubit>().register(
+                      nameController.text.trim(),
+                      emailController.text.trim(),
+                      passwordController.text,
+                      rePasswordController.text,
+                    );
+                    Navigator.pushNamed(context, Navigationbar.routeName);
                   }
                 },
                 child: Container(
@@ -171,16 +182,20 @@ class _RegisterPageState extends State<RegisterPage> {
                   height: 62.h,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
-                    color: Colors.black,
+                    color: state is SignUpLoadingState
+                        ? Colors.grey
+                        : Colors.black,
                   ),
                   child: Center(
-                    child: Text(
-                      'Sign Up',
-                      style: GoogleFonts.cairo(
-                        color: Colors.white,
-                        fontSize: 20.sp,
-                      ),
-                    ),
+                    child: state is SignUpLoadingState
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            'Sign Up',
+                            style: GoogleFonts.cairo(
+                              color: Colors.white,
+                              fontSize: 20.sp,
+                            ),
+                          ),
                   ),
                 ),
               ),

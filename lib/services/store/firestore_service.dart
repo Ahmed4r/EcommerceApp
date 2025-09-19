@@ -1,7 +1,9 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shop/model/product_model.dart';
+import 'package:shop/services/auth/auth_service.dart';
 
 class FirestoreService {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -15,7 +17,7 @@ class FirestoreService {
   // add users
   Future<void> addUser(Map<String, dynamic> userData) async {
     try {
-      await usersCollection.add(userData);
+      await usersCollection.doc(userData['uid']).set(userData);
     } catch (e) {
       log(e.toString());
     }

@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shop/model/user_model.dart';
 import 'package:shop/screens/login/cubit/login_state.dart';
 import 'package:shop/services/auth/auth_service.dart';
+import 'package:shop/services/store/firestore_service.dart';
 
 class LoginCubit extends Cubit<LoginState> {
   final FirebaseAuthService authService;
