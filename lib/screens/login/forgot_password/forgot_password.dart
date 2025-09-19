@@ -68,11 +68,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               CustomButton(
                 title: 'send',
                 onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    OtpScreen.routeName,
-                    arguments: {'email': Emailcontroller.text},
-                  );
+                  // Navigator.pushNamed(
+                  //   context,
+                  //   OtpScreen.routeName,
+                  //   arguments: {'email': Emailcontroller.text},
+                  // );
                 },
               ),
             ],

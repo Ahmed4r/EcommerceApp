@@ -1,124 +1,95 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shop/model/user_model.dart';
 import 'package:shop/screens/login/cubit/login_state.dart';
 import 'package:shop/services/auth/auth_service.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginCubit extends Cubit<LoginState> {
-  SharedPreferences? sharedpref;
-  final AuthService authService;
+  final FirebaseAuthService authService;
 
-  LoginCubit(this.authService) : super(LoginInitial()) {
-    _loadPrefs();
-  }
-  Future<void> _loadPrefs() async {
-    sharedpref = await SharedPreferences.getInstance();
-    emit(
-      LoginPrefsLoaded(
-        email: sharedpref!.getString('email') ?? '',
-        password: sharedpref!.getString('password') ?? '',
-        remember: sharedpref!.getBool('remember') ?? false,
-        isAdmin: sharedpref!.getBool('isAdmin') ?? false,
-      ),
-    );
-  }
+  LoginCubit(this.authService) : super(LoginInitialState());
 
   Future<void> login(String email, String password) async {
     if (email.isEmpty || password.isEmpty) {
-      emit(LoginFailure("Please enter email and password"));
+      emit(LoginFailureState("Please enter email and password"));
       return;
     }
-
-    emit(LoginLoading());
+    emit(LoginLoadingState());
     try {
       await authService.signInWithEmailAndPassword(email, password);
-      sharedpref ??= await SharedPreferences.getInstance();
-
-      // Check if user is admin by checking email or role from database
-      bool isAdmin = await _checkAdminRole(email);
-
-      // Save authentication tokens
-      await sharedpref!.setBool('authToken', true);
-      await sharedpref!.setBool('isAdmin', isAdmin);
-      await sharedpref!.setString('userEmail', email);
-
-      emit(LoginSuccess(isAdmin: isAdmin));
-    } catch (e) {
-      if (e is AuthRetryableFetchException) {
-        emit(LoginFailure("Network error, please try again later."));
-      } else if (e is AuthApiException) {
-        emit(LoginFailure("Authentication failed: ${e.message}"));
+      final user = FirebaseAuth.instance.currentUser;
+      final userModel = UserModel.fromFirebaseUser(user);
+      emit(LoginSuccessState(userModel));
+    } on FirebaseAuthException catch (e) {
+      // Handle common Firebase auth errors
+      String message;
+      if (e.code == 'network-request-failed') {
+        message = "Network error, please try again later.";
       } else {
-        emit(LoginFailure(e.toString()));
+        message = "Authentication failed: ${e.message ?? e.code}";
       }
-    }
-  }
-
-  Future<bool> _checkAdminRole(String email) async {
-    try {
-      // Simple email-based admin checking (no database queries to avoid errors)
-      List<String> adminEmails = [
-        'ahmedrady03@gmail.com',
-        'admin@shop.com',
-        'admin@example.com',
-        'ahmed@admin.com',
-        'superadmin@shop.com',
-        // Add your admin emails here
-      ];
-
-      bool isAdmin = adminEmails.contains(email.toLowerCase());
-      print('Admin check for $email: $isAdmin');
-      return isAdmin;
+      emit(LoginFailureState(message));
     } catch (e) {
-      // If there's an error checking admin role, default to false
-      print('Error checking admin role: $e');
-      return false;
+      emit(LoginFailureState(e.toString()));
     }
   }
 
-  Future<void> updateRemember(
-    bool remember,
-    String email,
-    String password,
-  ) async {
-    sharedpref ??= await SharedPreferences.getInstance();
-    bool isAdmin = sharedpref!.getBool('isAdmin') ?? false;
-
-    if (remember && email.isNotEmpty && password.isNotEmpty) {
-      await sharedpref!.setBool('remember', true);
-      await sharedpref!.setString('email', email);
-      await sharedpref!.setString('password', password);
-    } else {
-      await sharedpref!.remove('remember');
-    }
-    emit(
-      LoginPrefsLoaded(
-        email: email,
-        password: password,
-        remember: remember,
-        isAdmin: isAdmin,
-      ),
-    );
-  }
-
-  // Helper method to check if current user is admin
-  Future<bool> isCurrentUserAdmin() async {
-    sharedpref ??= await SharedPreferences.getInstance();
-    return sharedpref!.getBool('isAdmin') ?? false;
-  }
-
-  // Helper method to get current user email
-  Future<String> getCurrentUserEmail() async {
-    sharedpref ??= await SharedPreferences.getInstance();
-    return sharedpref!.getString('userEmail') ?? '';
-  }
-
-  // Method to logout and clear admin status
   Future<void> logout() async {
-    sharedpref ??= await SharedPreferences.getInstance();
-    await sharedpref!.setBool('authToken', false);
-    await sharedpref!.setBool('isAdmin', false);
-    await sharedpref!.remove('userEmail');
-    emit(LoginInitial());
+    emit(LoginLoadingState());
+    try {
+      await authService.signOut();
+      emit(LoginInitialState());
+    } on FirebaseAuthException catch (e) {
+      emit(LoginFailureState("Error during sign out: ${e.message ?? e.code}"));
+    } catch (e) {
+      emit(LoginFailureState("Error during sign out: ${e.toString()}"));
+    }
+  }
+
+  //  google singin
+  Future<void> nativeGoogleSignIn() async {
+    emit(LoginLoadingState());
+    try {
+      // Use simple GoogleSignIn configuration for mobile
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+
+      // Ensure a fresh sign in
+      await googleSignIn.signOut();
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        // user cancelled
+        emit(LoginInitialState());
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final String? accessToken = googleAuth.accessToken;
+      final String? idToken = googleAuth.idToken;
+
+      if (accessToken == null || idToken == null) {
+        emit(LoginFailureState("Missing Google tokens"));
+        return;
+      }
+
+      // Delegate Firebase sign-in to the auth service
+      await authService.signInWithGoogle(
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+
+      // Build UserModel from Firebase user and emit success
+      final user = FirebaseAuth.instance.currentUser;
+      final userModel = UserModel.fromFirebaseUser(user);
+      emit(LoginSuccessState(userModel));
+    } on FirebaseAuthException catch (e) {
+      emit(LoginFailureState(e.message ?? e.code));
+    } catch (e) {
+      emit(LoginFailureState(e.toString()));
+    }
   }
 }

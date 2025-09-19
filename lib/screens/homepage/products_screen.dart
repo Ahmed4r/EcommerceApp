@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/model/product.dart';
+import 'package:shop/model/product_model.dart';
 import 'package:shop/widgets/product_card.dart';
 
 class ShowProductspage extends StatelessWidget {

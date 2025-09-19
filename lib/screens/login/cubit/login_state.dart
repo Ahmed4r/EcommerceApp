@@ -1,30 +1,22 @@
-class LoginState {}
+import 'package:shop/model/user_model.dart';
 
-class LoginInitial extends LoginState {}
-
-class LoginLoading extends LoginState {}
-
-class LoginSuccess extends LoginState {
-  final bool isAdmin;
-  LoginSuccess({this.isAdmin = false});
+abstract class LoginState {
+  const LoginState();
 }
 
-class LoginFailure extends LoginState {
+class LoginInitialState extends LoginState {}
+
+class LoginLoadingState extends LoginState {}
+
+// Keep LoginSuccessState carrying your UserModel
+class LoginSuccessState extends LoginState {
+  final UserModel user;
+  const LoginSuccessState(this.user);
+}
+
+class LoginFailureState extends LoginState {
   final String error;
-
-  LoginFailure(this.error);
+  const LoginFailureState(this.error);
 }
 
-class LoginPrefsLoaded extends LoginState {
-  final String email;
-  final String password;
-  final bool remember;
-  final bool isAdmin;
 
-  LoginPrefsLoaded({
-    required this.email,
-    required this.password,
-    required this.remember,
-    this.isAdmin = false,
-  });
-}

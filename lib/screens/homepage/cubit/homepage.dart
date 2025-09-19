@@ -64,15 +64,19 @@ class _HomepageState extends State<Homepage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return BlocProvider(
-      create: (_) => HomepageCubit()
-        ..loadUserData()
-        ..loadProductsFromCache()
-        ..fetchProductsFromSupabase(force: false),
-      child: BlocBuilder<HomepageCubit, HomepageState>(
-        builder: (context, state) {
+    return BlocBuilder<HomepageCubit, HomepageState>(
+      builder: (context, state) {
+        if (state is HomepageInitial) {
           final cubit = context.read<HomepageCubit>();
-
+          cubit.fetchProductsFromFirebase();
+        }
+        if (state is HomepageLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (state is HomepageFailure) {
+          return Center(child: Text('Error: ${state.error}'));
+        }
+        if (state is HomepageSuccess) {
           return Scaffold(
             backgroundColor: AppColors.primary,
             appBar: AppBar(
@@ -81,13 +85,13 @@ class _HomepageState extends State<Homepage>
               backgroundColor: AppColors.primary,
               leading: Padding(
                 padding: EdgeInsets.only(left: 10.0.w),
-                child: CircleAvatar(
-                  onBackgroundImageError: (_, __) {},
-                  radius: 50.r,
-                  backgroundImage: state.image != null
-                      ? FileImage(File(state.image!))
-                      : const AssetImage('assets/profile.jpg') as ImageProvider,
-                ),
+                // child: CircleAvatar(
+                //   onBackgroundImageError: (_, __) {},
+                //   radius: 50.r,
+                //   // backgroundImage: state.image != null
+                //   //     ? FileImage(File(state.image!))
+                //   //     : const AssetImage('assets/profile.jpg') as ImageProvider,
+                // ),
               ),
               centerTitle: false,
               title: Column(
@@ -95,7 +99,8 @@ class _HomepageState extends State<Homepage>
                 children: [
                   Text('Hi Welcome', style: GoogleFonts.cairo(fontSize: 20.sp)),
                   Text(
-                    state.name ?? 'user',
+                    //   name
+                    '',
                     style: GoogleFonts.cairo(fontSize: 16.sp),
                   ),
                 ],
@@ -103,25 +108,25 @@ class _HomepageState extends State<Homepage>
               actions: [
                 Row(
                   children: [
-                    Container(
-                      margin: EdgeInsets.only(right: 8.w),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                          width: 1.w,
-                        ),
-                        borderRadius: BorderRadius.circular(16.r),
-                      ),
-                      child: IconButton(
-                        tooltip: 'My Orders',
-                        onPressed: () =>
-                            Navigator.pushNamed(context, OrdersPage.routeName),
-                        icon: FaIcon(
-                          FontAwesomeIcons.clipboardList,
-                          size: 18.r,
-                        ),
-                      ),
-                    ),
+                    // Container(
+                    //   margin: EdgeInsets.only(right: 8.w),
+                    //   decoration: BoxDecoration(
+                    //     border: Border.all(
+                    //       color: Colors.grey.shade300,
+                    //       width: 1.w,
+                    //     ),
+                    //     borderRadius: BorderRadius.circular(16.r),
+                    //   ),
+                    //   child: IconButton(
+                    //     tooltip: 'My Orders',
+                    //     onPressed: () =>
+                    //         Navigator.pushNamed(context, OrdersPage.routeName),
+                    //     icon: FaIcon(
+                    //       FontAwesomeIcons.clipboardList,
+                    //       size: 18.r,
+                    //     ),
+                    //   ),
+                    // ),
                     Container(
                       margin: EdgeInsets.only(right: 10.w),
                       decoration: BoxDecoration(
@@ -141,110 +146,106 @@ class _HomepageState extends State<Homepage>
                 ),
               ],
             ),
-            body: state.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : RefreshIndicator(
-                    onRefresh: () async {
-                      await cubit.fetchProductsFromSupabase(force: true);
-                    },
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.all(8.0.r),
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: 50.h,
-                            child: ListView.separated(
-                              separatorBuilder: (_, __) =>
-                                  SizedBox(width: 10.w),
-                              scrollDirection: Axis.horizontal,
-                              itemCount: categoryData.length,
-                              itemBuilder: (_, index) {
-                                bool isSelected = state.selectedIndex == index;
-                                return GestureDetector(
-                                  onTap: () =>
-                                      cubit.selectCategory(index, categoryData),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 250),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 22.w,
-                                      vertical: 15.h,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(60.r),
-                                      color: isSelected
-                                          ? Colors.blueAccent
-                                          : Colors.white,
-                                    ),
-                                    child: categoryData[index]["type"] == "text"
-                                        ? Text(
-                                            categoryData[index]["label"],
-                                            style: GoogleFonts.cairo(
-                                              color: isSelected
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                            ),
-                                          )
-                                        : isSelected
-                                        ? Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              FaIcon(
-                                                categoryData[index]["icon"],
-                                                color: Colors.white,
-                                                size: 16.r,
-                                              ),
-                                              SizedBox(width: 6.w),
-                                              Text(
-                                                categoryData[index]["label"],
-                                                style: GoogleFonts.cairo(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        : FaIcon(
-                                            categoryData[index]["icon"],
-                                            color: Colors.black,
-                                            size: 16.r,
-                                          ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          SizedBox(height: 12.h),
-                          sliderWidget(),
-                          SizedBox(height: 12.h),
-                          HomepageHeaders(
-                            "Popular Product",
-                            false,
-                            state.products,
-                            categoryData,
-                          ),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 10.h,
-                                  crossAxisSpacing: 10.w,
-                                  childAspectRatio: 3 / 4,
-                                ),
-                            itemCount: state.filteredItems.length,
+            body: RefreshIndicator(
+              onRefresh: () async {
+                await context.read<HomepageCubit>().fetchProductsFromFirebase();
+              },
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(8.0.r),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 50.h,
+                      child: ListView.separated(
+                        separatorBuilder: (_, __) => SizedBox(width: 10.w),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: categoryData.length,
+                        itemBuilder: (_, index) {
+                          // bool isSelected = state.selectedIndex == index;
+                          return GestureDetector(
+                            onTap: () => null,
+                            // cubit.selectCategory(index, categoryData),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 22.w,
+                                vertical: 15.h,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(60.r),
+                                // color: isSelected
+                                //     ? Colors.blueAccent
+                                //     : Colors.white,
+                              ),
 
-                            itemBuilder: (_, index) => buildItemCard(
-                              context,
-                              state.filteredItems[index],
+                              // child: categoryData[index]["type"] == "text"
+                              //     ? Text(
+                              //         categoryData[index]["label"],
+                              //         style: GoogleFonts.cairo(
+                              //           // color: isSelected
+                              //           //     ? Colors.white
+                              //           //     : Colors.black,
+                              //         ),
+                              //       )
+                              // : isSelected
+                              // ? Row(
+                              //     mainAxisSize: MainAxisSize.min,
+                              //     children: [
+                              //       FaIcon(
+                              //               categoryData[index]["icon"],
+                              //               color: Colors.white,
+                              //               size: 16.r,
+                              //             ),
+                              //             SizedBox(width: 6.w),
+                              //             Text(
+                              //               categoryData[index]["label"],
+                              //               style: GoogleFonts.cairo(
+                              //                 color: Colors.white,
+                              //               ),
+                              //             ),
+                              //           ],
+                              //         )
+                              //       : FaIcon(
+                              //           categoryData[index]["icon"],
+                              //           color: Colors.black,
+                              //           size: 16.r,
+                              //         ),
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ),
-                  ),
+                    // SizedBox(height: 12.h),
+                    sliderWidget(),
+                    SizedBox(height: 12.h),
+                    HomepageHeaders(
+                      "Popular Product",
+                      false,
+                      state.products,
+                      categoryData,
+                    ),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 10.h,
+                        crossAxisSpacing: 10.w,
+                        childAspectRatio: 3 / 4,
+                      ),
+                      itemCount: state.products.length,
+
+                      itemBuilder: (_, index) =>
+                          buildItemCard(context, state.products[index]),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           );
-        },
-      ),
+        }
+        return const SizedBox.shrink();
+      },
     );
   }
 }

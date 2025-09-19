@@ -8,7 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:redacted/redacted.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/model/product.dart';
+import 'package:shop/model/product_model.dart';
 import 'package:shop/screens/cart/cart_screen.dart';
 import 'package:shop/screens/homepage/product_details.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shop/model/product.dart';
+import 'package:shop/model/product_model.dart';
 import 'package:shop/screens/homepage/products_screen.dart';
 import 'package:shop/widgets/navigationbar.dart';
 

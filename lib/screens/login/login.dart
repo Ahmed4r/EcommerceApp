@@ -4,32 +4,31 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/screens/admin/admin_page.dart';
 import 'package:shop/screens/login/cubit/login_cubit.dart';
 import 'package:shop/screens/login/cubit/login_state.dart';
 import 'package:shop/screens/login/forgot_password/forgot_password.dart';
 import 'package:shop/screens/register/signup.dart';
 import 'package:shop/services/auth/auth_service.dart';
-import 'package:shop/services/admin_service.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
-import 'package:shop/widgets/navigationbar.dart';
-import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routeName = '/login_page';
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _login_pageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _login_pageState extends State<LoginPage> {
-  SharedPreferences? sharedpref;
+class _LoginPageState extends State<LoginPage> {
+  SharedPreferences? sharedPref;
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  bool checkboxValue = false;
+
+  final authService = FirebaseAuthService();
 
   @override
   void initState() {
@@ -38,209 +37,39 @@ class _login_pageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    Emailcontroller.dispose();
-    Passwordcontroller.dispose();
+    emailController.dispose();
+    passwordController.dispose();
     super.dispose();
-  }
-
-  TextEditingController Emailcontroller = TextEditingController();
-  // ahmedrady03@gmail.com
-  TextEditingController Passwordcontroller = TextEditingController();
-  // aA123456
-  bool checkboxvalue = false;
-
-  final authService = AuthService();
-
-  Future<void> _nativeGoogleSignIn() async {
-    try {
-      /// Web Client ID that you registered with Google Cloud.
-      const webClientId =
-          '152853602646-rm6evrh302a4gunht8k0nqk5jpn2hbob.apps.googleusercontent.com';
-
-      /// iOS Client ID that you registered with Google Cloud.
-      const iosClientId =
-          '152853602646-3jpm5kjlfparvi92gf3q0e8nagl42ups.apps.googleusercontent.com';
-
-      // Initialize Google Sign-In with proper configuration for Supabase
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        // For iOS, only use clientId
-        clientId: iosClientId,
-        // For web/server authentication with Supabase
-        serverClientId: webClientId,
-        // Request scopes needed for Supabase
-        scopes: ['email', 'profile'],
-      );
-
-      // Clear any previous sign-in to ensure fresh authentication
-      await googleSignIn.signOut();
-
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-
-      if (googleUser == null) {
-        // User cancelled the sign-in
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Google Sign-In cancelled')),
-          );
-        }
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final String? accessToken = googleAuth.accessToken;
-      final String? idToken = googleAuth.idToken;
-
-      if (accessToken == null) {
-        throw 'No Access Token found.';
-      }
-      if (idToken == null) {
-        throw 'No ID Token found.';
-      }
-
-      // Sign in with Supabase using Google tokens
-      final supabase = Supabase.instance.client;
-      await supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
-      );
-
-      if (mounted) {
-        // Handle successful sign-in
-        final userId = supabase.auth.currentUser?.id;
-        final userEmail = supabase.auth.currentUser?.email;
-
-        if (userId != null && userEmail != null) {
-          // Check and set admin status properly
-          bool isAdminUser = await AdminService.checkAdminRole(userEmail);
-          // save token
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('adminToken', isAdminUser);
-
-          var profile = await supabase
-              .from('profiles')
-              .select()
-              .eq('id', userId)
-              .maybeSingle();
-
-          if (profile == null) {
-            // Create profile if missing with proper role
-            String userRole = isAdminUser ? 'admin' : 'customer';
-            await supabase.from('profiles').insert({
-              'id': userId,
-              'email': userEmail,
-              'role': userRole,
-            });
-            profile = {'role': userRole};
-          }
-
-          // Navigate based on user role
-          if (mounted) {
-            // Sync local wishlist to Supabase after successful login
-            final wishlistCubit = context.read<WishlistCubit>();
-            await wishlistCubit.syncLocalToSupabase();
-
-            if (profile['role'] == 'admin' || isAdminUser) {
-              Navigator.pushReplacementNamed(context, AdminPage.routeName);
-            } else {
-              Navigator.pushReplacementNamed(context, Navigationbar.routeName);
-            }
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Welcome ${isAdminUser ? 'Admin' : 'User'}!'),
-                backgroundColor: Colors.green,
-              ),
-            );
-          }
-        }
-      }
-    } catch (e) {
-      log('Google Sign-In error: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Google Sign-In failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LoginCubit(authService),
-
-      child: BlocConsumer<LoginCubit, LoginState>(
-        listener: (context, state) async {
-          if (state is LoginSuccess) {
-            final supabase = Supabase.instance.client;
-            final userId = supabase.auth.currentUser?.id;
-            final userEmail = supabase.auth.currentUser?.email;
-            if (userId == null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('User ID is null.')));
-              return;
-            }
-
-            // Check and set admin status properly for email/password login too
-            bool isAdminUser = false;
-            if (userEmail != null) {
-              isAdminUser = await AdminService.checkAdminRole(userEmail);
-            }
-
-            var profile = await supabase
-                .from('profiles')
-                .select()
-                .eq('id', userId)
-                .maybeSingle();
-
-            if (profile == null) {
-              // Create profile if missing with proper role
-              String userRole = isAdminUser ? 'admin' : 'customer';
-              await supabase.from('profiles').insert({
-                'id': userId,
-                'email': userEmail,
-                'role': userRole,
-              });
-              profile = {'role': userRole};
-            }
-
-            // Sync local wishlist to Supabase after successful login
-            final wishlistCubit = context.read<WishlistCubit>();
-            await wishlistCubit.syncLocalToSupabase();
-            SharedPreferences pref = await SharedPreferences.getInstance();
-
-            if (profile['role'] == 'admin' || isAdminUser) {
-              Navigator.pushReplacementNamed(context, AdminPage.routeName);
-            } else {
-              Navigator.pushReplacementNamed(context, Navigationbar.routeName);
-            }
-          } else if (state is LoginFailure) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.error)));
-          } else if (state is LoginPrefsLoaded) {
-            Emailcontroller.text = state.email;
-            Passwordcontroller.text = state.password;
-          } else if (state is LoginLoading) {
-            Center(child: CircularProgressIndicator());
-          }
-        },
-
+    return BlocListener<LoginCubit, LoginState>(
+      listener: (context, state) {
+        if (state is LoginFailureState) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.error)));
+        }
+        // LoginSuccessState will be handled by AuthWrapper automatically
+      },
+      child: BlocBuilder<LoginCubit, LoginState>(
         builder: (context, state) {
-          final cubit = context.read<LoginCubit>();
+          if (state is LoginLoadingState) {
+            return Scaffold(
+              backgroundColor: AppColors.primary,
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          // Default login form for all other states
           return Scaffold(
             backgroundColor: AppColors.primary,
             appBar: AppBar(
               forceMaterialTransparency: true,
               backgroundColor: AppColors.primary,
               title: Text(
-                'login',
+                'Login',
                 style: GoogleFonts.sen(
                   fontSize: 30.sp,
                   fontWeight: FontWeight.bold,
@@ -270,13 +99,13 @@ class _login_pageState extends State<LoginPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CustomTextField(
-                            controller: Emailcontroller,
+                            controller: emailController,
                             labelText: 'Email',
                             icon: Icons.email,
                           ),
                           SizedBox(height: 0.h),
                           CustomTextField(
-                            controller: Passwordcontroller,
+                            controller: passwordController,
                             labelText: 'Password',
                             icon: Icons.password,
                             obscureText: true,
@@ -289,18 +118,6 @@ class _login_pageState extends State<LoginPage> {
 
                       Row(
                         children: [
-                          Checkbox(
-                            value: state is LoginPrefsLoaded
-                                ? state.remember
-                                : checkboxvalue,
-                            onChanged: (value) async {
-                              cubit.updateRemember(
-                                value!,
-                                Emailcontroller.text,
-                                Passwordcontroller.text,
-                              );
-                            },
-                          ),
                           Text(
                             "Remember me",
                             style: GoogleFonts.cairo(fontSize: 16.sp),
@@ -328,9 +145,9 @@ class _login_pageState extends State<LoginPage> {
                       CustomButton(
                         title: 'Log in',
                         onTap: () {
-                          cubit.login(
-                            Emailcontroller.text,
-                            Passwordcontroller.text,
+                          context.read<LoginCubit>().login(
+                            emailController.text,
+                            passwordController.text,
                           );
                         },
                       ),
@@ -373,7 +190,7 @@ class _login_pageState extends State<LoginPage> {
                       SizedBox(height: 20.h),
                       InkWell(
                         onTap: () async {
-                          await _nativeGoogleSignIn();
+                          await context.read<LoginCubit>().nativeGoogleSignIn();
                         },
                         child: const CircleAvatar(
                           child: FaIcon(

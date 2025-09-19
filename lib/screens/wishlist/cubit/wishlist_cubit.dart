@@ -1,13 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/model/product.dart';
+import 'package:shop/model/product_model.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_state.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class WishlistCubit extends Cubit<WishlistState> {
-  final supabase = Supabase.instance.client;
+  // final supabase = Supabase.instance.client;
 
   WishlistCubit() : super(const WishlistState()) {
     _loadFavorites();
@@ -15,31 +13,31 @@ class WishlistCubit extends Cubit<WishlistState> {
 
   Future<void> toggleFavorite(Product product) async {
     try {
-      final userId = supabase.auth.currentUser?.id;
-      if (userId == null) {
-        // User not logged in, fallback to local storage
-        await _toggleFavoriteLocal(product);
-        return;
-      }
+      // final userId = supabase.auth.currentUser?.id;
+      // if (userId == null) {
+      //   // User not logged in, fallback to local storage
+      //   await _toggleFavoriteLocal(product);
+      //   return;
+      // }
 
       final currentList = List<Product>.from(state.favorites);
       final isCurrentlyFavorite = currentList.any((p) => p.id == product.id);
 
       if (isCurrentlyFavorite) {
         // Remove from wishlist
-        await supabase
-            .from('wishlist')
-            .delete()
-            .eq('user_id', userId)
-            .eq('product_id', product.id);
+        // await supabase
+        //     .from('wishlist')
+        //     .delete()
+        //     .eq('user_id', userId)
+        //     .eq('product_id', product.id);
 
         currentList.removeWhere((p) => p.id == product.id);
       } else {
         // Add to wishlist
-        await supabase.from('wishlist').insert({
-          'user_id': userId,
-          'product_id': product.id,
-        });
+        // await supabase.from('wishlist').insert({
+        //   'user_id': userId,
+        //   'product_id': product.id,
+        // });
 
         currentList.add(product);
       }
@@ -63,40 +61,40 @@ class WishlistCubit extends Cubit<WishlistState> {
 
   Future<void> _loadFavorites() async {
     try {
-      final userId = supabase.auth.currentUser?.id;
-      if (userId == null) {
-        // User not logged in, load from local storage
-        await _loadFavoritesLocal();
-        return;
-      }
+      // final userId = supabase.auth.currentUser?.id;
+      // if (userId == null) {
+      //   // User not logged in, load from local storage
+      //   await _loadFavoritesLocal();
+      //   return;
+      // }
 
       // Load wishlist from Supabase with product details
-      final response = await supabase
-          .from('wishlist')
-          .select('''
-            *,
-            products (
-              id,
-              name,
-              price,
-              description,
-              image_url,
-              category,
-              created_at
-            )
-          ''')
-          .eq('user_id', userId)
-          .order('created_at', ascending: false);
+      // final response = await supabase
+      //     .from('wishlist')
+      //     .select('''
+      //       *,
+      //       products (
+      //         id,
+      //         name,
+      //         price,
+      //         description,
+      //         image_url,
+      //         category,
+      //         created_at
+      //       )
+      //     ''')
+      //     .eq('user_id', userId)
+      //     .order('created_at', ascending: false);
 
-      List<Product> favorites = [];
-      for (var item in response) {
-        if (item['products'] != null) {
-          final productData = item['products'];
-          favorites.add(Product.fromJson(productData));
-        }
-      }
+      // List<Product> favorites = [];
+      // for (var item in response) {
+      //   if (item['products'] != null) {
+      //     final productData = item['products'];
+      //     favorites.add(Product.fromJson(productData));
+      //   }
+      // }
 
-      emit(WishlistState(favorites: favorites));
+      // emit(WishlistState(favorites: favorites));
     } catch (e) {
       print('Error loading favorites from Supabase: $e');
       // Fallback to local storage
@@ -138,8 +136,8 @@ class WishlistCubit extends Cubit<WishlistState> {
   // Method to sync local wishlist to Supabase when user logs in
   Future<void> syncLocalToSupabase() async {
     try {
-      final userId = supabase.auth.currentUser?.id;
-      if (userId == null) return;
+      // final userId = supabase.auth.currentUser?.id;
+      // if (userId == null) return;
 
       // Get local favorites
       final prefs = await SharedPreferences.getInstance();
@@ -151,26 +149,26 @@ class WishlistCubit extends Cubit<WishlistState> {
             .toList();
 
         // Get existing wishlist from Supabase
-        final existingWishlist = await supabase
-            .from('wishlist')
-            .select('product_id')
-            .eq('user_id', userId);
+        // final existingWishlist = await supabase
+        //     .from('wishlist')
+        //     .select('product_id')
+        //     .eq('user_id', userId);
 
-        Set<String> existingProductIds = existingWishlist
-            .map<String>((item) => item['product_id'].toString())
-            .toSet();
+        // Set<String> existingProductIds = existingWishlist
+        //     .map<String>((item) => item['product_id'].toString())
+        //     .toSet();
 
         // Insert local favorites that don't exist in Supabase
-        List<Map<String, dynamic>> toInsert = [];
-        for (var product in localFavorites) {
-          if (!existingProductIds.contains(product.id)) {
-            toInsert.add({'user_id': userId, 'product_id': product.id});
-          }
-        }
+        // List<Map<String, dynamic>> toInsert = [];
+        // for (var product in localFavorites) {
+        //   if (!existingProductIds.contains(product.id)) {
+        //     toInsert.add({'user_id': userId, 'product_id': product.id});
+        //   }
+        // }
 
-        if (toInsert.isNotEmpty) {
-          await supabase.from('wishlist').insert(toInsert);
-        }
+        // if (toInsert.isNotEmpty) {
+        //   await supabase.from('wishlist').insert(toInsert);
+        // }
 
         // Clear local storage after sync
         await prefs.remove('wishlist');
@@ -184,20 +182,20 @@ class WishlistCubit extends Cubit<WishlistState> {
   }
 
   // Method to clear wishlist (useful for logout)
-  Future<void> clearWishlist() async {
-    try {
-      final userId = supabase.auth.currentUser?.id;
-      if (userId != null) {
-        await supabase.from('wishlist').delete().eq('user_id', userId);
-      }
+  // Future<void> clearWishlist() async {
+  //   try {
+  //     final userId = supabase.auth.currentUser?.id;
+  //     if (userId != null) {
+  //       await supabase.from('wishlist').delete().eq('user_id', userId);
+  //     }
 
-      // Also clear local storage
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('wishlist');
+  //     // Also clear local storage
+  //     final prefs = await SharedPreferences.getInstance();
+  //     await prefs.remove('wishlist');
 
-      emit(const WishlistState(favorites: []));
-    } catch (e) {
-      print('Error clearing wishlist: $e');
-    }
-  }
+  //     emit(const WishlistState(favorites: []));
+  //   } catch (e) {
+  //     print('Error clearing wishlist: $e');
+  //   }
+  // }
 }

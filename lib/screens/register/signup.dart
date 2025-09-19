@@ -6,7 +6,6 @@ import 'package:shop/app_colors.dart';
 import 'package:shop/services/auth/auth_service.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 import 'package:shop/widgets/navigationbar.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterPage extends StatefulWidget {
   static const String routeName = '/signup_page';
@@ -19,8 +18,6 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  final SupabaseClient supabase = Supabase.instance.client;
-
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -38,7 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  final authService = AuthService();
+  final authService = FirebaseAuthService();
   void register() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -49,13 +46,13 @@ class _RegisterPageState extends State<RegisterPage> {
         Navigator.pushReplacementNamed(context, Navigationbar.routeName);
       }
     } catch (e) {
-      if (e is AuthException) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(e.toString())));
-        }
-      }
+      // if (e is AuthException) {
+      //   if (mounted) {
+      //     ScaffoldMessenger.of(
+      //       context,
+      //     ).showSnackBar(SnackBar(content: Text(e.toString())));
+      //   }
+      // }
     }
   }
 

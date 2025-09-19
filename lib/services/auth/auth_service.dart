@@ -1,34 +1,29 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shop/services/admin_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class AuthService {
-  final SupabaseClient _supabaseClient = Supabase.instance.client;
+
+class FirebaseAuthService {
+  final FirebaseAuth authService = FirebaseAuth.instance;
 
   //sign out
   Future<void> signOut() async {
-    await _supabaseClient.auth.signOut();
-
-    // Clear admin status on logout
-    await AdminService.clearAdminStatus();
+    await authService.signOut();
   }
 
   //sign in
   Future<void> signInWithEmailAndPassword(String email, String password) async {
-    await _supabaseClient.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
+    await authService.signInWithEmailAndPassword(email: email, password: password);
   }
 
   //sign up
   Future<void> signUpWithEmailAndPassword(String email, String password) async {
-    await _supabaseClient.auth.signUp(email: email, password: password);
+    await authService.createUserWithEmailAndPassword(email: email, password: password);
   }
 
   //get user email
   String? getUserEmail() {
-    final session = _supabaseClient.auth.currentSession;
-    final user = session?.user;
+    final user = authService.currentUser;
     return user?.email;
   }
+
+  Future<void> signInWithGoogle({required String idToken, required String accessToken}) async {}
 }

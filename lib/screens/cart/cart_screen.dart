@@ -1,12 +1,10 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shop/model/product_model.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/model/product.dart';
 import 'package:shop/screens/cart/checkout_screen.dart';
 
 class CartScreen extends StatefulWidget {
@@ -57,7 +55,7 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
 
     // Load cart from Supabase for current user (if logged in)
     // Fire-and-forget; UI will update via listeners when done
-    CartManager().loadCartFromSupabase();
+    // CartManager().loadCartFromSupabase();
   }
 
   void _onCartChanged() {
@@ -393,7 +391,7 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
 
   void _handleCheckout() {
     // Navigate to the new Checkout screen with address, payment, and status
-    Navigator.pushNamed(context, CheckoutScreen.routeName);
+    // Navigator.pushNamed(context, CheckoutScreen.routeName);
   }
 
   void _showClearCartDialog() {
@@ -822,10 +820,10 @@ class CartManager {
     _notifyListeners();
 
     // Sync to Supabase (optimistic)
-    _upsertRemote(
-      product.id,
-      _cartItems.firstWhere((i) => i.product.id == product.id).quantity,
-    );
+    // _upsertRemote(
+    //   product.id,
+    //   _cartItems.firstWhere((i) => i.product.id == product.id).quantity,
+    // );
   }
 
   void removeFromCart(String productId) {
@@ -833,7 +831,7 @@ class CartManager {
     _notifyListeners();
 
     // Remote delete
-    _deleteRemote(productId);
+    // _deleteRemote(productId);
   }
 
   void updateQuantity(String productId, int quantity) {
@@ -848,9 +846,9 @@ class CartManager {
 
       // Sync remotely
       if (quantity <= 0) {
-        _deleteRemote(productId);
+        // _deleteRemote(productId);
       } else {
-        _upsertRemote(productId, quantity);
+        // _upsertRemote(productId, quantity);
       }
     }
   }
@@ -860,102 +858,102 @@ class CartManager {
     _notifyListeners();
 
     // Remote clear for current user
-    _clearRemote();
+    // _clearRemote();
   }
 
   // Remote syncing helpers
-  SupabaseClient get _supabase => Supabase.instance.client;
+  // SupabaseClient get _supabase => Supabase.instance.client;
 
-  Future<void> loadCartFromSupabase() async {
-    if (_isLoading) return;
-    final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) return; // not logged in -> keep local only
-    _isLoading = true;
-    try {
-      final List<dynamic> response = await _supabase
-          .from('cart')
-          .select('quantity, product:products(*)')
-          .eq('user_id', userId);
+  // Future<void> loadCartFromSupabase() async {
+  //   if (_isLoading) return;
+  //   final userId = _supabase.auth.currentUser?.id;
+  //   if (userId == null) return; // not logged in -> keep local only
+  //   _isLoading = true;
+  //   try {
+  //     final List<dynamic> response = await _supabase
+  //         .from('cart')
+  //         .select('quantity, product:products(*)')
+  //         .eq('user_id', userId);
 
-      final List<CartItem> fetched = [];
-      for (final row in response) {
-        try {
-          final map = row as Map<String, dynamic>;
-          final prodJson = map['product'] as Map<String, dynamic>?;
-          if (prodJson == null) continue;
-          final qty = (map['quantity'] as int?) ?? 1;
-          fetched.add(
-            CartItem(product: Product.fromJson(prodJson), quantity: qty),
-          );
-        } catch (_) {
-          // ignore malformed row
-        }
-      }
-      _cartItems
-        ..clear()
-        ..addAll(fetched);
-      _notifyListeners();
-    } catch (_) {
-      // ignore network/auth errors silently for now
-    } finally {
-      _isLoading = false;
-    }
-  }
+  //     final List<CartItem> fetched = [];
+  //     for (final row in response) {
+  //       try {
+  //         final map = row as Map<String, dynamic>;
+  //         final prodJson = map['product'] as Map<String, dynamic>?;
+  //         if (prodJson == null) continue;
+  //         final qty = (map['quantity'] as int?) ?? 1;
+  //         fetched.add(
+  //           CartItem(product: Product.fromJson(prodJson), quantity: qty),
+  //         );
+  //       } catch (_) {
+  //         // ignore malformed row
+  //       }
+  //     }
+  //     _cartItems
+  //       ..clear()
+  //       ..addAll(fetched);
+  //     _notifyListeners();
+  //   } catch (_) {
+  //     // ignore network/auth errors silently for now
+  //   } finally {
+  //     _isLoading = false;
+  //   }
+  // }
 
-  Future<void> _upsertRemote(String productId, int quantity) async {
-    final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) return;
-    try {
-      // Check if row exists
-      final List<dynamic> rows = await _supabase
-          .from('cart')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('product_id', productId)
-          .limit(1);
+  // Future<void> _upsertRemote(String productId, int quantity) async {
+  //   final userId = _supabase.auth.currentUser?.id;
+  //   if (userId == null) return;
+  //   try {
+  //     // Check if row exists
+  //     final List<dynamic> rows = await _supabase
+  //         .from('cart')
+  //         .select('id')
+  //         .eq('user_id', userId)
+  //         .eq('product_id', productId)
+  //         .limit(1);
 
-      if (rows.isNotEmpty) {
-        final Map<String, dynamic> first = rows.first as Map<String, dynamic>;
-        final id = first['id'];
-        await _supabase
-            .from('cart')
-            .update({'quantity': quantity})
-            .eq('id', id);
-      } else {
-        await _supabase.from('cart').insert({
-          'user_id': userId,
-          'product_id': productId,
-          'quantity': quantity,
-        });
-      }
-    } catch (_) {
-      // ignore
-    }
-  }
+  //     if (rows.isNotEmpty) {
+  //       final Map<String, dynamic> first = rows.first as Map<String, dynamic>;
+  //       final id = first['id'];
+  //       await _supabase
+  //           .from('cart')
+  //           .update({'quantity': quantity})
+  //           .eq('id', id);
+  //     } else {
+  //       await _supabase.from('cart').insert({
+  //         'user_id': userId,
+  //         'product_id': productId,
+  //         'quantity': quantity,
+  //       });
+  //     }
+  //   } catch (_) {
+  //     // ignore
+  //   }
+  // }
 
-  Future<void> _deleteRemote(String productId) async {
-    final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) return;
-    try {
-      await _supabase
-          .from('cart')
-          .delete()
-          .eq('user_id', userId)
-          .eq('product_id', productId);
-    } catch (_) {
-      // ignore
-    }
-  }
+  // Future<void> _deleteRemote(String productId) async {
+  //   final userId = _supabase.auth.currentUser?.id;
+  //   if (userId == null) return;
+  //   try {
+  //     await _supabase
+  //         .from('cart')
+  //         .delete()
+  //         .eq('user_id', userId)
+  //         .eq('product_id', productId);
+  //   } catch (_) {
+  //     // ignore
+  //   }
+  // }
 
-  Future<void> _clearRemote() async {
-    final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) return;
-    try {
-      await _supabase.from('cart').delete().eq('user_id', userId);
-    } catch (_) {
-      // ignore
-    }
-  }
+  // Future<void> _clearRemote() async {
+  //   final userId = _supabase.auth.currentUser?.id;
+  //   if (userId == null) return;
+  //   try {
+  //     await _supabase.from('cart').delete().eq('user_id', userId);
+  //   } catch (_) {
+  //     // ignore
+  //   }
+  // }
 }
 
 class CartItem {

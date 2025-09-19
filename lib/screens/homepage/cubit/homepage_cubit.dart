@@ -1,86 +1,41 @@
 import 'dart:developer';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/model/product.dart';
+import 'package:shop/model/product_model.dart';
+import 'package:shop/services/store/firestore_service.dart';
 import 'homepage_state.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomepageCubit extends Cubit<HomepageState> {
-  static const String _productsKey = 'cached_products';
-  Future<void> loadProductsFromCache() async {
-    final prefs = await SharedPreferences.getInstance();
-    final cached = prefs.getString(_productsKey);
-    if (cached != null) {
-      final List<dynamic> jsonList = Product.decodeJsonList(cached);
-      final products = jsonList
-          .map((item) => Product.fromJson(item as Map<String, dynamic>))
-          .toList();
-      emit(state.copyWith(products: products, filteredItems: products));
-    }
-  }
-
-  static const String _nameKey = 'profile_name';
-  static const String _imageKey = 'profile_img';
-
-  HomepageCubit() : super(const HomepageState());
+  HomepageCubit() : super(HomepageInitial());
+  FirestoreService firestoreService = FirestoreService();
 
   Future<void> loadUserData() async {
-    emit(state.copyWith(isLoading: true));
-    final prefs = await SharedPreferences.getInstance();
-    emit(
-      state.copyWith(
-        name: prefs.getString(_nameKey) ?? '',
-        image: prefs.getString(_imageKey),
-        isLoading: false,
-      ),
-    );
+    emit(HomepageLoading());
+    // Load user data from SharedPreferences
+    // final prefs = await SharedPreferences.getInstance();
   }
 
-  Future<void> fetchProductsFromSupabase({bool force = false}) async {
-    // If we already have products and not forced, skip network call
-    if (!force && state.products.isNotEmpty) {
-      return;
-    }
-    emit(state.copyWith(isLoading: true, error: null));
-    final supabase = Supabase.instance.client;
+  Future<void> fetchProductsFromFirebase() async {
+    emit(HomepageLoading());
+
     try {
-      final data = await supabase.from('products').select().then((value) {
-        print('Supabase products response:');
-        print(value);
-        return value as List<dynamic>;
-      });
-      final products = data.map((item) {
-        print('Product item:');
-        print(item);
-        return Product.fromJson(item as Map<String, dynamic>);
-      }).toList();
-      // Save to SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString(_productsKey, Product.encodeJsonList(products));
-      emit(
-        state.copyWith(
-          products: products,
-          filteredItems: products,
-          isLoading: false,
-          error: null,
-        ),
-      );
+      final products = await firestoreService.getProducts();
+      emit(HomepageSuccess(products.toList()));
     } catch (e) {
-      log(e.toString());
-      emit(state.copyWith(isLoading: false, error: e.toString()));
+      emit(HomepageFailure(e.toString()));
     }
   }
 
-  void selectCategory(int index, List<Map<String, dynamic>> categoryData) {
-    String? selectedCategory = index > 0
-        ? categoryData[index]["category"]
-        : null;
+  // void selectCategory(int index, List<Map<String, dynamic>> categoryData) {
+  //   String? selectedCategory = index > 0
+  //       ? categoryData[index]["category"]
+  //       : null;
 
-    final filtered = state.products.where((item) {
-      return selectedCategory == null || item.category == selectedCategory;
-    }).toList();
+  //   final filtered = state.products.where((item) {
+  //     return selectedCategory == null || item.category == selectedCategory;
+  //   }).toList();
 
-    emit(state.copyWith(selectedIndex: index, filteredItems: filtered));
-  }
+  //   emit(state.copyWith(selectedIndex: index, filteredItems: filtered));
+  // }
 }
