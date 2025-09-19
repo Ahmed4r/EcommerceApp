@@ -1,7 +1,7 @@
-import 'dart:developer';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop/firebase_options.dart';
 import 'package:shop/screens/admin/add_page.dart';
 import 'package:shop/screens/admin/admin_page.dart';
 import 'package:shop/screens/admin/orders_admin_page.dart';
@@ -26,54 +26,29 @@ import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/wishlist.dart';
 import 'package:shop/widgets/navigationbar.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  String url = 'https://lcbhbensqcotqqyywegd.supabase.co';
-  String anonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjYmhiZW5zcWNvdHFxeXl3ZWdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwOTc5ODQsImV4cCI6MjA3MDY3Mzk4NH0.z0_iRuwLSiCBEbwRPU620JzEr2aRgmF1FlB3q3l5R28';
-  await Supabase.initialize(debug: true, url: url, anonKey: anonKey);
-  final sharedpref = await SharedPreferences.getInstance();
-  final token = sharedpref.getBool('authToken') ?? false;
-  final isAdmin = sharedpref.getBool('isAdmin') ?? false;
-  final onboardingSeen = sharedpref.getBool('onboarding_seen') ?? false;
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(
     MultiBlocProvider(
       providers: [BlocProvider(create: (_) => WishlistCubit())],
       child: ShopApp(
-        token: token,
-        isAdmin: isAdmin,
-        onboardingSeen: onboardingSeen,
+      
       ),
     ),
   );
 }
 
 class ShopApp extends StatelessWidget {
-  final bool token;
-  final bool isAdmin;
-  final bool onboardingSeen;
-  const ShopApp({
-    super.key,
-    required this.token,
-    required this.isAdmin,
-    required this.onboardingSeen,
-  });
+  const ShopApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    log(token.toString());
-    String initialRoute = Navigationbar.routeName;
-    if (onboardingSeen == false) {
-      initialRoute = OnboardingScreen.routeName;
-    } else if (token == false) {
-      // show the welcome screen when user is not authenticated
-      initialRoute = WelcomeScreen.routeName;
-    } else if (isAdmin == true) {
-      initialRoute = AdminPage.routeName;
-    }
+   
 
     return ScreenUtilInit(
       designSize: const Size(360, 690),
@@ -81,7 +56,7 @@ class ShopApp extends StatelessWidget {
       splitScreenMode: true,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: initialRoute,
+        initialRoute: LoginPage.routeName,
         routes: {
           OrderDetailsPage.routeName: (context) => const OrderDetailsPage(),
           Homepage.routeName: (context) => Homepage(),
