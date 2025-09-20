@@ -30,13 +30,24 @@ class HomepageHeaders extends StatelessWidget {
         const Spacer(),
         TextButton(
           onPressed: () {
-            ctrl == true
-                ? navBarKey.currentState?.changeTab(1, categoryData)
-                : Navigator.pushNamed(
-                    context,
-                    ShowProductspage.routeName,
-                    arguments: products,
-                  );
+            // Add safety check for empty products list
+            if (ctrl == true) {
+              navBarKey.currentState?.changeTab(1, categoryData);
+            } else if (products.isNotEmpty) {
+              Navigator.pushNamed(
+                context,
+                ShowProductspage.routeName,
+                arguments: products,
+              );
+            } else {
+              // Show message if no products available
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No products available to show'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
           },
           child: Text(
             "See All",

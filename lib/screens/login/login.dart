@@ -13,6 +13,7 @@ import 'package:shop/screens/register/signup.dart';
 import 'package:shop/services/auth/auth_service.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
+import 'package:shop/widgets/navigationbar.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routeName = '/login_page';
@@ -50,8 +51,10 @@ class _LoginPageState extends State<LoginPage> {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(state.error)));
+        } else if (state is LoginSuccessState) {
+          // Navigate to main app on successful login
+          Navigator.pushReplacementNamed(context, Navigationbar.routeName);
         }
-        // LoginSuccessState will be handled by AuthWrapper automatically
       },
       child: BlocBuilder<LoginCubit, LoginState>(
         builder: (context, state) {

@@ -8,6 +8,7 @@ import 'package:shop/app_colors.dart';
 import 'package:shop/screens/homepage/cubit/homepage_cubit.dart';
 import 'package:shop/screens/homepage/cubit/homepage_state.dart';
 import 'package:shop/widgets/product_card.dart';
+// import 'package:shop/widgets/product_card.dart'; // Unused import
 
 class Category extends StatefulWidget {
   static const String routeName = 'category';
@@ -20,9 +21,11 @@ class Category extends StatefulWidget {
 
 class _CategoryState extends State<Category> {
   final TextEditingController searchController = TextEditingController();
-  HomepageCubit cubit = HomepageCubit();
+  // Remove local cubit instance - use the one from BlocProvider
 
-  int selectedIndex = -1;
+  int selectedIndex = 0; // Start with "All" selected
+  List<dynamic> filteredProducts = [];
+  String searchQuery = '';
   List<Map<String, dynamic>> categoryData = [
     {"type": "text", "label": "All", "icon": null, "category": null},
     {
@@ -58,9 +61,39 @@ class _CategoryState extends State<Category> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize data when category page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final cubit = context.read<HomepageCubit>();
+      cubit.fetchProductsFromFirebase();
+    });
+  }
+
+  @override
   void dispose() {
     searchController.dispose();
     super.dispose();
+  }
+
+  void filterProducts(List<dynamic> allProducts) {
+    String search = searchQuery.trim().toLowerCase();
+    String? selectedCategory = selectedIndex > 0
+        ? categoryData[selectedIndex]["category"]
+        : null;
+
+    setState(() {
+      filteredProducts = allProducts.where((item) {
+        final matchesSearch =
+            search.isEmpty ||
+            item.name.toLowerCase().contains(search) ||
+            item.description.toLowerCase().contains(search) ||
+            item.category.toLowerCase().contains(search);
+        final matchesCategory =
+            selectedCategory == null || item.category == selectedCategory;
+        return matchesSearch && matchesCategory;
+      }).toList();
+    });
   }
 
   // void filterProducts(BuildContext context, String query) {
@@ -90,7 +123,7 @@ class _CategoryState extends State<Category> {
           backgroundColor: AppColors.primary,
           appBar: AppBar(
             excludeHeaderSemantics: true,
-    
+
             elevation: 0,
             title: Text(
               "Category",
@@ -119,8 +152,12 @@ class _CategoryState extends State<Category> {
                           ),
                         ),
                         child: TextField(
-                          // onChanged: (query) =>
-                          //     filterProducts(context, query),
+                          onChanged: (query) {
+                            searchQuery = query;
+                            if (state is HomepageSuccess) {
+                              filterProducts(state.products);
+                            }
+                          },
                           controller: searchController,
                           decoration: InputDecoration(
                             border: InputBorder.none,
@@ -138,7 +175,7 @@ class _CategoryState extends State<Category> {
                       ),
                     ),
                   ),
-    
+
                   SizedBox(height: 15.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -154,7 +191,7 @@ class _CategoryState extends State<Category> {
                     ],
                   ),
                   SizedBox(height: 15.h),
-    
+
                   SizedBox(
                     height: 50.h,
                     child: ListView.separated(
@@ -164,15 +201,17 @@ class _CategoryState extends State<Category> {
                       itemCount: categoryData.length,
                       itemBuilder: (context, index) {
                         bool isSelected = selectedIndex == index;
-    
+
                         return GestureDetector(
                           onTap: () {
                             setState(() {
                               selectedIndex = index;
                             });
-                            // filterProducts(context, searchController.text);
+                            if (state is HomepageSuccess) {
+                              filterProducts(state.products);
+                            }
                           },
-    
+
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 250),
                             padding: EdgeInsets.symmetric(
@@ -232,24 +271,81 @@ class _CategoryState extends State<Category> {
                     ),
                   ),
                   SizedBox(height: 15.h),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // عدد الكروت في كل صف
-                      mainAxisSpacing: 10.h,
-                      crossAxisSpacing: 10.w,
-                      childAspectRatio:
-                          3 / 4, // نسبة العرض للطول حسب شكل الكرت
-                    ),
-                    // itemCount: state.filteredItems.length,
-                    itemBuilder: (context, index) {
-                      // return buildItemCard(
-                      //   context,
-                      //   state.filteredItems[index],
-                      // );
-                    },
-                  ),
+
+                  // Handle different states
+                  if (state is HomepageLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (state is HomepageFailure)
+                    Center(
+                      child: Column(
+                        children: [
+                          Text('Error: ${state.error}'),
+                          ElevatedButton(
+                            onPressed: () {
+                              context
+                                  .read<HomepageCubit>()
+                                  .fetchProductsFromFirebase();
+                            },
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (state is HomepageSuccess)
+                    Builder(
+                      builder: (context) {
+                        // Initialize filtered products if not done yet
+                        if (filteredProducts.isEmpty &&
+                            state.products.isNotEmpty) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            filterProducts(state.products);
+                          });
+                        }
+
+                        final productsToShow = filteredProducts.isEmpty
+                            ? state.products
+                            : filteredProducts;
+
+                        if (productsToShow.isEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20.0.r),
+                              child: Text(
+                                'No products found',
+                                style: GoogleFonts.cairo(
+                                  fontSize: 16.sp,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        return GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 10.h,
+                                crossAxisSpacing: 10.w,
+                                childAspectRatio: 3 / 4,
+                              ),
+                          itemCount: productsToShow.length,
+                          itemBuilder: (context, index) {
+                            if (index < productsToShow.length) {
+                              return buildItemCard(
+                                context,
+                                productsToShow[index],
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        );
+                      },
+                    )
+                  else
+                    const Center(child: Text('No data available')),
                 ],
               ),
             ),

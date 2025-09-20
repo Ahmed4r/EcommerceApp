@@ -113,6 +113,24 @@ class _ProductItemCardState extends State<ProductItemCard>
 
   @override
   Widget build(BuildContext context) {
+    // Add validation for required product fields
+    if (widget.product.id.isEmpty || widget.product.name.isEmpty) {
+      return Container(
+        width: 150.w,
+        height: 200.h,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        child: Center(
+          child: Text(
+            'Product data incomplete',
+            style: GoogleFonts.cairo(fontSize: 12.sp, color: Colors.grey[600]),
+          ),
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -140,6 +158,9 @@ class _ProductItemCardState extends State<ProductItemCard>
               Colors.black.withOpacity(0.3),
               BlendMode.darken,
             ),
+            onError: (error, stackTrace) {
+              // Handle image loading error silently
+            },
           ),
           borderRadius: BorderRadius.circular(20.r),
         ),

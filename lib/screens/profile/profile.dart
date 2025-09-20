@@ -28,9 +28,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
-    super.initState();
-    // Load user data when the widget initializes
     context.read<ProfileCubit>().loadUserData();
+    super.initState();
   }
 
   @override
@@ -45,7 +44,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
-        if (state is profileLoadingState) {
+        if (state is ProfileInitial || state is profileLoadingState) {
           return Scaffold(
             backgroundColor: AppColors.primary,
             body: Center(child: CircularProgressIndicator()),
@@ -77,17 +76,10 @@ class _ProfilePageState extends State<ProfilePage> {
         }
 
         if (state is profileSuccessState) {
-          // Get user data with null safety
-          final userName = context.read<ProfileCubit>().getUserName();
-          final userEmail = context.read<ProfileCubit>().getUserEmail();
-
-          nameController.text = userName ?? 'No Name';
-          emailController.text = userEmail ?? 'No Email';
-
-          // Initialize phone controller if empty (could be loaded from SharedPreferences or Firestore in the future)
-          if (phoneController.text.isEmpty) {
-            phoneController.text = '';
-          }
+          // Get user data from state
+          nameController.text = state.name;
+          emailController.text = state.email;
+          phoneController.text = state.phone;
 
           return Scaffold(
             backgroundColor: AppColors.primary,
@@ -174,8 +166,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         });
 
                         if (!isEditMode) {
-                          // Save the changes when exiting edit mode
-                          // Here you can add logic to save to SharedPreferences or Firestore
+                          context.read<ProfileCubit>().updateUserData({
+                            'uid': authservice.authService.currentUser?.uid,
+                            'displayName': nameController.text,
+                            'email': emailController.text,
+                            'phone': phoneController.text,
+                          });
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Profile updated successfully!'),

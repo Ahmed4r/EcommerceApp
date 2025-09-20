@@ -1,15 +1,14 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+// import 'package:shared_preferences/shared_preferences.dart'; // Unused import
 import 'package:shop/app_colors.dart';
 import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/widgets/homepage_headers.dart';
 import 'package:shop/widgets/product_card.dart';
 import 'package:carousel_slider_plus/carousel_slider_plus.dart';
-import 'package:shop/screens/orders/orders_page.dart';
 import 'homepage_cubit.dart';
 import 'homepage_state.dart';
 
@@ -22,8 +21,7 @@ class Homepage extends StatefulWidget {
   State<Homepage> createState() => _HomepageState();
 }
 
-class _HomepageState extends State<Homepage>
-    with AutomaticKeepAliveClientMixin {
+class _HomepageState extends State<Homepage> {
   final List<Map<String, dynamic>> categoryData = [
     {"type": "text", "label": "All", "icon": null, "category": null},
     {
@@ -59,24 +57,61 @@ class _HomepageState extends State<Homepage>
   ];
 
   @override
-  bool get wantKeepAlive => true;
+  void initState() {
+    super.initState();
+    // Load data when homepage initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomepageCubit>().loadUserData();
+      context.read<HomepageCubit>().fetchProductsFromFirebase();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return BlocBuilder<HomepageCubit, HomepageState>(
       builder: (context, state) {
-        if (state is HomepageInitial) {
-          final cubit = context.read<HomepageCubit>();
-          cubit.fetchProductsFromFirebase();
-        }
         if (state is HomepageLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const Scaffold(
+            backgroundColor: AppColors.primary,
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
         if (state is HomepageFailure) {
-          return Center(child: Text('Error: ${state.error}'));
+          return Scaffold(
+            backgroundColor: AppColors.primary,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 50.r, color: Colors.red),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'Error loading products',
+                    style: GoogleFonts.cairo(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    'Error: ${state.error}',
+                    style: GoogleFonts.cairo(fontSize: 14.sp),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 16.h),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<HomepageCubit>().fetchProductsFromFirebase();
+                    },
+                    child: Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
         }
         if (state is HomepageSuccess) {
+          final userName = context.read<HomepageCubit>().userName;
           return Scaffold(
             backgroundColor: AppColors.primary,
             appBar: AppBar(
@@ -99,8 +134,9 @@ class _HomepageState extends State<Homepage>
                 children: [
                   Text('Hi Welcome', style: GoogleFonts.cairo(fontSize: 20.sp)),
                   Text(
-                    //   name
-                    '',
+                    userName != null && userName.isNotEmpty
+                        ? 'Mr. $userName'
+                        : 'Welcome Guest',
                     style: GoogleFonts.cairo(fontSize: 16.sp),
                   ),
                 ],
@@ -108,25 +144,27 @@ class _HomepageState extends State<Homepage>
               actions: [
                 Row(
                   children: [
-                    // Container(
-                    //   margin: EdgeInsets.only(right: 8.w),
-                    //   decoration: BoxDecoration(
-                    //     border: Border.all(
-                    //       color: Colors.grey.shade300,
-                    //       width: 1.w,
-                    //     ),
-                    //     borderRadius: BorderRadius.circular(16.r),
-                    //   ),
-                    //   child: IconButton(
-                    //     tooltip: 'My Orders',
-                    //     onPressed: () =>
-                    //         Navigator.pushNamed(context, OrdersPage.routeName),
-                    //     icon: FaIcon(
-                    //       FontAwesomeIcons.clipboardList,
-                    //       size: 18.r,
-                    //     ),
-                    //   ),
-                    // ),
+                    Container(
+                      margin: EdgeInsets.only(right: 8.w),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                          width: 1.w,
+                        ),
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      // child: IconButton(
+                      child: Icon(
+                        // tooltip: 'My Orders',
+                        // onPressed:
+                        // () =>
+                        // Navigator.pushNamed(context, OrdersPage.routeName),
+                        //  FaIcon(
+                        FontAwesomeIcons.clipboardList,
+                        size: 18.r,
+                        // ),
+                      ),
+                    ),
                     Container(
                       margin: EdgeInsets.only(right: 10.w),
                       decoration: BoxDecoration(
@@ -224,20 +262,40 @@ class _HomepageState extends State<Homepage>
                       state.products,
                       categoryData,
                     ),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 10.h,
-                        crossAxisSpacing: 10.w,
-                        childAspectRatio: 3 / 4,
-                      ),
-                      itemCount: state.products.length,
-
-                      itemBuilder: (_, index) =>
-                          buildItemCard(context, state.products[index]),
-                    ),
+                    state.products.isNotEmpty
+                        ? GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 10.h,
+                                  crossAxisSpacing: 10.w,
+                                  childAspectRatio: 3 / 4,
+                                ),
+                            itemCount: state.products.length,
+                            itemBuilder: (_, index) {
+                              if (index < state.products.length) {
+                                return buildItemCard(
+                                  context,
+                                  state.products[index],
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          )
+                        : Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20.0.r),
+                              child: Text(
+                                'No products available',
+                                style: GoogleFonts.cairo(
+                                  fontSize: 16.sp,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          ),
                   ],
                 ),
               ),

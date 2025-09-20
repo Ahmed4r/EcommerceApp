@@ -1,19 +1,23 @@
-import 'dart:developer';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/model/product_model.dart';
 import 'package:shop/services/store/firestore_service.dart';
 import 'homepage_state.dart';
 
 class HomepageCubit extends Cubit<HomepageState> {
   HomepageCubit() : super(HomepageInitial());
   FirestoreService firestoreService = FirestoreService();
+  String? userName;
 
   Future<void> loadUserData() async {
-    emit(HomepageLoading());
-    // Load user data from SharedPreferences
-    // final prefs = await SharedPreferences.getInstance();
+    try {
+      SharedPreferences pref = await SharedPreferences.getInstance();
+      userName = pref.getString('name');
+      // You can emit a state with user data if needed
+      // emit(UserDataLoaded(name));
+    } catch (e) {
+      // Handle error silently for now
+      userName = null;
+    }
   }
 
   Future<void> fetchProductsFromFirebase() async {

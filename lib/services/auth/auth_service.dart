@@ -44,5 +44,11 @@ class FirebaseAuthService {
   Future<void> signInWithGoogle({
     required String idToken,
     required String accessToken,
-  }) async {}
+  }) async {
+    final credential = GoogleAuthProvider.credential(
+      accessToken: accessToken,
+      idToken: idToken,
+    );
+    await authService.signInWithCredential(credential);
+  }
 }

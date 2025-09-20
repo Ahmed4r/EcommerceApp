@@ -1,152 +1,214 @@
-// import 'dart:async';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:shop/model/address_model.dart';
-// import 'package:shop/screens/cart/cart_screen.dart';
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shop/model/address_model.dart';
+import 'package:shop/screens/cart/cart_screen.dart';
 
-// class OrdersService {
-//   OrdersService._();
-//   static final OrdersService instance = OrdersService._();
-//   FirebaseAuth fireAuth = FirebaseAuth.instance;
-//   FirebaseFirestore firestore = FirebaseFirestore.instance;
+class OrdersService {
+  OrdersService._();
+  static final OrdersService instance = OrdersService._();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-//   Future<dynamic> createOrder({
-//     required AddressModel?
-//     address, // kept for future extension; not stored in schema
-//     required String
-//     paymentMethod, // kept for future extension; not stored in schema
-//     required double total,
-//     required List<CartItem> items,
-//   }) async {
-//     final userId = fireAuth.currentUser?.uid;
-//     if (userId == null) {
-//       throw Exception('Not authenticated');
-//     }
+  Future<String> createOrder({
+    required AddressModel? address,
+    required String paymentMethod,
+    required double total,
+    required List<CartItem> items,
+  }) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('Not authenticated');
+    }
 
-//     // Create order row
-//     final order = await firestore.collection('orders').add({
-//       'user_id': userId,
-//       'status': 'pending',
-//       'total_amount': total,
-//     });
+    try {
+      // Create order document
+      final orderRef = await _firestore.collection('orders').add({
+        'userId': userId,
+        'status': 'pending',
+        'totalAmount': total,
+        'paymentMethod': paymentMethod,
+        'address': address?.toJson(),
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
 
-//     final orderId = order.id;
+      final orderId = orderRef.id;
 
-//     // Insert order items
-//     if (items.isNotEmpty) {
-//       final rows = items
-//           .map(
-//             (e) => {
-//               'order_id': orderId,
-//               'product_id': e.product.id,
-//               'quantity': e.quantity,
-//               'price': e.product.price,
-//             },
-//           )
-//           .toList();
-//       await firestore.collection('order_items').add(rows);
-//     }
+      // Create order items subcollection
+      if (items.isNotEmpty) {
+        final batch = _firestore.batch();
 
-//     return orderId;
-//   }
+        for (var item in items) {
+          final itemRef = _firestore
+              .collection('orders')
+              .doc(orderId)
+              .collection('items')
+              .doc();
 
-//   Future<List<Map<String, dynamic>>> fetchAllOrders() async {
-//     final data = await firestore.collection('orders').get();
-//     final list = data.docs.map((doc) => doc.data()).toList();
-//         .map((e) => Map<String, dynamic>.from(e as Map))
-//         .toList();
+          batch.set(itemRef, {
+            'productId': item.product.id,
+            'productData': item.product.toJson(),
+            'quantity': item.quantity,
+            'price': item.product.price,
+            'totalPrice': item.product.price * item.quantity,
+          });
+        }
 
-//     // Attach items for each order
-//     for (final o in list) {
-//       try {
-//         final items = await firestore
-//             .collection('order_items')
-//             .where('order_id', isEqualTo: o['id'])
-//             .get();
-//         o['items'] = items.docs.map((doc) => doc.data()).toList();
-//       } catch (_) {
-//         o['items'] = [];
-//       }
-//     }
-//     return list;
-//   }
+        await batch.commit();
+      }
 
-//   Future<List<Map<String, dynamic>>> fetchMyOrders() async {
-//     final userId = _supabase.auth.currentUser?.id;
-//     if (userId == null) {
-//       throw Exception('Not authenticated');
-//     }
+      return orderId;
+    } catch (e) {
+      print('Error creating order: $e');
+      throw Exception('Failed to create order: $e');
+    }
+  }
 
-//     final data = await _supabase
-//         .from('orders')
-//         .select()
-//         .eq('user_id', userId)
-//         .order('created_at', ascending: false);
+  Future<List<Map<String, dynamic>>> fetchAllOrders() async {
+    try {
+      final snapshot = await _firestore
+          .collection('orders')
+          .orderBy('createdAt', descending: true)
+          .get();
 
-//     final list = (data as List)
-//         .map((e) => Map<String, dynamic>.from(e as Map))
-//         .toList();
+      List<Map<String, dynamic>> orders = [];
 
-//     for (final o in list) {
-//       try {
-//         final items = await _supabase
-//             .from('order_items')
-//             .select('product_id, quantity, price')
-//             .eq('order_id', o['id']);
-//         o['items'] = items;
-//       } catch (_) {
-//         o['items'] = [];
-//       }
-//     }
-//     return list;
-//   }
+      for (var doc in snapshot.docs) {
+        final orderData = doc.data();
+        orderData['id'] = doc.id;
 
-//   Future<void> updateOrderStatus(dynamic orderId, String status) async {
-//     await _supabase.from('orders').update({'status': status}).eq('id', orderId);
-//   }
+        // Fetch order items
+        final itemsSnapshot = await _firestore
+            .collection('orders')
+            .doc(doc.id)
+            .collection('items')
+            .get();
 
-//   Stream<String> streamOrderStatus(dynamic orderId) {
-//     final controller = StreamController<String>.broadcast();
+        orderData['items'] = itemsSnapshot.docs
+            .map((itemDoc) => {'id': itemDoc.id, ...itemDoc.data()})
+            .toList();
 
-//     final channel = _supabase
-//         .channel('orders_status_$orderId')
-//         .onPostgresChanges(
-//           event: PostgresChangeEvent.update,
-//           schema: 'public',
-//           table: 'orders',
-//           filter: PostgresChangeFilter(
-//             type: PostgresChangeFilterType.eq,
-//             column: 'id',
-//             value: orderId,
-//           ),
-//           callback: (payload) {
-//             try {
-//               final newRec = payload.newRecord as Map<String, dynamic>?;
-//               final status = newRec?['status'] as String?;
-//               if (status != null) controller.add(status);
-//             } catch (_) {}
-//           },
-//         )
-//         .subscribe();
+        orders.add(orderData);
+      }
 
-//     // Seed current status once
-//     () async {
-//       try {
-//         final row = await _supabase
-//             .from('orders')
-//             .select('status')
-//             .eq('id', orderId)
-//             .single();
-//         final status = row['status'] as String?;
-//         if (status != null) controller.add(status);
-//       } catch (_) {}
-//     }();
+      return orders;
+    } catch (e) {
+      print('Error fetching all orders: $e');
+      return [];
+    }
+  }
 
-//     controller.onCancel = () {
-//       _supabase.removeChannel(channel);
-//     };
+  Future<List<Map<String, dynamic>>> fetchMyOrders() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('Not authenticated');
+    }
 
-//     return controller.stream;
-//   }
-// }
+    try {
+      final snapshot = await _firestore
+          .collection('orders')
+          .where('userId', isEqualTo: userId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      List<Map<String, dynamic>> orders = [];
+
+      for (var doc in snapshot.docs) {
+        final orderData = doc.data();
+        orderData['id'] = doc.id;
+
+        // Fetch order items
+        final itemsSnapshot = await _firestore
+            .collection('orders')
+            .doc(doc.id)
+            .collection('items')
+            .get();
+
+        orderData['items'] = itemsSnapshot.docs
+            .map((itemDoc) => {'id': itemDoc.id, ...itemDoc.data()})
+            .toList();
+
+        orders.add(orderData);
+      }
+
+      return orders;
+    } catch (e) {
+      print('Error fetching user orders: $e');
+      return [];
+    }
+  }
+
+  Future<void> updateOrderStatus(String orderId, String status) async {
+    try {
+      await _firestore.collection('orders').doc(orderId).update({
+        'status': status,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error updating order status: $e');
+      throw Exception('Failed to update order status: $e');
+    }
+  }
+
+  Stream<String?> streamOrderStatus(String orderId) {
+    return _firestore.collection('orders').doc(orderId).snapshots().map((
+      snapshot,
+    ) {
+      if (snapshot.exists) {
+        return snapshot.data()?['status'] as String?;
+      }
+      return null;
+    });
+  }
+
+  Future<Map<String, dynamic>?> getOrderDetails(String orderId) async {
+    try {
+      final orderDoc = await _firestore.collection('orders').doc(orderId).get();
+
+      if (!orderDoc.exists) return null;
+
+      final orderData = orderDoc.data()!;
+      orderData['id'] = orderDoc.id;
+
+      // Fetch order items
+      final itemsSnapshot = await _firestore
+          .collection('orders')
+          .doc(orderId)
+          .collection('items')
+          .get();
+
+      orderData['items'] = itemsSnapshot.docs
+          .map((itemDoc) => {'id': itemDoc.id, ...itemDoc.data()})
+          .toList();
+
+      return orderData;
+    } catch (e) {
+      print('Error getting order details: $e');
+      return null;
+    }
+  }
+
+  // Method to cancel an order (if status is still pending)
+  Future<bool> cancelOrder(String orderId) async {
+    try {
+      final orderDoc = await _firestore.collection('orders').doc(orderId).get();
+
+      if (!orderDoc.exists) return false;
+
+      final orderData = orderDoc.data()!;
+      final currentStatus = orderData['status'] as String?;
+
+      // Only allow cancellation if order is pending
+      if (currentStatus == 'pending') {
+        await updateOrderStatus(orderId, 'cancelled');
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      print('Error cancelling order: $e');
+      return false;
+    }
+  }
+}

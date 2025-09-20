@@ -1,9 +1,9 @@
 # shop
 
-E-Commerce App Prototype with Flutter & Supabase
+E-Commerce App Prototype with Flutter & Firebase
 The app includes:
 • Modern and responsive UI with product browsing
-• Authentication and database powered by Supabase
+• Authentication and database powered by Firebase
 • State management with Cubit for clean and scalable code
 • Cart and wishlist features for a smooth shopping experience
 • Cool animations for better UX
@@ -47,10 +47,10 @@ flutter build apk --release
 
 - iOS (macOS required):
 
-
 ```bash
 flutter build ios --release
 ```
+
 ## you can download ipa file from release section and try it with altstore ❤️
 
 ## 🖼️ Screenshots

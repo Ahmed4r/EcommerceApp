@@ -44,8 +44,10 @@ class _RegisterPageState extends State<RegisterPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.error), backgroundColor: Colors.red),
           );
+        } else if (state is SignUpSuccessState) {
+          // Navigate to main app on successful signup
+          Navigator.pushReplacementNamed(context, Navigationbar.routeName);
         }
-        // RegisterSuccessState will be handled by AuthWrapper automatically
       },
       child: BlocBuilder<SignupCubit, SignUpState>(
         builder: (context, state) {

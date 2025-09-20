@@ -10,7 +10,9 @@ class ShowProductspage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final obj = ModalRoute.of(context)!.settings.arguments as List<Product>;
+    final arguments = ModalRoute.of(context)?.settings.arguments;
+    final List<Product> products = arguments is List<Product> ? arguments : [];
+
     return Scaffold(
       backgroundColor: AppColors.primary,
       appBar: AppBar(
@@ -24,20 +26,30 @@ class ShowProductspage extends StatelessWidget {
         title: Text("Products"),
         backgroundColor: AppColors.primary,
       ),
-      body: GridView.builder(
-        shrinkWrap: true,
-        // physics: NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2, // عدد الكروت في كل صف
-          mainAxisSpacing: 10.h,
-          crossAxisSpacing: 10.w,
-          childAspectRatio: 3 / 4, // نسبة العرض للطول حسب شكل الكرت
-        ),
-        itemCount: obj.length,
-        itemBuilder: (context, index) {
-          return buildItemCard(context, obj[index]);
-        },
-      ),
+      body: products.isEmpty
+          ? Center(
+              child: Text(
+                'No products available',
+                style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
+              ),
+            )
+          : GridView.builder(
+              shrinkWrap: true,
+              // physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // عدد الكروت في كل صف
+                mainAxisSpacing: 10.h,
+                crossAxisSpacing: 10.w,
+                childAspectRatio: 3 / 4, // نسبة العرض للطول حسب شكل الكرت
+              ),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                if (index < products.length) {
+                  return buildItemCard(context, products[index]);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
     );
   }
 }

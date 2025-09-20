@@ -1,119 +1,155 @@
-// import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-// class AdminService {
-//   static const String _isAdminKey = 'isAdmin';
-//   static const String _userEmailKey = 'userEmail';
+class AdminService {
+  static const String _isAdminKey = 'isAdmin';
 
-//   /// Check if the current user has admin privileges
-//   static Future<bool> isAdmin() async {
-//     final prefs = await SharedPreferences.getInstance();
-//     return prefs.getBool(_isAdminKey) ?? false;
-//   }
+  // Firebase services
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-//   /// Get current user email
-//   static Future<String> getCurrentUserEmail() async {
-//     final prefs = await SharedPreferences.getInstance();
-//     return prefs.getString(_userEmailKey) ?? '';
-//   }
+  /// Check if the current user has admin privileges
+  static Future<bool> isAdmin() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return false;
 
-//   /// Set admin status for current user
-//   static Future<void> setAdminStatus(bool isAdmin) async {
-//     final prefs = await SharedPreferences.getInstance();
-//     await prefs.setBool(_isAdminKey, isAdmin);
-//   }
+      // Check from Firebase Firestore first
+      final adminDoc = await _firestore
+          .collection('admins')
+          .doc(user.uid)
+          .get();
 
-//   /// Check admin status from multiple sources
-//   static Future<bool> checkAdminRole(String email) async {
-//     try {
-//       // Method 1: Check by predefined admin emails (Primary method)
-//       List<String> adminEmails = [
-//         'ahmedrady@gmail.com',
-//         // Add your admin emails here
-//       ];
+      if (adminDoc.exists) {
+        final isFirebaseAdmin = adminDoc.data()?['isAdmin'] ?? false;
+        // Cache locally
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(_isAdminKey, isFirebaseAdmin);
+        return isFirebaseAdmin;
+      }
 
-//       if (adminEmails.contains(email.toLowerCase())) {
-//         await setAdminStatus(true);
-//         return true;
-//       }
+      // Fallback to predefined admin emails
+      return await checkAdminRole(user.email ?? '');
+    } catch (e) {
+      // Fallback to local storage
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_isAdminKey) ?? false;
+    }
+  }
 
-//       // Method 2: Check from Supabase auth metadata (if available)
-//       try {
-//         final supabase = Supabase.instance.client;
-//         final user = supabase.auth.currentUser;
-//         if (user != null && user.userMetadata?['role'] == 'admin') {
-//           await setAdminStatus(true);
-//           return true;
-//         }
-//       } catch (e) {
-//         print('Auth metadata check failed: $e');
-//         // Continue to next method
-//       }
+  /// Get current user email
+  static Future<String> getCurrentUserEmail() async {
+    final user = _auth.currentUser;
+    return user?.email ?? '';
+  }
 
-//       // Method 3: Check if products table exists and user can access it (admin privilege test)
-//       try {
-//         final supabase = Supabase.instance.client;
-//         // Try to access products table to see if user has admin-like permissions
-//         await supabase.from('products').select('id').limit(1);
+  /// Set admin status for current user in Firebase and locally
+  static Future<void> setAdminStatus(bool isAdmin) async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        // Save to Firebase
+        await _firestore.collection('admins').doc(user.uid).set({
+          'isAdmin': isAdmin,
+          'email': user.email,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
 
-//         // If we can access products table successfully, this is a good sign
-//         // but we still rely primarily on the email list for admin access
-//         print('Products table access successful for $email');
-//       } catch (e) {
-//         print('Products table access check failed: $e');
-//         // This is fine, just means we can't use this method
-//       }
+      // Save locally as cache
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_isAdminKey, isAdmin);
+    } catch (e) {
+      print('Error setting admin status: $e');
+      // Fallback to local storage only
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_isAdminKey, isAdmin);
+    }
+  }
 
-//       // Default to false if no admin indicators found
-//       await setAdminStatus(false);
-//       return false;
-//     } catch (e) {
-//       print('Error checking admin role: $e');
-//       // If there's any error, fall back to email-only checking
-//       List<String> adminEmails = ['ahmedrady@gmail.com'];
+  /// Check admin status from multiple sources
+  static Future<bool> checkAdminRole(String email) async {
+    try {
+      // Method 1: Check by predefined admin emails (Primary method)
+      List<String> adminEmails = [
+        'ahmedrady@gmail.com',
+        'admin@ecommerce.com',
+        // Add your admin emails here
+      ];
 
-//       bool isAdminByEmail = adminEmails.contains(email.toLowerCase());
-//       await setAdminStatus(isAdminByEmail);
-//       return isAdminByEmail;
-//     }
-//   }
+      if (adminEmails.contains(email.toLowerCase())) {
+        await setAdminStatus(true);
+        return true;
+      }
 
-//   /// Simple email-based admin check (no database queries)
-//   static Future<bool> checkAdminRoleSimple(String email) async {
-//     try {
-//       List<String> adminEmails = ['ahmedrady@gmail.com'];
+      // Method 2: Check from Firebase Firestore admins collection
+      try {
+        final user = _auth.currentUser;
+        if (user != null) {
+          final adminDoc = await _firestore
+              .collection('admins')
+              .doc(user.uid)
+              .get();
 
-//       bool isAdminByEmail = adminEmails.contains(email.toLowerCase());
-//       await setAdminStatus(isAdminByEmail);
-//       return isAdminByEmail;
-//     } catch (e) {
-//       print('Error in simple admin check: $e');
-//       await setAdminStatus(false);
-//       return false;
-//     }
-//   }
+          if (adminDoc.exists && adminDoc.data()?['isAdmin'] == true) {
+            await setAdminStatus(true);
+            return true;
+          }
+        }
+      } catch (e) {
+        print('Firebase admin check failed: $e');
+      }
 
-//   /// Clear admin status (for logout)
-//   static Future<void> clearAdminStatus() async {
-//     final prefs = await SharedPreferences.getInstance();
-//     await prefs.remove(_isAdminKey);
-//     await prefs.remove(_userEmailKey);
-//   }
+      // Default to false if no admin indicators found
+      await setAdminStatus(false);
+      return false;
+    } catch (e) {
+      print('Error checking admin role: $e');
+      return false;
+    }
+  }
 
-//   /// Middleware to check admin access before navigating to admin pages
-//   static Future<bool> requireAdminAccess() async {
-//     bool isAdminUser = await isAdmin();
-//     if (!isAdminUser) {
-//       throw AdminAccessDeniedException('Admin access required');
-//     }
-//     return true;
-//   }
-// }
+  /// Simple email-based admin check (no database queries)
+  static Future<bool> checkAdminRoleSimple(String email) async {
+    try {
+      List<String> adminEmails = ['ahmedrady@gmail.com', 'admin@ecommerce.com'];
 
-// /// Custom exception for admin access denial
-// class AdminAccessDeniedException implements Exception {
-//   final String message;
-//   AdminAccessDeniedException(this.message);
+      bool isAdminByEmail = adminEmails.contains(email.toLowerCase());
+      await setAdminStatus(isAdminByEmail);
+      return isAdminByEmail;
+    } catch (e) {
+      print('Error in simple admin check: $e');
+      await setAdminStatus(false);
+      return false;
+    }
+  }
 
-//   @override
-//   String toString() => 'AdminAccessDeniedException: $message';
-// }
+  /// Clear admin status (for logout)
+  static Future<void> clearAdminStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_isAdminKey);
+    } catch (e) {
+      print('Error clearing admin status: $e');
+    }
+  }
+
+  /// Middleware to check admin access before navigating to admin pages
+  static Future<bool> requireAdminAccess() async {
+    bool isAdminUser = await isAdmin();
+    if (!isAdminUser) {
+      throw AdminAccessDeniedException('Admin access required');
+    }
+    return true;
+  }
+}
+
+/// Custom exception for admin access denial
+class AdminAccessDeniedException implements Exception {
+  final String message;
+  AdminAccessDeniedException(this.message);
+
+  @override
+  String toString() => 'AdminAccessDeniedException: $message';
+}

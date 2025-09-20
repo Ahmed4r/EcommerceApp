@@ -57,7 +57,7 @@ class ShopApp extends StatelessWidget {
       splitScreenMode: true,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: AuthWrapper(), // Use AuthWrapper instead of initialRoute
+        home: const AuthWrapper(), // Use AuthWrapper instead of direct route
         routes: {
           Homepage.routeName: (context) => Homepage(),
           ShowProductspage.routeName: (context) => ShowProductspage(),
@@ -86,18 +86,48 @@ class AuthWrapper extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
+        // Show loading while checking auth state
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
+        // Handle errors in auth stream
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error, size: 50, color: Colors.red),
+                  const SizedBox(height: 16),
+                  const Text('Authentication Error'),
+                  const SizedBox(height: 8),
+                  Text('${snapshot.error}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Try to restart auth check
+                      Navigator.pushReplacementNamed(
+                        context,
+                        LoginPage.routeName,
+                      );
+                    },
+                    child: const Text('Go to Login'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         if (snapshot.hasData && snapshot.data != null) {
           // User is logged in
-          return Navigationbar();
+          return const Navigationbar();
         } else {
           // User is not logged in
-          return LoginPage();
+          return const LoginPage();
         }
       },
     );

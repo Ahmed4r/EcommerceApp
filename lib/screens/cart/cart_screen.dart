@@ -1,11 +1,15 @@
 import 'dart:ui';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/model/product_model.dart';
 import 'package:shop/app_colors.dart';
-import 'package:shop/screens/cart/checkout_screen.dart';
+// import 'package:shop/screens/cart/checkout_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CartScreen extends StatefulWidget {
   static const String routeName = '/cart';
@@ -53,9 +57,9 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
     // Listen to cart changes
     CartManager().addListener(_onCartChanged);
 
-    // Load cart from Supabase for current user (if logged in)
+    // Load cart from Firebase for current user (if logged in)
     // Fire-and-forget; UI will update via listeners when done
-    // CartManager().loadCartFromSupabase();
+    CartManager().loadCartFromFirebase();
   }
 
   void _onCartChanged() {
@@ -786,6 +790,10 @@ class CartManager {
   final List<VoidCallback> _listeners = [];
   bool _isLoading = false;
 
+  // Firebase services
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   List<CartItem> get cartItems => _cartItems;
   int get itemCount => _cartItems.fold(0, (sum, item) => sum + item.quantity);
   double get totalPrice => _cartItems.fold(
@@ -818,20 +826,22 @@ class CartManager {
       _cartItems.add(CartItem(product: product, quantity: 1));
     }
     _notifyListeners();
+    _saveToLocal();
 
-    // Sync to Supabase (optimistic)
-    // _upsertRemote(
-    //   product.id,
-    //   _cartItems.firstWhere((i) => i.product.id == product.id).quantity,
-    // );
+    // Sync to Firebase (optimistic)
+    _upsertRemote(
+      product.id,
+      _cartItems.firstWhere((i) => i.product.id == product.id).quantity,
+    );
   }
 
   void removeFromCart(String productId) {
     _cartItems.removeWhere((item) => item.product.id == productId);
     _notifyListeners();
+    _saveToLocal();
 
     // Remote delete
-    // _deleteRemote(productId);
+    _deleteRemote(productId);
   }
 
   void updateQuantity(String productId, int quantity) {
@@ -843,12 +853,13 @@ class CartManager {
         _cartItems[index].quantity = quantity;
       }
       _notifyListeners();
+      _saveToLocal();
 
       // Sync remotely
       if (quantity <= 0) {
-        // _deleteRemote(productId);
+        _deleteRemote(productId);
       } else {
-        // _upsertRemote(productId, quantity);
+        _upsertRemote(productId, quantity);
       }
     }
   }
@@ -856,104 +867,215 @@ class CartManager {
   void clearCart() {
     _cartItems.clear();
     _notifyListeners();
+    _saveToLocal();
 
     // Remote clear for current user
-    // _clearRemote();
+    _clearRemote();
   }
 
-  // Remote syncing helpers
-  // SupabaseClient get _supabase => Supabase.instance.client;
+  // Load cart from Firebase
+  Future<void> loadCartFromFirebase() async {
+    if (_isLoading) return;
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      // User not logged in, load from local storage
+      await _loadFromLocal();
+      return;
+    }
 
-  // Future<void> loadCartFromSupabase() async {
-  //   if (_isLoading) return;
-  //   final userId = _supabase.auth.currentUser?.id;
-  //   if (userId == null) return; // not logged in -> keep local only
-  //   _isLoading = true;
-  //   try {
-  //     final List<dynamic> response = await _supabase
-  //         .from('cart')
-  //         .select('quantity, product:products(*)')
-  //         .eq('user_id', userId);
+    _isLoading = true;
+    try {
+      final querySnapshot = await _firestore
+          .collection('cart')
+          .where('userId', isEqualTo: userId)
+          .get();
 
-  //     final List<CartItem> fetched = [];
-  //     for (final row in response) {
-  //       try {
-  //         final map = row as Map<String, dynamic>;
-  //         final prodJson = map['product'] as Map<String, dynamic>?;
-  //         if (prodJson == null) continue;
-  //         final qty = (map['quantity'] as int?) ?? 1;
-  //         fetched.add(
-  //           CartItem(product: Product.fromJson(prodJson), quantity: qty),
-  //         );
-  //       } catch (_) {
-  //         // ignore malformed row
-  //       }
-  //     }
-  //     _cartItems
-  //       ..clear()
-  //       ..addAll(fetched);
-  //     _notifyListeners();
-  //   } catch (_) {
-  //     // ignore network/auth errors silently for now
-  //   } finally {
-  //     _isLoading = false;
-  //   }
-  // }
+      final List<CartItem> fetched = [];
+      for (final doc in querySnapshot.docs) {
+        try {
+          final data = doc.data();
+          final productData = data['productData'] as Map<String, dynamic>?;
+          if (productData == null) continue;
+          final qty = (data['quantity'] as int?) ?? 1;
+          fetched.add(
+            CartItem(product: Product.fromJson(productData), quantity: qty),
+          );
+        } catch (e) {
+          print('Error parsing cart item: $e');
+        }
+      }
+      _cartItems
+        ..clear()
+        ..addAll(fetched);
+      _notifyListeners();
+      _saveToLocal(); // Save to local storage for offline access
+    } catch (e) {
+      print('Error loading cart from Firebase: $e');
+      // Fallback to local storage
+      await _loadFromLocal();
+    } finally {
+      _isLoading = false;
+    }
+  }
 
-  // Future<void> _upsertRemote(String productId, int quantity) async {
-  //   final userId = _supabase.auth.currentUser?.id;
-  //   if (userId == null) return;
-  //   try {
-  //     // Check if row exists
-  //     final List<dynamic> rows = await _supabase
-  //         .from('cart')
-  //         .select('id')
-  //         .eq('user_id', userId)
-  //         .eq('product_id', productId)
-  //         .limit(1);
+  // Local storage methods
+  Future<void> _saveToLocal() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cartJson = _cartItems
+          .map(
+            (item) => {
+              'product': item.product.toJson(),
+              'quantity': item.quantity,
+            },
+          )
+          .toList();
+      await prefs.setString('cart', jsonEncode(cartJson));
+    } catch (e) {
+      print('Error saving cart to local storage: $e');
+    }
+  }
 
-  //     if (rows.isNotEmpty) {
-  //       final Map<String, dynamic> first = rows.first as Map<String, dynamic>;
-  //       final id = first['id'];
-  //       await _supabase
-  //           .from('cart')
-  //           .update({'quantity': quantity})
-  //           .eq('id', id);
-  //     } else {
-  //       await _supabase.from('cart').insert({
-  //         'user_id': userId,
-  //         'product_id': productId,
-  //         'quantity': quantity,
-  //       });
-  //     }
-  //   } catch (_) {
-  //     // ignore
-  //   }
-  // }
+  Future<void> _loadFromLocal() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cartString = prefs.getString('cart');
+      if (cartString != null) {
+        final cartJson = jsonDecode(cartString) as List<dynamic>;
+        final cartItems = cartJson.map((item) {
+          final itemMap = item as Map<String, dynamic>;
+          return CartItem(
+            product: Product.fromJson(itemMap['product']),
+            quantity: itemMap['quantity'] as int,
+          );
+        }).toList();
 
-  // Future<void> _deleteRemote(String productId) async {
-  //   final userId = _supabase.auth.currentUser?.id;
-  //   if (userId == null) return;
-  //   try {
-  //     await _supabase
-  //         .from('cart')
-  //         .delete()
-  //         .eq('user_id', userId)
-  //         .eq('product_id', productId);
-  //   } catch (_) {
-  //     // ignore
-  //   }
-  // }
+        _cartItems
+          ..clear()
+          ..addAll(cartItems);
+        _notifyListeners();
+      }
+    } catch (e) {
+      print('Error loading cart from local storage: $e');
+    }
+  }
 
-  // Future<void> _clearRemote() async {
-  //   final userId = _supabase.auth.currentUser?.id;
-  //   if (userId == null) return;
-  //   try {
-  //     await _supabase.from('cart').delete().eq('user_id', userId);
-  //   } catch (_) {
-  //     // ignore
-  //   }
-  // }
+  Future<void> _upsertRemote(String productId, int quantity) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
+    try {
+      final cartItem = _cartItems.firstWhere(
+        (item) => item.product.id == productId,
+      );
+
+      final docRef = _firestore.collection('cart').doc('${userId}_$productId');
+
+      await docRef.set({
+        'userId': userId,
+        'productId': productId,
+        'productData': cartItem.product.toJson(),
+        'quantity': quantity,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error upserting cart item to Firebase: $e');
+    }
+  }
+
+  Future<void> _deleteRemote(String productId) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
+    try {
+      await _firestore.collection('cart').doc('${userId}_$productId').delete();
+    } catch (e) {
+      print('Error deleting cart item from Firebase: $e');
+    }
+  }
+
+  Future<void> _clearRemote() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
+    try {
+      final querySnapshot = await _firestore
+          .collection('cart')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      final batch = _firestore.batch();
+      for (var doc in querySnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    } catch (e) {
+      print('Error clearing cart from Firebase: $e');
+    }
+  }
+
+  // Method to sync local cart to Firebase when user logs in
+  Future<void> syncLocalToFirebase() async {
+    try {
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) return;
+
+      // Get local cart items
+      final prefs = await SharedPreferences.getInstance();
+      final cartString = prefs.getString('cart');
+      if (cartString == null) return;
+
+      final cartJson = jsonDecode(cartString) as List<dynamic>;
+      if (cartJson.isEmpty) return;
+
+      // Get existing cart from Firebase
+      final existingSnapshot = await _firestore
+          .collection('cart')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      Map<String, int> existingQuantities = {};
+      for (var doc in existingSnapshot.docs) {
+        final data = doc.data();
+        existingQuantities[data['productId']] = data['quantity'] as int;
+      }
+
+      // Batch write for better performance
+      final batch = _firestore.batch();
+
+      for (var item in cartJson) {
+        final itemMap = item as Map<String, dynamic>;
+        final product = Product.fromJson(itemMap['product']);
+        final quantity = itemMap['quantity'] as int;
+
+        // Merge local and remote quantities
+        final existingQty = existingQuantities[product.id] ?? 0;
+        final newQuantity = quantity + existingQty;
+
+        final docRef = _firestore
+            .collection('cart')
+            .doc('${userId}_${product.id}');
+
+        batch.set(docRef, {
+          'userId': userId,
+          'productId': product.id,
+          'productData': product.toJson(),
+          'quantity': newQuantity,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      await batch.commit();
+
+      // Clear local storage after sync
+      await prefs.remove('cart');
+
+      // Reload cart from Firebase
+      await loadCartFromFirebase();
+    } catch (e) {
+      print('Error syncing local cart to Firebase: $e');
+    }
+  }
 }
 
 class CartItem {

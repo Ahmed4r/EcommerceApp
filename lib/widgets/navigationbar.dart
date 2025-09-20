@@ -17,8 +17,16 @@ class Navigationbar extends StatefulWidget {
 }
 
 class _NavigationbarState extends State<Navigationbar> {
-  List<Widget> pages = [Homepage(), Category(), WishlistPage(), ProfilePage()];
+  late List<Widget> pages;
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Create pages once in initState to avoid recreating them on every rebuild
+    pages = [const Homepage(), Category(), WishlistPage(), ProfilePage()];
+  }
+
   void _handleIndexChanged(int i) {
     setState(() {
       _selectedIndex = i;
@@ -36,14 +44,14 @@ class _NavigationbarState extends State<Navigationbar> {
     return Scaffold(
       extendBody: true,
       // Keep state of each page alive and avoid refetching on tab switch
-      body: IndexedStack(index: _selectedIndex, children: pages),
+      body: pages[_selectedIndex],
 
       bottomNavigationBar: CrystalNavigationBar(
         curve: Curves.bounceOut,
         currentIndex: _selectedIndex,
 
         unselectedItemColor: Colors.white,
-        backgroundColor: Colors.black.withOpacity(0.1),
+        backgroundColor: Colors.black.withValues(alpha: 0.1),
 
         borderWidth: 2,
         outlineBorderColor: Colors.white,

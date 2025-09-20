@@ -1,54 +1,378 @@
-// import 'dart:async';
-// import 'dart:convert';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:shop/app_colors.dart';
-// import 'package:shop/model/address_model.dart';
-// import 'package:shop/screens/location/address_details_Screen.dart';
-// import 'package:shop/screens/cart/cart_screen.dart';
-// import 'package:shop/services/orders_service.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/app_colors.dart';
+import 'package:shop/model/address_model.dart';
+import 'package:shop/screens/cart/cart_screen.dart';
+import 'package:shop/services/orders_service.dart';
 
-// class CheckoutScreen extends StatefulWidget {
-//   static const String routeName = '/checkout';
+class CheckoutScreen extends StatefulWidget {
+  static const String routeName = '/checkout';
 
-//   const CheckoutScreen({super.key});
+  const CheckoutScreen({super.key});
 
-//   @override
-//   State<CheckoutScreen> createState() => _CheckoutScreenState();
-// }
+  @override
+  State<CheckoutScreen> createState() => _CheckoutScreenState();
+}
 
-// class _CheckoutScreenState extends State<CheckoutScreen> {
-//   int _currentStep = 0; // 0: Address, 1: Payment, 2: Review
+class _CheckoutScreenState extends State<CheckoutScreen> {
+  String _paymentMethod = 'cod'; // 'cod' | 'card'
+  bool _placing = false;
 
-//   List<AddressModel> _addresses = [];
-//   AddressModel? _selectedAddress;
+  // Demo address for checkout
+  final AddressModel _demoAddress = AddressModel(
+    label: 'Home',
+    address: '123 Main Street, Downtown, City 12345\nPhone: +1 234 567 8900',
+    iconName: 'home',
+    iconColor: Colors.blue,
+  );
 
-//   String _paymentMethod = 'cod'; // 'cod' | 'saved_card' | 'new_card'
-//   final _nameController = TextEditingController();
-//   final _cardController = TextEditingController();
-//   final _expiryController = TextEditingController();
-//   final _cvvController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    CartManager().addListener(_onCartChanged);
+  }
 
-//   bool _placing = false;
-//   dynamic _orderId; // Supabase order id
-//   String _orderStatus = 'pending';
+  @override
+  void dispose() {
+    CartManager().removeListener(_onCartChanged);
+    super.dispose();
+  }
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     _loadAddresses();
-//     // keep in sync with cart changes
-//     CartManager().addListener(_onCartChanged);
-//   }
+  void _onCartChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
 
-//   void _onCartChanged() {
-//     if (!mounted) return;
-//     setState(() {});
-//   }
+  @override
+  Widget build(BuildContext context) {
+    final cartItems = CartManager().cartItems;
+    final totalPrice = CartManager().totalPrice;
 
-//   Future<void> _loadAddresses() async {
+    if (cartItems.isEmpty) {
+      return Scaffold(
+        backgroundColor: AppColors.primary,
+        appBar: AppBar(
+          backgroundColor: AppColors.primary,
+          title: Text(
+            'Checkout',
+            style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.shopping_cart_outlined, size: 64.r),
+              SizedBox(height: 16.h),
+              Text(
+                'Your cart is empty',
+                style: GoogleFonts.cairo(fontSize: 18.sp),
+              ),
+              SizedBox(height: 16.h),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Go Back to Shopping'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: AppColors.primary,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        title: Text(
+          'Checkout',
+          style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.r),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Order Summary
+            _SectionCard(
+              title: 'Order Summary',
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Items (${cartItems.length})',
+                        style: GoogleFonts.cairo(fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        '\$${totalPrice.toStringAsFixed(2)}',
+                        style: GoogleFonts.cairo(fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+                  ...cartItems
+                      .take(3)
+                      .map(
+                        (item) => Padding(
+                          padding: EdgeInsets.only(bottom: 8.h),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${item.product.name} x${item.quantity}',
+                                  style: GoogleFonts.cairo(fontSize: 14.sp),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Text(
+                                '\$${(item.product.price * item.quantity).toStringAsFixed(2)}',
+                                style: GoogleFonts.cairo(fontSize: 14.sp),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  if (cartItems.length > 3)
+                    Text(
+                      '+ ${cartItems.length - 3} more items',
+                      style: GoogleFonts.cairo(
+                        color: Colors.grey[600],
+                        fontSize: 12.sp,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 16.h),
+
+            // Delivery Address
+            _SectionCard(
+              title: 'Delivery Address',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(_demoAddress.icon, color: _demoAddress.iconColor),
+                      SizedBox(width: 8.w),
+                      Text(
+                        _demoAddress.label ?? 'Address',
+                        style: GoogleFonts.cairo(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    _demoAddress.address ?? '',
+                    style: GoogleFonts.cairo(color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 16.h),
+
+            // Payment Method
+            _SectionCard(
+              title: 'Payment Method',
+              child: Column(
+                children: [
+                  RadioListTile<String>(
+                    title: Text('Cash on Delivery'),
+                    subtitle: Text('Pay when your order arrives'),
+                    value: 'cod',
+                    groupValue: _paymentMethod,
+                    onChanged: (value) {
+                      setState(() => _paymentMethod = value!);
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: Text('Credit/Debit Card'),
+                    subtitle: Text('Pay online (Not implemented)'),
+                    value: 'card',
+                    groupValue: _paymentMethod,
+                    onChanged: (value) {
+                      setState(() => _paymentMethod = value!);
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 24.h),
+
+            // Place Order Button
+            SizedBox(
+              width: double.infinity,
+              height: 56.h,
+              child: ElevatedButton(
+                onPressed: _placing ? null : _placeOrder,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+                child: _placing
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        'Place Order - \$${totalPrice.toStringAsFixed(2)}',
+                        style: GoogleFonts.cairo(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _placeOrder() async {
+    setState(() => _placing = true);
+
+    try {
+      // Create order in Firebase
+      final orderId = await OrdersService.instance.createOrder(
+        address: _demoAddress,
+        paymentMethod: _paymentMethod,
+        total: CartManager().totalPrice,
+        items: CartManager().cartItems,
+      );
+
+      // Clear the cart
+      CartManager().clearCart();
+
+      // Show success dialog
+      if (mounted) {
+        _showOrderSuccessDialog(orderId);
+      }
+    } catch (e) {
+      // Show error dialog
+      if (mounted) {
+        _showErrorDialog(e.toString());
+      }
+    } finally {
+      if (mounted) setState(() => _placing = false);
+    }
+  }
+
+  void _showOrderSuccessDialog(String orderId) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle, color: Colors.green, size: 64.r),
+            SizedBox(height: 16.h),
+            Text(
+              'Order Placed Successfully!',
+              style: GoogleFonts.cairo(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Order ID: ${orderId.substring(0, 8)}...',
+              style: GoogleFonts.cairo(
+                color: Colors.grey[600],
+                fontSize: 14.sp,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              'Your order has been placed successfully. You can track your order in the Orders section.',
+              style: GoogleFonts.cairo(fontSize: 14.sp),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pop(); // Close checkout screen
+            },
+            child: Text('Continue Shopping'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String error) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Order Failed'),
+        content: Text('Failed to place order: $error'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final Widget child;
+
+  const _SectionCard({required this.title, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10.r,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.cairo(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          child,
+        ],
+      ),
+    );
+  }
+}
 //     final prefs = await SharedPreferences.getInstance();
 //     final list = prefs.getStringList('addresses') ?? [];
 //     final parsed = list
