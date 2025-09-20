@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shop/app_colors.dart';
+
 import 'package:shop/model/product_model.dart';
 import 'package:shop/screens/cart/cart_screen.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
@@ -19,7 +19,7 @@ class ProductDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedPageWrapper(
       child: Scaffold(
-        backgroundColor: AppColors.primary,
+        backgroundColor: Theme.of(context).colorScheme.background,
         body: SafeArea(
           child: Column(
             children: [
@@ -31,7 +31,7 @@ class ProductDetailsPage extends StatelessWidget {
                   children: [
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                      child: _circleButton(Icons.arrow_back_ios_new),
+                      child: _circleButton(context, Icons.arrow_back_ios_new),
                     ),
                     GestureDetector(
                       onTap: () {
@@ -49,7 +49,7 @@ class ProductDetailsPage extends StatelessWidget {
                           ),
                         );
                       },
-                      child: _circleButton(Icons.add_shopping_cart),
+                      child: _circleButton(context, Icons.add_shopping_cart),
                     ),
                   ],
                 ),
@@ -82,7 +82,7 @@ class ProductDetailsPage extends StatelessWidget {
                 child: Container(
                   padding: EdgeInsets.all(20.w),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(25.r),
                     ),
@@ -159,7 +159,9 @@ class ProductDetailsPage extends StatelessWidget {
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.black,
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15.r),
                                   ),
@@ -174,7 +176,9 @@ class ProductDetailsPage extends StatelessWidget {
                                       style: GoogleFonts.cairo(
                                         fontSize: 16.sp,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary,
                                       ),
                                     ),
 
@@ -210,17 +214,25 @@ class ProductDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _circleButton(IconData icon, {Color color = Colors.black}) {
+  Widget _circleButton(BuildContext context, IconData icon, {Color? color}) {
     return Container(
       padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         shape: BoxShape.circle,
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+          BoxShadow(
+            color: Theme.of(context).shadowColor.withOpacity(0.1),
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
-      child: Icon(icon, size: 20.r, color: color),
+      child: Icon(
+        icon,
+        size: 20.r,
+        color: color ?? Theme.of(context).iconTheme.color,
+      ),
     );
   }
 }

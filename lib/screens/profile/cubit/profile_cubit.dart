@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/services/store/firestore_service.dart';
 
-import '../../services/auth/auth_service.dart';
+import '../../../services/auth/auth_service.dart';
 
 part 'profile_state.dart';
 

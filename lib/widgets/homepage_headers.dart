@@ -25,7 +25,10 @@ class HomepageHeaders extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.cairo(color: Colors.black, fontSize: 16.sp),
+          style: GoogleFonts.cairo(
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+            fontSize: 16.sp,
+          ),
         ),
         const Spacer(),
         TextButton(

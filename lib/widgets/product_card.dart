@@ -7,7 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:redacted/redacted.dart';
-import 'package:shop/app_colors.dart';
+
 import 'package:shop/model/product_model.dart';
 import 'package:shop/screens/cart/cart_screen.dart';
 import 'package:shop/screens/homepage/product_details.dart';
@@ -177,7 +177,6 @@ class _ProductItemCardState extends State<ProductItemCard>
                     child: Text(
                       widget.product.name,
                       style: GoogleFonts.notoSansRejang(
-                        color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 12.sp,
                       ),
@@ -259,8 +258,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                       children: [
                         Text(
                           "\$ ${widget.product.price.toString()}",
-                          style: GoogleFonts.cairo(
-                            color: Colors.black,
+                          style: GoogleFonts.cairo(                       
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
                           ),

@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/app_colors.dart';
+
 import 'package:shop/screens/login/cubit/login_cubit.dart';
 import 'package:shop/screens/login/cubit/login_state.dart';
 import 'package:shop/screens/login/forgot_password/forgot_password.dart';
@@ -60,23 +60,23 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context, state) {
           if (state is LoginLoadingState) {
             return Scaffold(
-              backgroundColor: AppColors.primary,
+              backgroundColor: Theme.of(context).colorScheme.background,
               body: Center(child: CircularProgressIndicator()),
             );
           }
 
           // Default login form for all other states
           return Scaffold(
-            backgroundColor: AppColors.primary,
+            backgroundColor: Theme.of(context).colorScheme.background,
             appBar: AppBar(
               forceMaterialTransparency: true,
-              backgroundColor: AppColors.primary,
+              backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
               title: Text(
                 'Login',
                 style: GoogleFonts.sen(
                   fontSize: 30.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: Theme.of(context).appBarTheme.titleTextStyle?.color,
                 ),
               ),
               centerTitle: true,
@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                         'Please sign in to your existing account',
                         style: GoogleFonts.sen(
                           fontSize: 16.sp,
-                          color: Colors.black,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                       SizedBox(height: 40.h),
@@ -163,7 +163,9 @@ class _LoginPageState extends State<LoginPage> {
                             'Don\'t have an account?',
                             style: GoogleFonts.cairo(
                               fontSize: 16.sp,
-                              color: Colors.black,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                             ),
                           ),
                           TextButton(
@@ -187,7 +189,7 @@ class _LoginPageState extends State<LoginPage> {
                         'Or',
                         style: GoogleFonts.cairo(
                           fontSize: 16.sp,
-                          color: Colors.black,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                       SizedBox(height: 20.h),

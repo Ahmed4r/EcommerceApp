@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shop/app_colors.dart';
+
 import 'package:shop/screens/register/cubit/signup_cubit.dart';
 import 'package:shop/screens/register/cubit/signup_state.dart';
 import 'package:shop/widgets/custom_text_field.dart';
@@ -53,7 +53,7 @@ class _RegisterPageState extends State<RegisterPage> {
         builder: (context, state) {
           if (state is SignUpLoadingState) {
             return Scaffold(
-              backgroundColor: AppColors.primary,
+              backgroundColor: Theme.of(context).colorScheme.background,
               body: Center(child: CircularProgressIndicator()),
             );
           }
@@ -66,16 +66,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _buildSignUpForm(BuildContext context, SignUpState state) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         forceMaterialTransparency: true,
-        backgroundColor: AppColors.primary,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         title: Text(
           'Sign Up',
           style: GoogleFonts.sen(
             fontSize: 30.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Theme.of(context).appBarTheme.titleTextStyle?.color,
           ),
         ),
         leading: IconButton(
@@ -94,7 +94,10 @@ class _RegisterPageState extends State<RegisterPage> {
             children: [
               Text(
                 'Please sign up to get started',
-                style: GoogleFonts.sen(fontSize: 16.sp, color: Colors.black),
+                style: GoogleFonts.sen(
+                  fontSize: 16.sp,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
               ),
               SizedBox(height: 20.h),
               Form(
@@ -190,7 +193,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   child: Center(
                     child: state is SignUpLoadingState
-                        ? CircularProgressIndicator(color: Colors.white)
+                        ? CircularProgressIndicator(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          )
                         : Text(
                             'Sign Up',
                             style: GoogleFonts.cairo(

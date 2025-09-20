@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shop/app_colors.dart';
+
 import 'package:shop/screens/homepage/product_details.dart';
 import 'package:shop/utils/custom_page_routes.dart';
 
@@ -21,17 +21,17 @@ class WishlistPage extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           backgroundColor: state.favorites.isEmpty
-              ? Color(0xffEDF1F4)
-              : AppColors.primary,
+              ? Theme.of(context).colorScheme.background
+              : Theme.of(context).colorScheme.background,
           appBar: AppBar(
             forceMaterialTransparency: true,
             backgroundColor: state.favorites.isEmpty
-                ? Color(0xffEDF1F4)
-                : AppColors.primary,
+                ? Theme.of(context).colorScheme.background
+                : Theme.of(context).appBarTheme.backgroundColor,
             title: Text(
               "Wishlist (${state.favorites.length})",
               style: GoogleFonts.cairo(
-                color: Colors.black,
+                color: Theme.of(context).textTheme.titleLarge?.color,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -181,7 +181,7 @@ class WishlistPage extends StatelessWidget {
                                 backgroundColor: Colors.red.withOpacity(0.9),
                                 child: FaIcon(
                                   FontAwesomeIcons.heart,
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.onError,
                                   size: 12.sp,
                                 ),
                               ),

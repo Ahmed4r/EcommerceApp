@@ -5,11 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shop/app_colors.dart';
+
 import 'package:shop/screens/location/location_access_screen.dart';
-import 'package:shop/screens/profile/profile_cubit.dart';
+import 'package:shop/screens/profile/cubit/profile_cubit.dart';
 import 'package:shop/services/auth/auth_service.dart';
 import 'package:shop/widgets/custom_text_field.dart';
+import 'package:shop/widgets/theme/theme_toggle_widget.dart';
 
 class ProfilePage extends StatefulWidget {
   static const String routeName = 'profile';
@@ -46,21 +47,23 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (context, state) {
         if (state is ProfileInitial || state is profileLoadingState) {
           return Scaffold(
-            backgroundColor: AppColors.primary,
+            backgroundColor: Theme.of(context).colorScheme.background,
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
         if (state is profileFailureState) {
           return Scaffold(
-            backgroundColor: AppColors.primary,
+            backgroundColor: Theme.of(context).colorScheme.background,
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Failed to load profile data',
-                    style: TextStyle(color: Colors.red),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
@@ -82,61 +85,75 @@ class _ProfilePageState extends State<ProfilePage> {
           phoneController.text = state.phone;
 
           return Scaffold(
-            backgroundColor: AppColors.primary,
+            backgroundColor: Theme.of(context).colorScheme.background,
             extendBodyBehindAppBar: true,
             appBar: buildAppBar(context),
-            body: Center(
+            body: SafeArea(
               child: SingleChildScrollView(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    SizedBox(height: 10.h),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(20.r),
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                         child: Container(
-                          width: 340.w,
-                          height: 380.h,
+                          width: double.infinity,
+                          constraints: BoxConstraints(minHeight: 380.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20.w,
+                            vertical: 30.h,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surface.withOpacity(0.9),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.outline.withOpacity(0.3),
                               width: 1.5.w,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Theme.of(
+                                  context,
+                                ).shadowColor.withOpacity(0.1),
                                 blurRadius: 10.r,
                                 offset: Offset(0, 4),
                               ),
                             ],
                           ),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Stack(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 50.r,
-                                    backgroundImage: AssetImage(
-                                      'assets/profile.jpg',
-                                    ),
-                                  ),
-                                ],
+                              SizedBox(height: 10.h),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ThemeToggleCard(
+                                  title: 'Theme Preference',
+                                  subtitle:
+                                      'Choose between light and dark theme',
+                                  padding: EdgeInsets.all(16.w),
+                                ),
                               ),
+                              SizedBox(height: 10.h),
+
+                              // My Orders Section
                               CustomTextField(
                                 controller: nameController,
                                 labelText: 'Name',
                                 icon: Icons.person,
                                 enabled: isEditMode,
                               ),
+                              SizedBox(height: 5.h),
                               CustomTextField(
                                 controller: emailController,
                                 labelText: 'Email',
                                 icon: Icons.email,
                                 enabled: false,
                               ),
+                              SizedBox(height: 5.h),
                               CustomTextField(
                                 controller: phoneController,
                                 labelText: 'Phone',
@@ -158,6 +175,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     ),
+
+                    // Theme Toggle Widget
                     SizedBox(height: 20.h),
                     GestureDetector(
                       onTap: () async {
@@ -185,11 +204,15 @@ class _ProfilePageState extends State<ProfilePage> {
                         height: 40.h,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: isEditMode ? Colors.green : Colors.black,
+                          color: isEditMode
+                              ? Theme.of(context).colorScheme.secondary
+                              : Theme.of(context).colorScheme.primary,
                           borderRadius: BorderRadius.circular(20.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Theme.of(
+                                context,
+                              ).shadowColor.withOpacity(0.1),
                               blurRadius: 10.r,
                               offset: Offset(0, 4),
                             ),
@@ -198,7 +221,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Text(
                           isEditMode ? "Save Changes" : "Edit Profile",
                           style: GoogleFonts.cairo(
-                            color: Colors.white,
+                            color: isEditMode
+                                ? Theme.of(context).colorScheme.onSecondary
+                                : Theme.of(context).colorScheme.onPrimary,
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
                           ),
@@ -219,7 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
 PreferredSizeWidget? buildAppBar(BuildContext context) {
   return AppBar(
-    backgroundColor: AppColors.primary,
+    backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
     centerTitle: true,
     leading: IconButton(
       onPressed: () async {
@@ -231,12 +256,16 @@ PreferredSizeWidget? buildAppBar(BuildContext context) {
           log('error while sign out');
         }
       },
-      icon: FaIcon(FontAwesomeIcons.signOut, color: Colors.black, size: 18.sp),
+      icon: FaIcon(
+        FontAwesomeIcons.signOut,
+        color: Theme.of(context).appBarTheme.iconTheme?.color,
+        size: 18.sp,
+      ),
     ),
     title: Text(
       "My Profile",
       style: GoogleFonts.cairo(
-        color: Colors.black,
+        color: Theme.of(context).appBarTheme.titleTextStyle?.color,
         fontWeight: FontWeight.bold,
       ),
     ),
@@ -247,8 +276,22 @@ PreferredSizeWidget? buildAppBar(BuildContext context) {
         },
         icon: FaIcon(
           FontAwesomeIcons.locationArrow,
-          color: Colors.grey,
-          size: 30.r,
+          color: Theme.of(
+            context,
+          ).appBarTheme.iconTheme?.color?.withOpacity(0.7),
+          size: 20.r,
+        ),
+      ),
+      IconButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/orders');
+        },
+        icon: FaIcon(
+          FontAwesomeIcons.receipt,
+          color: Theme.of(
+            context,
+          ).appBarTheme.iconTheme?.color?.withOpacity(0.7),
+          size: 20.r,
         ),
       ),
     ],

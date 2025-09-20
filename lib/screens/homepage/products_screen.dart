@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shop/app_colors.dart';
+
 import 'package:shop/model/product_model.dart';
 import 'package:shop/widgets/product_card.dart';
 
@@ -14,7 +14,7 @@ class ShowProductspage extends StatelessWidget {
     final List<Product> products = arguments is List<Product> ? arguments : [];
 
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
@@ -24,7 +24,7 @@ class ShowProductspage extends StatelessWidget {
         ),
         forceMaterialTransparency: true,
         title: Text("Products"),
-        backgroundColor: AppColors.primary,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       ),
       body: products.isEmpty
           ? Center(

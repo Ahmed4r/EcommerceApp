@@ -5,11 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/model/product_model.dart';
-import 'package:shop/app_colors.dart';
-// import 'package:shop/screens/cart/checkout_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop/screens/cart/checkout_screen.dart';
 
 class CartScreen extends StatefulWidget {
   static const String routeName = '/cart';
@@ -82,7 +81,7 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
     final totalPrice = CartManager().totalPrice;
 
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: _buildAppBar(context),
       body: cartItems.isEmpty
           ? _buildEmptyCart()
@@ -95,35 +94,35 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.primary,
       elevation: 0,
       forceMaterialTransparency: true,
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
         icon: Container(
           padding: EdgeInsets.all(8.r),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.8),
+            color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
             borderRadius: BorderRadius.circular(12.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8.r,
-                offset: Offset(0, 2),
-              ),
-            ],
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            ),
           ),
           child: Center(
-            child: Icon(Icons.arrow_back_ios, color: Colors.black, size: 18.r),
+            child: Icon(
+              Icons.arrow_back_ios,
+              size: 18.r,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
         ),
       ),
       title: Text(
         'Shopping Cart',
         style: GoogleFonts.cairo(
-          color: Colors.black,
           fontSize: 20.sp,
           fontWeight: FontWeight.bold,
+          color: Theme.of(context).appBarTheme.titleTextStyle?.color,
         ),
       ),
       centerTitle: true,
@@ -158,13 +157,13 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
                 width: 120.w,
                 height: 120.h,
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
                   shape: BoxShape.circle,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                 ),
                 child: Icon(
                   FontAwesomeIcons.cartShopping,
                   size: 60.sp,
-                  color: Colors.grey[400],
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               SizedBox(height: 24.h),
@@ -173,7 +172,7 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
                 style: GoogleFonts.cairo(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[600],
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
               ),
               SizedBox(height: 8.h),
@@ -181,7 +180,9 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
                 'Add some products to get started',
                 style: GoogleFonts.cairo(
                   fontSize: 16.sp,
-                  color: Colors.grey[500],
+                  color: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                 ),
               ),
               SizedBox(height: 32.h),
@@ -194,12 +195,17 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
                   ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.blue, Colors.blueAccent],
+                      colors: [
+                        Theme.of(context).colorScheme.primary,
+                        Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                      ],
                     ),
                     borderRadius: BorderRadius.circular(25.r),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blue.withOpacity(0.3),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.3),
                         blurRadius: 12.r,
                         offset: Offset(0, 6),
                       ),
@@ -208,7 +214,7 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
                   child: Text(
                     'Start Shopping',
                     style: GoogleFonts.cairo(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                     ),
@@ -236,12 +242,20 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
                 padding: EdgeInsets.all(20.r),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.blue.shade50, Colors.white],
+                    colors: [
+                      Theme.of(context).colorScheme.surface,
+                      Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withOpacity(0.2),
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Theme.of(context).shadowColor.withOpacity(0.1),
                       blurRadius: 10.r,
                       offset: Offset(0, 5),
                     ),
@@ -257,7 +271,9 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
                           '${cartItems.length} Items',
                           style: GoogleFonts.cairo(
                             fontSize: 16.sp,
-                            color: Colors.grey[600],
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.color,
                           ),
                         ),
                         Text(
@@ -265,7 +281,9 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
                           style: GoogleFonts.cairo(
                             fontSize: 24.sp,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Theme.of(
+                              context,
+                            ).textTheme.titleLarge?.color,
                           ),
                         ),
                       ],
@@ -273,12 +291,14 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
                     Container(
                       padding: EdgeInsets.all(12.r),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(15.r),
                       ),
                       child: Icon(
                         FontAwesomeIcons.receipt,
-                        color: Colors.blue,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 24.sp,
                       ),
                     ),
@@ -337,10 +357,10 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
     return Container(
       padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Theme.of(context).shadowColor.withOpacity(0.1),
             blurRadius: 10.r,
             offset: Offset(0, -5),
           ),
@@ -373,16 +393,16 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
               children: [
                 Icon(
                   FontAwesomeIcons.creditCard,
-                  color: Colors.white,
                   size: 20.sp,
+                  color: Colors.white,
                 ),
                 SizedBox(width: 12.w),
                 Text(
                   'Checkout • \$${totalPrice.toStringAsFixed(2)}',
                   style: GoogleFonts.cairo(
-                    color: Colors.white,
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -395,28 +415,39 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
 
   void _handleCheckout() {
     // Navigate to the new Checkout screen with address, payment, and status
-    // Navigator.pushNamed(context, CheckoutScreen.routeName);
+    Navigator.pushNamed(context, CheckoutScreen.routeName);
   }
 
   void _showClearCartDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.r),
         ),
         title: Text(
           'Clear Cart',
-          style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+          style: GoogleFonts.cairo(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).textTheme.titleLarge?.color,
+          ),
         ),
         content: Text(
           'Are you sure you want to remove all items from your cart?',
-          style: GoogleFonts.cairo(),
+          style: GoogleFonts.cairo(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: GoogleFonts.cairo(color: Colors.grey)),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.cairo(
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -485,15 +516,14 @@ class _CartItemCardState extends State<CartItemCard>
             child: Container(
               padding: EdgeInsets.all(16.r),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
+                color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(20.r),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
-                  width: 1.5.w,
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Theme.of(context).shadowColor.withOpacity(0.1),
                     blurRadius: 10.r,
                     offset: Offset(0, 5),
                   ),
@@ -512,10 +542,12 @@ class _CartItemCardState extends State<CartItemCard>
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            color: Colors.grey[300],
+                            color: Theme.of(context).colorScheme.surfaceVariant,
                             child: Icon(
                               Icons.image_not_supported,
-                              color: Colors.grey[600],
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           );
                         },
@@ -534,7 +566,9 @@ class _CartItemCardState extends State<CartItemCard>
                           style: GoogleFonts.cairo(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.color,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -544,7 +578,7 @@ class _CartItemCardState extends State<CartItemCard>
                           widget.cartItem.product.category,
                           style: GoogleFonts.cairo(
                             fontSize: 12.sp,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                           ),
                         ),
                         SizedBox(height: 6.h),
@@ -584,8 +618,12 @@ class _CartItemCardState extends State<CartItemCard>
                       // Quantity Controls
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
                           borderRadius: BorderRadius.circular(20.r),
+                          border: Border.all(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outline.withOpacity(0.3),
+                          ),
                         ),
                         child: Column(
                           children: [
@@ -603,7 +641,9 @@ class _CartItemCardState extends State<CartItemCard>
                                 child: Icon(
                                   Icons.add,
                                   size: 16.sp,
-                                  color: Colors.black,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
                                 ),
                               ),
                             ),
@@ -617,6 +657,9 @@ class _CartItemCardState extends State<CartItemCard>
                                 style: GoogleFonts.cairo(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.bold,
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium?.color,
                                 ),
                               ),
                             ),
@@ -634,7 +677,9 @@ class _CartItemCardState extends State<CartItemCard>
                                 child: Icon(
                                   Icons.remove,
                                   size: 16.sp,
-                                  color: Colors.black,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
                                 ),
                               ),
                             ),
@@ -721,11 +766,11 @@ class _CheckoutSuccessDialogState extends State<CheckoutSuccessDialog>
         child: Container(
           padding: EdgeInsets.all(32.r),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(30.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Theme.of(context).shadowColor.withOpacity(0.2),
                 blurRadius: 20.r,
                 offset: Offset(0, 10),
               ),
@@ -761,7 +806,7 @@ class _CheckoutSuccessDialogState extends State<CheckoutSuccessDialog>
                 style: GoogleFonts.cairo(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
               ),
               SizedBox(height: 8.h),
@@ -770,7 +815,7 @@ class _CheckoutSuccessDialogState extends State<CheckoutSuccessDialog>
                 textAlign: TextAlign.center,
                 style: GoogleFonts.cairo(
                   fontSize: 16.sp,
-                  color: Colors.grey[600],
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
             ],

@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shop/app_colors.dart';
 import 'package:shop/screens/homepage/cubit/homepage_cubit.dart';
 import 'package:shop/screens/homepage/cubit/homepage_state.dart';
 import 'package:shop/widgets/product_card.dart';
@@ -120,16 +119,18 @@ class _CategoryState extends State<Category> {
     return BlocBuilder<HomepageCubit, HomepageState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: AppColors.primary,
+          backgroundColor: Theme.of(context).colorScheme.background,
           appBar: AppBar(
             excludeHeaderSemantics: true,
-
             elevation: 0,
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
             title: Text(
               "Category",
-              style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+              style: GoogleFonts.cairo(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).appBarTheme.titleTextStyle?.color,
+              ),
             ),
-            backgroundColor: Colors.transparent,
           ),
           body: SingleChildScrollView(
             child: Padding(
@@ -138,40 +139,28 @@ class _CategoryState extends State<Category> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Glassy Search Bar
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20.r),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.4),
-                            width: 1.5.w,
-                          ),
-                        ),
-                        child: TextField(
-                          onChanged: (query) {
-                            searchQuery = query;
-                            if (state is HomepageSuccess) {
-                              filterProducts(state.products);
-                            }
-                          },
-                          controller: searchController,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            labelText: 'Search',
-                            labelStyle: GoogleFonts.cairo(
-                              color: Colors.black54,
-                            ),
-                            prefixIcon: Icon(
-                              FontAwesomeIcons.magnifyingGlass,
-                              size: 20.r,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
+                  TextField(
+                    onChanged: (query) {
+                      searchQuery = query;
+                      if (state is HomepageSuccess) {
+                        filterProducts(state.products);
+                      }
+                    },
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      labelText: 'Search',
+                      labelStyle: GoogleFonts.cairo(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.6),
+                      ),
+                      prefixIcon: Icon(
+                        FontAwesomeIcons.magnifyingGlass,
+                        size: 20.r,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.7),
                       ),
                     ),
                   ),
@@ -183,7 +172,7 @@ class _CategoryState extends State<Category> {
                       Text(
                         "Shop By Category",
                         style: GoogleFonts.cairo(
-                          color: Colors.black,
+                          color: Theme.of(context).textTheme.titleMedium?.color,
                           fontSize: 16.sp,
                         ),
                       ),
@@ -221,16 +210,28 @@ class _CategoryState extends State<Category> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(60.r),
                               color: isSelected
-                                  ? Colors.blueAccent
-                                  : Colors.white,
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.surface,
+                              border: !isSelected
+                                  ? Border.all(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.outline.withOpacity(0.2),
+                                      width: 1,
+                                    )
+                                  : null,
                             ),
                             child: categoryData[index]["type"] == "text"
                                 ? Text(
                                     categoryData[index]["label"],
                                     style: GoogleFonts.cairo(
                                       color: isSelected
-                                          ? Colors.white
-                                          : Colors.black,
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface,
                                       fontSize: 16.sp,
                                     ),
                                   )
@@ -242,8 +243,12 @@ class _CategoryState extends State<Category> {
                                       FaIcon(
                                         categoryData[index]["icon"],
                                         color: isSelected
-                                            ? Colors.white
-                                            : Colors.black,
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimary
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.onSurface,
                                         size: 16.r,
                                       ),
                                       SizedBox(width: 6.w),
@@ -251,8 +256,12 @@ class _CategoryState extends State<Category> {
                                         categoryData[index]["label"],
                                         style: GoogleFonts.cairo(
                                           color: isSelected
-                                              ? Colors.white
-                                              : Colors.black,
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.onPrimary
+                                              : Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
                                           fontSize: 16.sp,
                                         ),
                                       ),
@@ -261,8 +270,12 @@ class _CategoryState extends State<Category> {
                                 : FaIcon(
                                     categoryData[index]["icon"],
                                     color: isSelected
-                                        ? Colors.white
-                                        : Colors.black,
+                                        ? Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
                                     size: 16.r,
                                   ),
                           ),
@@ -314,7 +327,9 @@ class _CategoryState extends State<Category> {
                                 'No products found',
                                 style: GoogleFonts.cairo(
                                   fontSize: 16.sp,
-                                  color: Colors.grey[600],
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface.withOpacity(0.6),
                                 ),
                               ),
                             ),

@@ -101,20 +101,26 @@ class OrdersService {
 
   Future<List<Map<String, dynamic>>> fetchMyOrders() async {
     final userId = _auth.currentUser?.uid;
+    print('🔍 Current user ID: $userId');
     if (userId == null) {
+      print('❌ User not authenticated');
       throw Exception('Not authenticated');
     }
 
     try {
+      print('📡 Fetching orders from Firestore...');
       final snapshot = await _firestore
           .collection('orders')
           .where('userId', isEqualTo: userId)
-          .orderBy('createdAt', descending: true)
+          // Removed orderBy to avoid composite index requirement
+          // Will sort on client side instead
           .get();
 
+      print('📦 Found ${snapshot.docs.length} orders');
       List<Map<String, dynamic>> orders = [];
 
       for (var doc in snapshot.docs) {
+        print('🔄 Processing order: ${doc.id}');
         final orderData = doc.data();
         orderData['id'] = doc.id;
 
@@ -125,6 +131,7 @@ class OrdersService {
             .collection('items')
             .get();
 
+        print('📋 Order ${doc.id} has ${itemsSnapshot.docs.length} items');
         orderData['items'] = itemsSnapshot.docs
             .map((itemDoc) => {'id': itemDoc.id, ...itemDoc.data()})
             .toList();
@@ -132,9 +139,19 @@ class OrdersService {
         orders.add(orderData);
       }
 
+      // Client-side sorting by createdAt (newest first)
+      orders.sort((a, b) {
+        final aTime =
+            (a['createdAt'] as Timestamp?)?.toDate() ?? DateTime(1970);
+        final bTime =
+            (b['createdAt'] as Timestamp?)?.toDate() ?? DateTime(1970);
+        return bTime.compareTo(aTime); // Descending order
+      });
+
+      print('✅ Successfully fetched and sorted ${orders.length} orders');
       return orders;
     } catch (e) {
-      print('Error fetching user orders: $e');
+      print('❌ Error fetching user orders: $e');
       return [];
     }
   }

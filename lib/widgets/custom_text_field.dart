@@ -8,14 +8,14 @@ class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
   final String labelText;
   final IconData icon;
-  bool obscureText;
+  final bool obscureText;
   final String type;
   final bool enabled;
   final int? maxLines;
   final bool? keyboardTypeNumber;
   final String? Function(String?)? validator;
 
-  CustomTextField({
+  const CustomTextField({
     super.key,
     required this.controller,
     required this.labelText,
@@ -34,8 +34,19 @@ class CustomTextField extends StatefulWidget {
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
+  late bool _obscureText;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureText = widget.obscureText;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(20.r),
       child: BackdropFilter(
@@ -44,16 +55,24 @@ class _CustomTextFieldState extends State<CustomTextField> {
           padding: EdgeInsets.all(10),
           margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.3),
+            color: isDark
+                ? theme.colorScheme.surface.withOpacity(0.8)
+                : theme.colorScheme.surface.withOpacity(0.3),
             borderRadius: BorderRadius.circular(20.r),
             border: Border.all(
-              color: Colors.white.withOpacity(0.4),
+              color: isDark
+                  ? theme.colorScheme.outline.withOpacity(0.5)
+                  : theme.colorScheme.outline.withOpacity(0.4),
               width: 1.5.w,
             ),
           ),
           child: Row(
             children: [
-              FaIcon(widget.icon, color: Colors.black54, size: 20.sp),
+              FaIcon(
+                widget.icon,
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                size: 20.sp,
+              ),
               SizedBox(width: 10.w),
               Expanded(
                 child: TextFormField(
@@ -66,26 +85,35 @@ class _CustomTextFieldState extends State<CustomTextField> {
                             ? TextInputType.phone
                             : TextInputType.text)
                       : TextInputType.visiblePassword,
-                  obscureText: widget.obscureText,
-                  style: GoogleFonts.cairo(color: Colors.black87),
-
-                  cursorColor: Colors.blueAccent,
+                  obscureText: _obscureText,
+                  style: GoogleFonts.cairo(color: theme.colorScheme.onSurface),
+                  cursorColor: theme.colorScheme.primary,
                   decoration: InputDecoration(
                     suffixIcon: widget.type == "password"
                         ? IconButton(
                             onPressed: () {
                               setState(() {
-                                widget.obscureText = !widget.obscureText;
+                                _obscureText = !_obscureText;
                               });
                             },
-                            icon: widget.obscureText
-                                ? FaIcon(FontAwesomeIcons.eyeSlash)
-                                : FaIcon(FontAwesomeIcons.eye),
+                            icon: _obscureText
+                                ? FaIcon(
+                                    FontAwesomeIcons.eyeSlash,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.7),
+                                  )
+                                : FaIcon(
+                                    FontAwesomeIcons.eye,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.7),
+                                  ),
                           )
                         : null,
                     border: InputBorder.none,
                     labelText: widget.labelText,
-                    labelStyle: GoogleFonts.cairo(color: Colors.black54),
+                    labelStyle: GoogleFonts.cairo(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    ),
                   ),
                 ),
               ),

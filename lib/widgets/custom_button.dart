@@ -5,18 +5,22 @@ import 'package:google_fonts/google_fonts.dart';
 class CustomButton extends StatelessWidget {
   final String title;
   final Function()? onTap;
-  Color color;
-  Color textColor;
-  CustomButton({
+  final Color? color;
+  final Color? textColor;
+  const CustomButton({
     super.key,
     required this.title,
     this.onTap,
-    this.color = Colors.black,
-    this.textColor = Colors.white,
+    this.color,
+    this.textColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final buttonColor = color ?? theme.colorScheme.primary;
+    final buttonTextColor = textColor ?? theme.colorScheme.onPrimary;
+
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -24,12 +28,12 @@ class CustomButton extends StatelessWidget {
         height: 62.h,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: color,
+          color: buttonColor,
         ),
         child: Center(
           child: Text(
             title,
-            style: GoogleFonts.cairo(color: textColor, fontSize: 20.sp),
+            style: GoogleFonts.cairo(color: buttonTextColor, fontSize: 20.sp),
           ),
         ),
       ),

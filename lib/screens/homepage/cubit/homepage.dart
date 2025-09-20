@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:shared_preferences/shared_preferences.dart'; // Unused import
-import 'package:shop/app_colors.dart';
+
 import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/widgets/homepage_headers.dart';
 import 'package:shop/widgets/product_card.dart';
@@ -72,13 +72,12 @@ class _HomepageState extends State<Homepage> {
       builder: (context, state) {
         if (state is HomepageLoading) {
           return const Scaffold(
-            backgroundColor: AppColors.primary,
             body: Center(child: CircularProgressIndicator()),
           );
         }
         if (state is HomepageFailure) {
           return Scaffold(
-            backgroundColor: AppColors.primary,
+            backgroundColor: Theme.of(context).colorScheme.background,
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -113,31 +112,29 @@ class _HomepageState extends State<Homepage> {
         if (state is HomepageSuccess) {
           final userName = context.read<HomepageCubit>().userName;
           return Scaffold(
-            backgroundColor: AppColors.primary,
+            backgroundColor: Theme.of(context).colorScheme.background,
             appBar: AppBar(
-              toolbarHeight: 50.h,
               forceMaterialTransparency: true,
-              backgroundColor: AppColors.primary,
-              leading: Padding(
-                padding: EdgeInsets.only(left: 10.0.w),
-                // child: CircleAvatar(
-                //   onBackgroundImageError: (_, __) {},
-                //   radius: 50.r,
-                //   // backgroundImage: state.image != null
-                //   //     ? FileImage(File(state.image!))
-                //   //     : const AssetImage('assets/profile.jpg') as ImageProvider,
-                // ),
-              ),
+              backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
               centerTitle: false,
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Hi Welcome', style: GoogleFonts.cairo(fontSize: 20.sp)),
+                  Text(
+                    'Hi Welcome',
+                    style: GoogleFonts.cairo(
+                      fontSize: 20.sp,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
                   Text(
                     userName != null && userName.isNotEmpty
                         ? 'Mr. $userName'
                         : 'Welcome Guest',
-                    style: GoogleFonts.cairo(fontSize: 16.sp),
+                    style: GoogleFonts.cairo(
+                      fontSize: 16.sp,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                   ),
                 ],
               ),
@@ -145,39 +142,19 @@ class _HomepageState extends State<Homepage> {
                 Row(
                   children: [
                     Container(
-                      margin: EdgeInsets.only(right: 8.w),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                          width: 1.w,
-                        ),
-                        borderRadius: BorderRadius.circular(16.r),
-                      ),
-                      // child: IconButton(
-                      child: Icon(
-                        // tooltip: 'My Orders',
-                        // onPressed:
-                        // () =>
-                        // Navigator.pushNamed(context, OrdersPage.routeName),
-                        //  FaIcon(
-                        FontAwesomeIcons.clipboardList,
-                        size: 18.r,
-                        // ),
-                      ),
-                    ),
-                    Container(
                       margin: EdgeInsets.only(right: 10.w),
                       decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                          width: 1.w,
-                        ),
+                        border: Border.all(width: 1.w),
                         borderRadius: BorderRadius.circular(16.r),
                       ),
                       child: IconButton(
                         onPressed: () =>
                             Navigator.pushNamed(context, CartScreen.routeName),
-                        icon: FaIcon(FontAwesomeIcons.cartShopping, size: 20.r),
+                        icon: FaIcon(
+                          FontAwesomeIcons.cartShopping,
+                          color: Theme.of(context).iconTheme.color,
+                          size: 20.r,
+                        ),
                       ),
                     ),
                   ],
@@ -192,68 +169,7 @@ class _HomepageState extends State<Homepage> {
                 padding: EdgeInsets.all(8.0.r),
                 child: Column(
                   children: [
-                    SizedBox(
-                      height: 50.h,
-                      child: ListView.separated(
-                        separatorBuilder: (_, __) => SizedBox(width: 10.w),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: categoryData.length,
-                        itemBuilder: (_, index) {
-                          // bool isSelected = state.selectedIndex == index;
-                          return GestureDetector(
-                            onTap: () => null,
-                            // cubit.selectCategory(index, categoryData),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 250),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 22.w,
-                                vertical: 15.h,
-                              ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(60.r),
-                                // color: isSelected
-                                //     ? Colors.blueAccent
-                                //     : Colors.white,
-                              ),
-
-                              // child: categoryData[index]["type"] == "text"
-                              //     ? Text(
-                              //         categoryData[index]["label"],
-                              //         style: GoogleFonts.cairo(
-                              //           // color: isSelected
-                              //           //     ? Colors.white
-                              //           //     : Colors.black,
-                              //         ),
-                              //       )
-                              // : isSelected
-                              // ? Row(
-                              //     mainAxisSize: MainAxisSize.min,
-                              //     children: [
-                              //       FaIcon(
-                              //               categoryData[index]["icon"],
-                              //               color: Colors.white,
-                              //               size: 16.r,
-                              //             ),
-                              //             SizedBox(width: 6.w),
-                              //             Text(
-                              //               categoryData[index]["label"],
-                              //               style: GoogleFonts.cairo(
-                              //                 color: Colors.white,
-                              //               ),
-                              //             ),
-                              //           ],
-                              //         )
-                              //       : FaIcon(
-                              //           categoryData[index]["icon"],
-                              //           color: Colors.black,
-                              //           size: 16.r,
-                              //         ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    // SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
                     sliderWidget(),
                     SizedBox(height: 12.h),
                     HomepageHeaders(

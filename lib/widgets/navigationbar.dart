@@ -82,7 +82,7 @@ class _NavigationbarState extends State<Navigationbar> {
           CrystalNavigationBarItem(
             icon: Icons.person,
             unselectedIcon: Icons.person,
-            selectedColor: Colors.black,
+            selectedColor: Theme.of(context).colorScheme.primary,
           ),
         ],
       ),
