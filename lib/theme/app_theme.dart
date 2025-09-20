@@ -337,10 +337,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: _darkDividerColor),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _darkPrimary, width: 2),
-        ),
+       
         labelStyle: const TextStyle(color: _darkTextSecondary),
         hintStyle: const TextStyle(color: _darkTextSecondary),
       ),
