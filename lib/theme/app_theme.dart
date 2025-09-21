@@ -4,8 +4,7 @@ import 'package:flutter/services.dart';
 class AppTheme {
   // Light theme colors
 
-  static const Color _lightPrimary = Color(0xFF1976D2);
-  static const Color _lightPrimaryVariant = Color(0xFF1565C0);
+  static const Color _lightPrimary = Colors.black45;
   static const Color _lightSecondary = Color(0xFF03DAC6);
   static const Color _lightBackground = Color(0xFFF5F5F5);
   static const Color _lightSurface = Color(0xFFFFFFFF);
@@ -151,7 +150,7 @@ class AppTheme {
       // Button themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color.fromARGB(255, 61, 61, 61),
+          backgroundColor: _lightPrimary,
           foregroundColor: _lightOnPrimary,
           elevation: 2,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -161,8 +160,8 @@ class AppTheme {
 
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: Color.fromARGB(255, 61, 61, 61),
-          side: const BorderSide(color: Color.fromARGB(255, 61, 61, 61)),
+          foregroundColor: _lightPrimary,
+          side: const BorderSide(color: _lightPrimary),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
@@ -170,7 +169,7 @@ class AppTheme {
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: Color.fromARGB(255, 61, 61, 61),
+          foregroundColor: _lightPrimary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
@@ -192,7 +191,7 @@ class AppTheme {
       // Bottom navigation bar theme
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: _lightSurface,
-        selectedItemColor: Color.fromARGB(255, 61, 61, 61),
+        selectedItemColor: _lightPrimary,
         unselectedItemColor: _lightTextSecondary,
         elevation: 8,
         type: BottomNavigationBarType.fixed,
@@ -337,7 +336,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: _darkDividerColor),
         ),
-       
+
         labelStyle: const TextStyle(color: _darkTextSecondary),
         hintStyle: const TextStyle(color: _darkTextSecondary),
       ),

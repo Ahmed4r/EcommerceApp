@@ -88,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: 40.h),
+                      SizedBox(height: 30.h),
                       Text(
                         'Please sign in to your existing account',
                         style: GoogleFonts.sen(
@@ -119,31 +119,6 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
 
-                      Row(
-                        children: [
-                          Text(
-                            "Remember me",
-                            style: GoogleFonts.cairo(fontSize: 16.sp),
-                          ),
-                          const Spacer(),
-                          TextButton(
-                            onPressed: () {
-                              log('clicked');
-                              Navigator.pushNamed(
-                                context,
-                                ForgotPassword.routeName,
-                              );
-                            },
-                            child: Text(
-                              'Forgot password',
-                              style: GoogleFonts.cairo(
-                                fontSize: 16.sp,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                       SizedBox(height: 20.h),
                       CustomButton(
                         title: 'Log in',
@@ -200,11 +175,27 @@ class _LoginPageState extends State<LoginPage> {
                         child: const CircleAvatar(
                           child: FaIcon(
                             FontAwesomeIcons.google,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextButton(
+                        onPressed: () {
+                          log('clicked');
+                          Navigator.pushNamed(
+                            context,
+                            ForgotPassword.routeName,
+                          );
+                        },
+                        child: Text(
+                          'Forgot password',
+                          style: GoogleFonts.cairo(
+                            fontSize: 16.sp,
                             color: Colors.grey,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 200),
                     ],
                   ),
                 ),

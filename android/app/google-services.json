@@ -12,7 +12,12 @@
           "package_name": "com.example.shop"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "209723495727-npidul8qjegdolthf0rs3i7rd1mcn4p2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyArIjbklSQ03PCS_RVeK3MhSyCixRq3mT8"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "209723495727-npidul8qjegdolthf0rs3i7rd1mcn4p2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "209723495727-mli0o70tjcii4hlj3trkure966bkii16.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.shop"
+              }
+            }
+          ]
         }
       }
     }

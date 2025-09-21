@@ -77,7 +77,12 @@ class _ProductItemCardState extends State<ProductItemCard>
             children: [
               Icon(Icons.check_circle, color: Colors.green),
               SizedBox(width: 10),
-              Expanded(child: Text('${widget.product.name} added to cart!')),
+              Expanded(
+                child: Text(
+                  '${widget.product.name} added to cart!',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
             ],
           ),
           duration: Duration(seconds: 2),
@@ -258,7 +263,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                       children: [
                         Text(
                           "\$ ${widget.product.price.toString()}",
-                          style: GoogleFonts.cairo(                       
+                          style: GoogleFonts.cairo(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
                           ),

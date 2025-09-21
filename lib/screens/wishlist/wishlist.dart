@@ -19,6 +19,25 @@ class WishlistPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<WishlistCubit, WishlistState>(
       builder: (context, state) {
+        if (state is WishlistLoadingState) {
+          return Scaffold(
+            backgroundColor: Theme.of(context).colorScheme.background,
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (state is WishlistErrorState) {
+          return Scaffold(
+            backgroundColor: Theme.of(context).colorScheme.background,
+            body: Center(
+              child: Text(
+                'Error: ${state.message}',
+                style: GoogleFonts.cairo(
+                  color: Theme.of(context).textTheme.titleLarge?.color,
+                ),
+              ),
+            ),
+          );
+        }
+
         return Scaffold(
           backgroundColor: state.favorites.isEmpty
               ? Theme.of(context).colorScheme.background
@@ -35,16 +54,6 @@ class WishlistPage extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            actions: [
-              if (state.favorites.isNotEmpty)
-                IconButton(
-                  icon: Icon(Icons.refresh),
-                  onPressed: () {
-                    // Reload wishlist from Supabase
-                    context.read<WishlistCubit>().loadFavorites();
-                  },
-                ),
-            ],
           ),
           body: state.favorites.isEmpty
               ? Center(

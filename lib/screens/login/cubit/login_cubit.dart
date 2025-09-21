@@ -48,7 +48,7 @@ class LoginCubit extends Cubit<LoginState> {
     }
   }
 
-  //  google singin
+  //  google sign-in
   Future<void> nativeGoogleSignIn() async {
     emit(LoginLoadingState());
     try {
@@ -78,10 +78,7 @@ class LoginCubit extends Cubit<LoginState> {
       }
 
       // Delegate Firebase sign-in to the auth service
-      await authService.signInWithGoogle(
-        idToken: idToken,
-        accessToken: accessToken,
-      );
+      await authService.signInWithGoogle();
 
       // Build UserModel from Firebase user and emit success
       final user = FirebaseAuth.instance.currentUser;

@@ -1,42 +1,41 @@
 import 'dart:convert';
 import 'dart:developer';
+
+import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/model/product_model.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_state.dart';
+
+import '../../../model/product_model.dart';
 
 class WishlistCubit extends Cubit<WishlistState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  WishlistCubit() : super(const WishlistState()) {
-    _loadFavorites();
+  WishlistCubit() : super(const WishlistInitial()) {
+    _loadFavorites(); // استدعاء مبدئي واحد
   }
 
   Future<void> toggleFavorite(Product product) async {
     try {
       final userId = _auth.currentUser?.uid;
+      final current = List<Product>.from(state.favorites);
+
       if (userId == null) {
-        // User not logged in, fallback to local storage
         await _toggleFavoriteLocal(product);
         return;
       }
 
-      final currentList = List<Product>.from(state.favorites);
-      final isCurrentlyFavorite = currentList.any((p) => p.id == product.id);
+      final isFav = current.any((p) => p.id == product.id);
 
-      if (isCurrentlyFavorite) {
-        // Remove from wishlist
+      if (isFav) {
         await _firestore
             .collection('wishlist')
             .doc('${userId}_${product.id}')
             .delete();
-
-        currentList.removeWhere((p) => p.id == product.id);
+        current.removeWhere((p) => p.id == product.id);
       } else {
-        // Add to wishlist
         await _firestore
             .collection('wishlist')
             .doc('${userId}_${product.id}')
@@ -46,178 +45,148 @@ class WishlistCubit extends Cubit<WishlistState> {
               'productData': product.toJson(),
               'createdAt': FieldValue.serverTimestamp(),
             });
-
-        currentList.add(product);
+        current.add(product);
       }
 
-      emit(WishlistState(favorites: currentList));
+      emit(WishlistSuccessState(current));
     } catch (e) {
       log('Error toggling favorite: $e');
-      // Fallback to local storage if Firebase fails
+      emit(
+        WishlistErrorState(
+          'Failed to update wishlist.',
+          favorites: state.favorites,
+        ),
+      );
       await _toggleFavoriteLocal(product);
     }
   }
 
-  bool isFavorite(Product product) {
-    return state.favorites.any((p) => p.id == product.id);
-  }
+  bool isFavorite(Product product) =>
+      state.favorites.any((p) => p.id == product.id);
 
-  // Public method to reload favorites (useful for refresh)
-  Future<void> loadFavorites() async {
-    await _loadFavorites();
-  }
+  Future<void> loadFavorites() => _loadFavorites();
 
   Future<void> _loadFavorites() async {
+    emit(WishlistLoadingState(favorites: state.favorites));
     try {
       final userId = _auth.currentUser?.uid;
       if (userId == null) {
-        // User not logged in, load from local storage
         await _loadFavoritesLocal();
         return;
       }
 
-      // Load wishlist from Firebase Firestore
-      final querySnapshot = await _firestore
+      final snap = await _firestore
           .collection('wishlist')
           .where('userId', isEqualTo: userId)
           .orderBy('createdAt', descending: true)
           .get();
 
-      List<Product> favorites = [];
-      for (var doc in querySnapshot.docs) {
+      final favs = <Product>[];
+      for (var doc in snap.docs) {
         final data = doc.data();
-        if (data['productData'] != null) {
-          try {
-            final product = Product.fromJson(data['productData']);
-            favorites.add(product);
-          } catch (e) {
-            log('Error parsing product data: $e');
-          }
+        try {
+          favs.add(Product.fromJson(data['productData']));
+        } catch (e) {
+          log('Error parsing product: $e');
         }
       }
 
-      emit(WishlistState(favorites: favorites));
+      emit(WishlistSuccessState(favs));
     } catch (e) {
-      log('Error loading favorites from Firebase: $e');
-      // Fallback to local storage
+      log('Error loading favorites: $e');
       await _loadFavoritesLocal();
     }
   }
 
-  // Fallback methods for local storage (when user is not logged in)
+  // --- Local storage ---
   Future<void> _toggleFavoriteLocal(Product product) async {
-    final currentList = List<Product>.from(state.favorites);
+    final list = List<Product>.from(state.favorites);
+    list.any((p) => p.id == product.id)
+        ? list.removeWhere((p) => p.id == product.id)
+        : list.add(product);
 
-    if (currentList.any((p) => p.id == product.id)) {
-      currentList.removeWhere((p) => p.id == product.id);
-    } else {
-      currentList.add(product);
-    }
-
-    emit(WishlistState(favorites: currentList));
-
-    // Save products locally as JSON
+    emit(WishlistSuccessState(list));
     final prefs = await SharedPreferences.getInstance();
-    List<String> jsonList = currentList
-        .map((p) => jsonEncode(p.toJson()))
-        .toList();
-    await prefs.setStringList('wishlist', jsonList);
+    await prefs.setStringList(
+      'wishlist',
+      list.map((p) => jsonEncode(p.toJson())).toList(),
+    );
   }
 
   Future<void> _loadFavoritesLocal() async {
     final prefs = await SharedPreferences.getInstance();
-    List<String> saved = prefs.getStringList('wishlist') ?? [];
-
-    List<Product> loaded = saved
-        .map((e) => Product.fromJson(jsonDecode(e)))
-        .toList();
-
-    emit(WishlistState(favorites: loaded));
+    final saved = prefs.getStringList('wishlist') ?? [];
+    final list = saved.map((e) => Product.fromJson(jsonDecode(e))).toList();
+    emit(WishlistSuccessState(list));
   }
 
-  // Method to sync local wishlist to Firebase when user logs in
   Future<void> syncLocalToFirebase() async {
     try {
       final userId = _auth.currentUser?.uid;
       if (userId == null) return;
 
-      // Get local favorites
       final prefs = await SharedPreferences.getInstance();
-      List<String> saved = prefs.getStringList('wishlist') ?? [];
+      final saved = prefs.getStringList('wishlist') ?? [];
 
-      if (saved.isNotEmpty) {
-        List<Product> localFavorites = saved
-            .map((e) => Product.fromJson(jsonDecode(e)))
-            .toList();
+      if (saved.isEmpty) return;
 
-        // Get existing wishlist from Firebase
-        final existingSnapshot = await _firestore
-            .collection('wishlist')
-            .where('userId', isEqualTo: userId)
-            .get();
+      final localFavs = saved
+          .map((e) => Product.fromJson(jsonDecode(e)))
+          .toList();
 
-        Set<String> existingProductIds = existingSnapshot.docs
-            .map((doc) => doc.data()['productId'].toString())
-            .toSet();
+      final existing = await _firestore
+          .collection('wishlist')
+          .where('userId', isEqualTo: userId)
+          .get();
 
-        // Batch write for better performance
-        final batch = _firestore.batch();
+      final ids = existing.docs.map((d) => d['productId'].toString()).toSet();
 
-        // Insert local favorites that don't exist in Firebase
-        for (var product in localFavorites) {
-          if (!existingProductIds.contains(product.id)) {
-            final docRef = _firestore
-                .collection('wishlist')
-                .doc('${userId}_${product.id}');
-
-            batch.set(docRef, {
-              'userId': userId,
-              'productId': product.id,
-              'productData': product.toJson(),
-              'createdAt': FieldValue.serverTimestamp(),
-            });
-          }
+      final batch = _firestore.batch();
+      for (var p in localFavs) {
+        if (!ids.contains(p.id)) {
+          final ref = _firestore.doc('wishlist/${userId}_${p.id}');
+          batch.set(ref, {
+            'userId': userId,
+            'productId': p.id,
+            'productData': p.toJson(),
+            'createdAt': FieldValue.serverTimestamp(),
+          });
         }
-
-        await batch.commit();
-
-        // Clear local storage after sync
-        await prefs.remove('wishlist');
-
-        // Reload favorites from Firebase
-        await _loadFavorites();
       }
+      await batch.commit();
+      await prefs.remove('wishlist');
+      await _loadFavorites();
     } catch (e) {
-      log('Error syncing local wishlist to Firebase: $e');
+      log('Error syncing local wishlist: $e');
     }
   }
 
-  // Method to clear wishlist (useful for logout)
   Future<void> clearWishlist() async {
+    emit(WishlistLoadingState(favorites: state.favorites));
     try {
       final userId = _auth.currentUser?.uid;
       if (userId != null) {
-        // Get all wishlist documents for the user
-        final snapshot = await _firestore
+        final snap = await _firestore
             .collection('wishlist')
             .where('userId', isEqualTo: userId)
             .get();
-
-        // Batch delete for better performance
         final batch = _firestore.batch();
-        for (var doc in snapshot.docs) {
-          batch.delete(doc.reference);
+        for (var d in snap.docs) {
+          batch.delete(d.reference);
         }
         await batch.commit();
       }
-
-      // Also clear local storage
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('wishlist');
-
-      emit(const WishlistState(favorites: []));
+      emit(const WishlistSuccessState([]));
     } catch (e) {
       log('Error clearing wishlist: $e');
+      emit(
+        WishlistErrorState(
+          'Failed to clear wishlist.',
+          favorites: state.favorites,
+        ),
+      );
     }
   }
 }
