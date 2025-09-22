@@ -3,61 +3,88 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LocationService {
-  static Future<void> requestLocationPermission() async {
-    LocationPermission permission = await Geolocator.requestPermission();
-    if (permission != LocationPermission.whileInUse &&
-        permission != LocationPermission.always) {
-      return Future.error('Location permissions are denied');
+  static Future<bool> requestLocationPermission() async {
+    try {
+      LocationPermission permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        throw Exception('Location permissions are denied');
+      }
+      return true;
+    } catch (e) {
+      debugPrint('❌ Error requesting location permission: $e');
+      rethrow;
     }
   }
 
-  static Future<void> checkLocationService() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    } else {
-      await requestLocationPermission();
+  static Future<bool> checkLocationService() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception('Location services are disabled.');
+      }
+      return true;
+    } catch (e) {
+      debugPrint('❌ Error checking location service: $e');
+      rethrow;
     }
   }
 
   static Future<Position?> getCurrentLocation(BuildContext context) async {
-    bool serviceEnabled;
-    LocationPermission permission;
+    try {
+      bool serviceEnabled;
+      LocationPermission permission;
 
-    // Check if location services are enabled
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location services are disabled.')),
-      );
-      return null;
-    }
-
-    // Check permission
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permissions are denied')),
-        );
+      // Check if location services are enabled
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location services are disabled.')),
+          );
+        }
         return null;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Location permissions are permanently denied.'),
-        ),
+      // Check permission
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Location permissions are denied')),
+            );
+          }
+          return null;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location permissions are permanently denied.'),
+            ),
+          );
+        }
+        return null;
+      }
+
+      // Get current position with timeout
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 10),
       );
+    } catch (e) {
+      debugPrint('❌ Error getting current location: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to get location: $e')));
+      }
       return null;
     }
-
-    // Get current position
-    return await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
   }
 
   static Future<String> getAddressFromCoordinates(
@@ -75,20 +102,20 @@ class LocationService {
         if ((place.name ?? '').isNotEmpty) place.name!,
         if ((place.street ?? '').isNotEmpty && place.street != place.name)
           place.street!,
-        if ((place.country ?? '').isNotEmpty) place.country!,
-
         if ((place.subLocality ?? '').isNotEmpty) place.subLocality!,
         if ((place.locality ?? '').isNotEmpty) place.locality!,
         if ((place.administrativeArea ?? '').isNotEmpty)
           place.administrativeArea!,
+        if ((place.country ?? '').isNotEmpty) place.country!,
         if ((place.postalCode ?? '').isNotEmpty) place.postalCode!,
       ];
 
-      return addressParts.join(', ');
+      return addressParts.isNotEmpty
+          ? addressParts.join(', ')
+          : 'Address not found';
     } catch (e, stack) {
       debugPrint('❌ Error in getAddressFromCoordinates: $e\n$stack');
       return 'Address not found';
     }
   }
-  
 }
