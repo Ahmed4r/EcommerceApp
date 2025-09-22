@@ -1,6 +1,7 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shop/model/user_model.dart';
 import 'package:shop/screens/login/cubit/login_state.dart';
 import 'package:shop/services/auth/auth_service.dart';
@@ -52,42 +53,52 @@ class LoginCubit extends Cubit<LoginState> {
   Future<void> nativeGoogleSignIn() async {
     emit(LoginLoadingState());
     try {
-      // Use simple GoogleSignIn configuration for mobile
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-      );
-
-      // Ensure a fresh sign in
-      await googleSignIn.signOut();
-
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser == null) {
-        // user cancelled
-        emit(LoginInitialState());
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final String? accessToken = googleAuth.accessToken;
-      final String? idToken = googleAuth.idToken;
-
-      if (accessToken == null || idToken == null) {
-        emit(LoginFailureState("Missing Google tokens"));
-        return;
-      }
-
-      // Delegate Firebase sign-in to the auth service
+      // Use the auth service to handle Google Sign-In
       await authService.signInWithGoogle();
+      log('User signed in with Google successfully');
 
-      // Build UserModel from Firebase user and emit success
+      // Get the current user and emit success
       final user = FirebaseAuth.instance.currentUser;
-      final userModel = UserModel.fromFirebaseUser(user);
-      emit(LoginSuccessState(userModel));
+      if (user != null) {
+        final userModel = UserModel.fromFirebaseUser(user);
+        emit(LoginSuccessState(userModel));
+      } else {
+        emit(
+          LoginFailureState(
+            "Failed to get user information after Google sign-in",
+          ),
+        );
+      }
     } on FirebaseAuthException catch (e) {
-      emit(LoginFailureState(e.message ?? e.code));
+      String message;
+      switch (e.code) {
+        case 'account-exists-with-different-credential':
+          message =
+              "An account already exists with this email address but different sign-in method";
+          break;
+        case 'invalid-credential':
+          message = "Invalid Google credentials";
+          break;
+        case 'operation-not-allowed':
+          message = "Google sign-in is not enabled";
+          break;
+        case 'user-disabled':
+          message = "This user account has been disabled";
+          break;
+        case 'network-request-failed':
+          message = "Network error, please try again later";
+          break;
+        default:
+          message = "Google sign-in failed: ${e.message ?? e.code}";
+      }
+      emit(LoginFailureState(message));
     } catch (e) {
-      emit(LoginFailureState(e.toString()));
+      String message = e.toString();
+      if (message.contains('cancelled')) {
+        emit(LoginInitialState()); // Return to initial state if user cancelled
+      } else {
+        emit(LoginFailureState("Google sign-in failed: $message"));
+      }
     }
   }
 }

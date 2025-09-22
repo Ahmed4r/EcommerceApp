@@ -114,27 +114,20 @@ class _HomepageState extends State<Homepage> {
           return Scaffold(
             backgroundColor: Theme.of(context).colorScheme.background,
             appBar: AppBar(
-              forceMaterialTransparency: true,
+              elevation: 0,
+              excludeHeaderSemantics: true,
+              // forceMaterialTransparency: true,
               backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
               centerTitle: false,
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Hi Welcome',
-                    style: GoogleFonts.cairo(
-                      fontSize: 20.sp,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                  ),
+                  Text('Hi Welcome', style: GoogleFonts.cairo(fontSize: 20.sp)),
                   Text(
                     userName != null && userName.isNotEmpty
                         ? 'Mr. $userName'
                         : 'Welcome Guest',
-                    style: GoogleFonts.cairo(
-                      fontSize: 16.sp,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
+                    style: GoogleFonts.cairo(fontSize: 16.sp),
                   ),
                 ],
               ),
@@ -150,11 +143,7 @@ class _HomepageState extends State<Homepage> {
                       child: IconButton(
                         onPressed: () =>
                             Navigator.pushNamed(context, CartScreen.routeName),
-                        icon: FaIcon(
-                          FontAwesomeIcons.cartShopping,
-                          color: Theme.of(context).iconTheme.color,
-                          size: 20.r,
-                        ),
+                        icon: FaIcon(FontAwesomeIcons.cartShopping, size: 20.r),
                       ),
                     ),
                   ],

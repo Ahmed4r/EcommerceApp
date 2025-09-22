@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/app_colors.dart';
 
 import 'package:shop/screens/register/cubit/signup_cubit.dart';
 import 'package:shop/screens/register/cubit/signup_state.dart';
@@ -189,7 +190,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     borderRadius: BorderRadius.circular(14),
                     color: state is SignUpLoadingState
                         ? Colors.grey
-                        : Colors.black,
+                        : AppColors.darkPrimary,
                   ),
                   child: Center(
                     child: state is SignUpLoadingState

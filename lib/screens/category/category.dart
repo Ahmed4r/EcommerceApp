@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/model/product_model.dart';
 import 'package:shop/screens/homepage/cubit/homepage_cubit.dart';
 import 'package:shop/screens/homepage/cubit/homepage_state.dart';
 import 'package:shop/widgets/product_card.dart';
@@ -23,7 +24,7 @@ class _CategoryState extends State<Category> {
   // Remove local cubit instance - use the one from BlocProvider
 
   int selectedIndex = 0; // Start with "All" selected
-  List<dynamic> filteredProducts = [];
+  List<Product> filteredProducts = [];
   String searchQuery = '';
   List<Map<String, dynamic>> categoryData = [
     {"type": "text", "label": "All", "icon": null, "category": null},
@@ -75,21 +76,21 @@ class _CategoryState extends State<Category> {
     super.dispose();
   }
 
-  void filterProducts(List<dynamic> allProducts) {
+  void filterProducts(List<Product> allProducts) {
     String search = searchQuery.trim().toLowerCase();
     String? selectedCategory = selectedIndex > 0
         ? categoryData[selectedIndex]["category"]
         : null;
 
     setState(() {
-      filteredProducts = allProducts.where((item) {
+      filteredProducts = allProducts.where((product) {
         final matchesSearch =
             search.isEmpty ||
-            item.name.toLowerCase().contains(search) ||
-            item.description.toLowerCase().contains(search) ||
-            item.category.toLowerCase().contains(search);
+            product.name.toLowerCase().contains(search) ||
+            product.description.toLowerCase().contains(search) ||
+            product.category.toLowerCase().contains(search);
         final matchesCategory =
-            selectedCategory == null || item.category == selectedCategory;
+            selectedCategory == null || product.category == selectedCategory;
         return matchesSearch && matchesCategory;
       }).toList();
     });

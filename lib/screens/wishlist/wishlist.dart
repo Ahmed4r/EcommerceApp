@@ -39,20 +39,15 @@ class WishlistPage extends StatelessWidget {
         }
 
         return Scaffold(
-          backgroundColor: state.favorites.isEmpty
-              ? Theme.of(context).colorScheme.background
-              : Theme.of(context).colorScheme.background,
+          backgroundColor: Theme.of(context).colorScheme.background,
           appBar: AppBar(
-            forceMaterialTransparency: true,
-            backgroundColor: state.favorites.isEmpty
-                ? Theme.of(context).colorScheme.background
-                : Theme.of(context).appBarTheme.backgroundColor,
+            elevation: 0,
+            excludeHeaderSemantics: true,
+            // forceMaterialTransparency: true,
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
             title: Text(
               "Wishlist (${state.favorites.length})",
-              style: GoogleFonts.cairo(
-                color: Theme.of(context).textTheme.titleLarge?.color,
-                fontWeight: FontWeight.bold,
-              ),
+              style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
             ),
           ),
           body: state.favorites.isEmpty

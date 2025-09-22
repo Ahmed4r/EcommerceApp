@@ -4,9 +4,24 @@ import 'package:google_sign_in/google_sign_in.dart';
 class FirebaseAuthService {
   final FirebaseAuth authService = FirebaseAuth.instance;
 
+  // Configure Google Sign-In
+  static final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+  );
+
   //sign out
   Future<void> signOut() async {
-    await authService.signOut();
+    try {
+      // Sign out from Google first if user signed in with Google
+      if (await _googleSignIn.isSignedIn()) {
+        await _googleSignIn.signOut();
+      }
+      // Then sign out from Firebase
+      await authService.signOut();
+    } catch (e) {
+      // Still try to sign out from Firebase even if Google sign out fails
+      await authService.signOut();
+    }
   }
 
   //sign in
@@ -44,23 +59,41 @@ class FirebaseAuthService {
 
   Future<UserCredential> signInWithGoogle() async {
     try {
-      final googleSignIn = GoogleSignIn();
-      final googleUser = await googleSignIn.signIn();
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
         throw Exception('Google sign-in was cancelled by the user.');
       }
 
-      final googleAuth = await googleUser.authentication;
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
+      // Create a new credential
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
+      // Sign in to Firebase with the Google credential
       return await authService.signInWithCredential(credential);
     } catch (e) {
       throw Exception('Google sign-in failed: $e');
     }
+  }
+
+  // Check if Google Sign-In is available
+  Future<bool> isGoogleSignInAvailable() async {
+    try {
+      return await _googleSignIn.isSignedIn();
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Get current Google user
+  GoogleSignInAccount? getCurrentGoogleUser() {
+    return _googleSignIn.currentUser;
   }
 }
