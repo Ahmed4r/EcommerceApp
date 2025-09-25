@@ -137,7 +137,7 @@ class _HomepageState extends State<Homepage> {
                     Container(
                       margin: EdgeInsets.only(right: 10.w),
                       decoration: BoxDecoration(
-                        border: Border.all(width: 1.w),
+                        border: Border.all(width: 1.w, color: Colors.grey),
                         borderRadius: BorderRadius.circular(16.r),
                       ),
                       child: IconButton(

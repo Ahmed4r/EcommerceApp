@@ -118,15 +118,13 @@ class _ProductItemCardState extends State<ProductItemCard>
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     // Add validation for required product fields
     if (widget.product.id.isEmpty || widget.product.name.isEmpty) {
       return Container(
         width: 150.w,
         height: 200.h,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(20.r),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.r)),
         child: Center(
           child: Text(
             'Product data incomplete',
@@ -183,6 +181,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                       widget.product.name,
                       style: GoogleFonts.notoSansRejang(
                         fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Colors.white,
                         fontSize: 12.sp,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -222,7 +221,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                             Text(
                               widget.product.rate.toString(),
                               style: GoogleFonts.cairo(
-                                color: Colors.white,
+                                color: isDarkMode ? Colors.white : Colors.white,
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -266,6 +265,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                           style: GoogleFonts.cairo(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
+                            color: isDarkMode ? Colors.white : Colors.white,
                           ),
                         ),
                         GestureDetector(
