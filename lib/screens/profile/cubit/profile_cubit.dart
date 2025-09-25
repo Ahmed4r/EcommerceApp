@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,10 +22,10 @@ class ProfileCubit extends Cubit<ProfileState> {
       final userEmail = authService.getUserEmail();
       final userPhone = await firestoreService.getUserPhone();
 
-      print('ProfileCubit - Loading user data:');
-      print('Name: $userName');
-      print('Email: $userEmail');
-      print('Phone: $userPhone');
+      log('ProfileCubit - Loading user data:');
+      log('Name: $userName');
+      log('Email: $userEmail');
+      log('Phone: $userPhone');
 
       // Save to SharedPreferences
       await saveUserDate("name", userName ?? "");

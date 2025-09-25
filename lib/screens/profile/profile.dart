@@ -5,8 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:shop/screens/location/location_access_screen.dart';
+import 'package:shop/screens/login/login.dart';
+import 'package:shop/screens/orders/orders_screen.dart';
 import 'package:shop/screens/profile/cubit/profile_cubit.dart';
 import 'package:shop/services/auth/auth_service.dart';
 import 'package:shop/widgets/custom_text_field.dart';
@@ -249,11 +250,21 @@ PreferredSizeWidget? buildAppBar(BuildContext context) {
     leading: IconButton(
       onPressed: () async {
         try {
-          context
-              .read<ProfileCubit>()
-              .signOut(); // No manual navigation needed - AuthWrapper handles it
+          await context.read<ProfileCubit>().signOut();
+          // Navigate to login page after successful logout
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            LoginPage.routeName,
+            (route) => false,
+          );
         } catch (e) {
-          log('error while sign out');
+          log('Error while signing out: $e');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to sign out. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       },
       icon: FaIcon(
@@ -284,7 +295,7 @@ PreferredSizeWidget? buildAppBar(BuildContext context) {
       ),
       IconButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/orders');
+          Navigator.pushNamed(context, OrdersScreen.routeName);
         },
         icon: FaIcon(
           FontAwesomeIcons.receipt,

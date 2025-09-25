@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shop/model/user_model.dart';
 import 'package:shop/screens/login/cubit/login_state.dart';
 import 'package:shop/services/auth/auth_service.dart';
-// import 'package:shop/services/store/firestore_service.dart'; // Unused import
+import 'package:shop/services/user_service.dart';
 
 class LoginCubit extends Cubit<LoginState> {
   final FirebaseAuthService authService;
@@ -21,8 +21,21 @@ class LoginCubit extends Cubit<LoginState> {
     try {
       await authService.signInWithEmailAndPassword(email, password);
       final user = FirebaseAuth.instance.currentUser;
-      final userModel = UserModel.fromFirebaseUser(user);
-      emit(LoginSuccessState(userModel));
+
+      if (user == null) {
+        emit(LoginFailureState("Authentication failed"));
+        return;
+      }
+
+      // Get user data from Firestore with role information
+      UserModel? userModel = await UserService.getCurrentUserWithData();
+
+      if (userModel == null) {
+        emit(LoginFailureState("Failed to get user data"));
+        return;
+      }
+
+      emit(LoginSuccessState(userModel, userModel.role));
     } on FirebaseAuthException catch (e) {
       // Handle common Firebase auth errors
       String message;
@@ -60,8 +73,17 @@ class LoginCubit extends Cubit<LoginState> {
       // Get the current user and emit success
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        final userModel = UserModel.fromFirebaseUser(user);
-        emit(LoginSuccessState(userModel));
+        // Get user data from Firestore with role information
+        UserModel? userModel = await UserService.getCurrentUserWithData();
+
+        if (userModel == null) {
+          emit(
+            LoginFailureState("Failed to get user data after Google sign-in"),
+          );
+          return;
+        }
+
+        emit(LoginSuccessState(userModel, userModel.role));
       } else {
         emit(
           LoginFailureState(

@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/orders_service.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
+  static const String routeName = '/order_details';
   final String orderId;
 
   const OrderDetailsScreen({super.key, required this.orderId});

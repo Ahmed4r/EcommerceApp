@@ -84,6 +84,7 @@ class SignupCubit extends Cubit<SignUpState> {
           'uid': updatedUser!.uid,
           'email': email,
           'displayName': name,
+          'role': 'user',
           'createdAt': DateTime.now().toIso8601String(),
         });
 

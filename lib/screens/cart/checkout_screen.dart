@@ -1,12 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/model/address_model.dart';
 import 'package:shop/screens/cart/cart_screen.dart';
+import 'package:shop/screens/orders/orders_screen.dart';
 import 'package:shop/services/orders_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -23,6 +25,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   String _paymentMethod = 'cod'; // 'cod' | 'card' | 'apple_pay' | 'google_pay'
   bool _placing = false;
   int _currentStep = 0;
+  List<AddressModel> addresses = [];
 
   // Animation Controllers
   late AnimationController _slideController;
@@ -36,36 +39,29 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   final TextEditingController _expiryController = TextEditingController();
   final TextEditingController _cvvController = TextEditingController();
 
-  // Demo addresses
-  final List<AddressModel> _addresses = [
-    AddressModel(
-      label: 'Home',
-      address:
-          '123 Main Street, Downtown\nCity 12345, State\nPhone: +1 234 567 8900',
-      iconName: 'home',
-      iconColor: Colors.blue,
-    ),
-    AddressModel(
-      label: 'Work',
-      address:
-          '456 Business Ave, Office District\nCity 54321, State\nPhone: +1 987 654 3210',
-      iconName: 'work',
-      iconColor: Colors.orange,
-    ),
-    AddressModel(
-      label: 'Other',
-      address:
-          '789 Custom Location, Area\nCity 67890, State\nPhone: +1 555 123 4567',
-      iconName: 'location_on',
-      iconColor: Colors.green,
-    ),
-  ];
+  //  get saved addresses from shared preferences
+  Future<void> _loadAddresses() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String>? addressJsonList = prefs.getStringList('addresses');
+    if (addressJsonList != null) {
+      setState(() {
+        addresses = addressJsonList
+            .map(
+              (jsonStr) => AddressModel.fromJson(
+                Map<String, dynamic>.from(jsonDecode(jsonStr) as Map),
+              ),
+            )
+            .toList();
+      });
+    }
+  }
 
   AddressModel? _selectedAddress;
 
   @override
   void initState() {
     super.initState();
+    _loadAddresses();
 
     // Initialize animations
     _slideController = AnimationController(
@@ -93,7 +89,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     _fadeController.forward();
 
     // Set default address
-    _selectedAddress = _addresses.first;
+    _selectedAddress = addresses.isNotEmpty ? addresses.first : null;
 
     CartManager().addListener(_onCartChanged);
   }
@@ -117,6 +113,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final cartItems = CartManager().cartItems;
     final totalPrice = CartManager().totalPrice;
 
@@ -139,13 +136,12 @@ class _CheckoutScreenState extends State<CheckoutScreen>
                   padding: EdgeInsets.all(16.r),
                   child: Column(
                     children: [
-                      _buildAddressSection(),
+                      _buildAddressSection(isDarkMode),
                       SizedBox(height: 20.h),
-                      _buildPaymentSection(),
+                      _buildPaymentSection(isDarkMode),
                       SizedBox(height: 20.h),
                       _buildOrderSummary(cartItems, totalPrice),
-                      SizedBox(height: 20.h),
-                      _buildPromoCode(),
+
                       SizedBox(height: 100.h), // Space for bottom button
                     ],
                   ),
@@ -369,7 +365,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     );
   }
 
-  Widget _buildAddressSection() {
+  Widget _buildAddressSection(isDarkMode) {
     return _EnhancedSectionCard(
       title: 'Delivery Address',
       icon: FontAwesomeIcons.locationDot,
@@ -447,7 +443,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: _addresses.map((address) {
+              children: addresses.map((address) {
                 final isSelected = _selectedAddress?.label == address.label;
                 return GestureDetector(
                   onTap: () => setState(() {
@@ -514,7 +510,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     );
   }
 
-  Widget _buildPaymentSection() {
+  Widget _buildPaymentSection(isDarkMode) {
     return _EnhancedSectionCard(
       title: 'Payment Method',
       icon: FontAwesomeIcons.creditCard,
@@ -558,7 +554,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
             icon: FontAwesomeIcons.apple,
             title: 'Apple Pay',
             subtitle: 'Touch ID or Face ID',
-            iconColor: Colors.black,
+            iconColor: isDarkMode ? Colors.white : Colors.black,
             onChanged: (value) => setState(() {
               _paymentMethod = value!;
               _currentStep = 2;
@@ -814,83 +810,6 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     );
   }
 
-  Widget _buildPromoCode() {
-    return _EnhancedSectionCard(
-      title: 'Promo Code',
-      icon: FontAwesomeIcons.tag,
-      iconColor: Colors.red,
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Enter promo code',
-                hintStyle: GoogleFonts.cairo(
-                  color: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.color?.withOpacity(0.5),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withOpacity(0.3),
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withOpacity(0.3),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 14.h,
-                ),
-              ),
-              style: GoogleFonts.cairo(
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-              ),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          ElevatedButton(
-            onPressed: () {
-              // Handle promo code application
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Promo code applied!'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-            ),
-            child: Text(
-              'Apply',
-              style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildCheckoutButton(double totalPrice) {
     return Container(
       padding: EdgeInsets.all(20.r),
@@ -1016,9 +935,9 @@ class _CheckoutScreenState extends State<CheckoutScreen>
               Expanded(
                 child: ListView.builder(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  itemCount: _addresses.length,
+                  itemCount: addresses.length,
                   itemBuilder: (context, index) {
-                    final address = _addresses[index];
+                    final address = addresses[index];
                     final isSelected = _selectedAddress?.label == address.label;
 
                     return GestureDetector(
@@ -1243,7 +1162,10 @@ class _CheckoutScreenState extends State<CheckoutScreen>
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop(); // Close dialog
-                        Navigator.of(context).pop(); // Close checkout screen
+                        Navigator.pushReplacementNamed(
+                          context,
+                          OrdersScreen.routeName,
+                        );
                         // Navigate to orders screen (implement this)
                       },
                       style: ElevatedButton.styleFrom(

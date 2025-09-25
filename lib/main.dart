@@ -1,8 +1,8 @@
 import 'dart:developer';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shop/auth_gate.dart';
 import 'package:shop/firebase_options.dart';
 import 'package:shop/screens/cart/cart_screen.dart';
 import 'package:shop/screens/cart/checkout_screen.dart';
@@ -29,6 +29,7 @@ import 'package:shop/widgets/navigationbar.dart';
 import 'package:shop/theme/theme_cubit.dart';
 import 'package:shop/theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shop/screens/admin/admin_dashboard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,7 +68,7 @@ class ShopApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeState.themeMode,
-            home: const AuthWrapper(),
+            home: AuthGate(),
             routes: {
               Homepage.routeName: (context) => Homepage(),
               ShowProductspage.routeName: (context) => ShowProductspage(),
@@ -83,67 +84,13 @@ class ShopApp extends StatelessWidget {
               OnboardingScreen.routeName: (context) => OnboardingScreen(),
               WelcomeScreen.routeName: (context) => const WelcomeScreen(),
               CheckoutScreen.routeName: (context) => CheckoutScreen(),
-              '/orders': (context) => const OrdersScreen(),
+              OrdersScreen.routeName: (context) => const OrdersScreen(),
+              AdminPage.routeName: (context) => const AdminPage(),
+              AuthGate.routeName: (context) => const AuthGate(),
             },
           );
         },
       ),
-    );
-  }
-}
-
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        // Show loading while checking auth state
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        // Handle errors in auth stream
-        if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error, size: 50, color: Colors.red),
-                  const SizedBox(height: 16),
-                  const Text('Authentication Error'),
-                  const SizedBox(height: 8),
-                  Text('${snapshot.error}'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Try to restart auth check
-                      Navigator.pushReplacementNamed(
-                        context,
-                        LoginPage.routeName,
-                      );
-                    },
-                    child: const Text('Go to Login'),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        if (snapshot.hasData && snapshot.data != null) {
-          // User is logged in
-          return const Navigationbar();
-        } else {
-          // User is not logged in
-          return const LoginPage();
-        }
-      },
     );
   }
 }

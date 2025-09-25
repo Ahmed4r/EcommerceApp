@@ -5,14 +5,14 @@ class UserModel {
   final String? email;
   final String? displayName;
   final String? photoUrl;
-  final bool isAdmin;
+  final String role;
 
   const UserModel({
     required this.uid,
     this.email,
     this.displayName,
     this.photoUrl,
-    this.isAdmin = false,
+    this.role = 'user',
   });
 
   factory UserModel.fromFirebaseUser(User? u) {
@@ -21,7 +21,7 @@ class UserModel {
       email: u?.email,
       displayName: u?.displayName,
       photoUrl: u?.photoURL,
-      isAdmin: false,
+      role: 'user',
     );
   }
 
@@ -31,7 +31,7 @@ class UserModel {
       email: json['email'],
       displayName: json['displayName'],
       photoUrl: json['photoUrl'],
-      isAdmin: json['isAdmin'] == true,
+      role: json['role'] ?? 'user',
     );
   }
 
@@ -40,6 +40,6 @@ class UserModel {
     'email': email,
     'displayName': displayName,
     'photoUrl': photoUrl,
-    'isAdmin': isAdmin,
+    'role': role,
   };
 }

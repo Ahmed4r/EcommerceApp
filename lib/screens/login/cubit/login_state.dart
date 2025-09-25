@@ -8,15 +8,17 @@ class LoginInitialState extends LoginState {}
 
 class LoginLoadingState extends LoginState {}
 
-// Keep LoginSuccessState carrying your UserModel
+// LoginSuccessState with user data and role information
 class LoginSuccessState extends LoginState {
   final UserModel user;
-  const LoginSuccessState(this.user);
+  final String role;
+  const LoginSuccessState(this.user, this.role);
+
+  bool get isAdmin => role == 'admin';
+  bool get isUser => role == 'user';
 }
 
 class LoginFailureState extends LoginState {
   final String error;
   const LoginFailureState(this.error);
 }
-
-

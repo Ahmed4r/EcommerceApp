@@ -1,11 +1,11 @@
 import 'dart:developer';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:shop/screens/login/cubit/login_cubit.dart';
 import 'package:shop/screens/login/cubit/login_state.dart';
 import 'package:shop/screens/login/forgot_password/forgot_password.dart';
@@ -52,8 +52,15 @@ class _LoginPageState extends State<LoginPage> {
             context,
           ).showSnackBar(SnackBar(content: Text(state.error)));
         } else if (state is LoginSuccessState) {
-          // Navigate to main app on successful login
-          Navigator.pushReplacementNamed(context, Navigationbar.routeName);
+          // Navigate based on user role
+          if (state.isAdmin) {
+            // Navigate to admin dashboard
+            // You need to create an admin dashboard route
+            Navigator.pushReplacementNamed(context, '/admin_dashboard');
+          } else {
+            // Navigate to regular user main app
+            Navigator.pushReplacementNamed(context, Navigationbar.routeName);
+          }
         }
       },
       child: BlocBuilder<LoginCubit, LoginState>(

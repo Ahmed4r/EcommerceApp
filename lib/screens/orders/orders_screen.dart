@@ -9,6 +9,7 @@ import '../../services/orders_service.dart';
 import 'order_details_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
+  static const String routeName = '/orders_screen';
   const OrdersScreen({super.key});
 
   @override
