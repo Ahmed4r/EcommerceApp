@@ -3,12 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:shop/screens/homepage/product_details.dart';
-import 'package:shop/utils/custom_page_routes.dart';
-
 import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
 import 'package:shop/screens/wishlist/cubit/wishlist_state.dart';
+import 'package:shop/utils/custome_page_routes.dart';
 
 class WishlistPage extends StatelessWidget {
   static const String routeName = "/wishlist";
@@ -123,10 +121,12 @@ class WishlistPage extends StatelessWidget {
                                     child: Hero(
                                       tag: "wishlist_${product.name}_$index",
                                       child: ClipRRect(
+                                        
                                         borderRadius: BorderRadius.vertical(
                                           top: Radius.circular(12.r),
                                         ),
                                         child: Image.network(
+                                      
                                           product.image.isNotEmpty
                                               ? product.image
                                               : 'https://lightwidget.com/wp-content/uploads/localhost-file-not-found.jpg',
