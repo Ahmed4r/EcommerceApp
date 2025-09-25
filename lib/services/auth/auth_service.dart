@@ -40,6 +40,11 @@ class FirebaseAuthService {
     );
   }
 
+  // reset password
+  Future<void> sendPasswordResetEmail(String email) async {
+    await authService.sendPasswordResetEmail(email: email);
+  }
+
   //get user email
   String? getUserEmail() {
     final user = authService.currentUser;

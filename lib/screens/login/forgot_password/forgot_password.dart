@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/services/auth/auth_service.dart';
 import 'package:shop/widgets/custom_button.dart';
 import 'package:shop/widgets/custom_text_field.dart';
 
@@ -14,7 +15,16 @@ class ForgotPassword extends StatefulWidget {
 }
 
 class _ForgotPasswordState extends State<ForgotPassword> {
-  TextEditingController Emailcontroller = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  FirebaseAuthService authService = FirebaseAuthService();
+  FocusNode emailFocusNode = FocusNode();
+  @override
+  void dispose() {
+    emailController.dispose();
+    emailFocusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,19 +69,38 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               SizedBox(height: 20.h),
 
               CustomTextField(
-                controller: Emailcontroller,
+                focusNode: emailFocusNode,
+                controller: emailController,
                 labelText: 'email',
                 icon: FontAwesomeIcons.envelope,
               ),
               SizedBox(height: 20.h),
               CustomButton(
                 title: 'send',
-                onTap: () {
-                  // Navigator.pushNamed(
-                  //   context,
-                  //   OtpScreen.routeName,
-                  //   arguments: {'email': Emailcontroller.text},
-                  // );
+                onTap: () async {
+                  try {
+                    if (emailController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Please enter your email')),
+                      );
+                      return;
+                    }
+                    await authService.sendPasswordResetEmail(
+                      emailController.text,
+                    );
+
+                    emailController.clear();
+                    emailFocusNode.unfocus();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Password reset email sent')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error sending password reset email'),
+                      ),
+                    );
+                  }
                 },
               ),
             ],

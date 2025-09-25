@@ -14,6 +14,7 @@ class CustomTextField extends StatefulWidget {
   final int? maxLines;
   final bool? keyboardTypeNumber;
   final String? Function(String?)? validator;
+  final FocusNode? focusNode;
 
   const CustomTextField({
     super.key,
@@ -26,6 +27,7 @@ class CustomTextField extends StatefulWidget {
     this.enabled = true,
     this.maxLines = 1,
     this.keyboardTypeNumber,
+    this.focusNode,
     TextInputType keyboardType = TextInputType.emailAddress,
   });
 
@@ -76,6 +78,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               SizedBox(width: 10.w),
               Expanded(
                 child: TextFormField(
+                  focusNode: widget.focusNode,
                   maxLines: widget.maxLines,
                   enabled: widget.enabled,
                   controller: widget.controller,
