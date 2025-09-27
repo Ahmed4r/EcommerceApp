@@ -17,6 +17,16 @@ workflows:
         script: |
           flutter pub get
 
+      - name: Set iOS deployment target to 15.0
+        script: |
+          flutter config --ios-deployment-target=15.0
+        
+          cd ios
+          echo "platform :ios, '15.0'" > temp_podfile
+          tail -n +2 Podfile >> temp_podfile
+          mv temp_podfile Podfile
+          cd ..
+
       - name: Clean and update CocoaPods
         script: |
           rm -f ios/Podfile.lock
