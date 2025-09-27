@@ -17,38 +17,34 @@ workflows:
         script: |
           flutter pub get
 
-      - name: Set iOS deployment target to 15.0
+      - name: Set iOS deployment target
         script: |
-          flutter config --ios-deployment-target=15.0
-        
           cd ios
-          echo "platform :ios, '15.0'" > temp_podfile
-          tail -n +2 Podfile >> temp_podfile
-          mv temp_podfile Podfile
+          if ! grep -q "platform :ios, '15.5'" Podfile; then
+            echo "platform :ios, '15.5'" | cat - Podfile > temp && mv temp Podfile
+          fi
           cd ..
 
       - name: Clean and update CocoaPods
         script: |
           rm -f ios/Podfile.lock
-          rm -rf ios/Pods
           cd ios
           pod repo update
-          pod install --repo-update
+          pod deintegrate
+          pod install
           cd ..
 
       - name: Build iOS (no signing)
         script: |
-          flutter clean
-          flutter pub get
           flutter build ios --release --no-codesign
 
       - name: Create Payload folder
         working_directory: build/ios/iphoneos
-        script: mkdir -p Payload
+        script: mkdir Payload
 
       - name: Move Runner.app into Payload
         working_directory: build/ios/iphoneos
-        script: mv Runner.app/ Payload/
+        script: mv Runner.app/ Payload
 
       - name: Zip output IPA
         working_directory: build/ios/iphoneos
