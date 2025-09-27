@@ -7,6 +7,8 @@ class FirebaseAuthService {
   // Configure Google Sign-In
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
+    // Force account picker and add client ID for better compatibility
+    forceCodeForRefreshToken: true,
   );
 
   //sign out
@@ -64,6 +66,9 @@ class FirebaseAuthService {
 
   Future<UserCredential> signInWithGoogle() async {
     try {
+      // Sign out any previous Google account first
+      await _googleSignIn.signOut();
+
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
@@ -75,6 +80,11 @@ class FirebaseAuthService {
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
+      // Check if we have valid tokens
+      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
+        throw Exception('Failed to get Google authentication tokens.');
+      }
+
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -83,7 +93,15 @@ class FirebaseAuthService {
 
       // Sign in to Firebase with the Google credential
       return await authService.signInWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      throw Exception('Firebase Auth Error: ${e.code} - ${e.message}');
     } catch (e) {
+      // Handle specific Google Sign-In errors
+      if (e.toString().contains('12500')) {
+        throw Exception(
+          'Google Sign-In configuration error. Please check your SHA-1 fingerprint and OAuth client setup.',
+        );
+      }
       throw Exception('Google sign-in failed: $e');
     }
   }
