@@ -156,9 +156,9 @@ class _ProductItemCardState extends State<ProductItemCard>
                   ? widget.product.image
                   : 'https://lightwidget.com/wp-content/uploads/localhost-file-not-found.jpg',
             ),
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.3),
+              Colors.black.withOpacity(0.02),
               BlendMode.darken,
             ),
             onError: (error, stackTrace) {
@@ -181,8 +181,17 @@ class _ProductItemCardState extends State<ProductItemCard>
                       widget.product.name,
                       style: GoogleFonts.notoSansRejang(
                         fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.white,
+                        color: isDarkMode ? Colors.white : Colors.black,
                         fontSize: 12.sp,
+                        shadows: [
+                          Shadow(
+                            color: isDarkMode
+                                ? Colors.black.withOpacity(1)
+                                : Colors.black.withOpacity(0.1),
+                            offset: Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -196,15 +205,21 @@ class _ProductItemCardState extends State<ProductItemCard>
                         width: 60.w,
                         height: 40.h,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: isDarkMode
+                              ? Colors.white.withOpacity(0.2)
+                              : Colors.black.withOpacity(0.02),
                           borderRadius: BorderRadius.circular(20.r),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
+                            color: isDarkMode
+                                ? Colors.white.withOpacity(0.3)
+                                : Colors.black.withOpacity(0.02),
                             width: 1.5.w,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: isDarkMode
+                                  ? Colors.white.withOpacity(0.2)
+                                  : Colors.black.withOpacity(0.02),
                               blurRadius: 10.r,
                               offset: Offset(0, 4),
                             ),
@@ -215,13 +230,13 @@ class _ProductItemCardState extends State<ProductItemCard>
                           children: [
                             Icon(
                               Icons.star_border_rounded,
-                              color: Colors.white,
+                              color: isDarkMode ? Colors.white : Colors.black,
                               size: 18.sp,
                             ),
                             Text(
                               widget.product.rate.toString(),
                               style: GoogleFonts.cairo(
-                                color: isDarkMode ? Colors.white : Colors.white,
+                                color: isDarkMode ? Colors.white : Colors.black,
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -243,15 +258,16 @@ class _ProductItemCardState extends State<ProductItemCard>
                     width: 140.w,
                     height: 40.h,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
+                        color: isDarkMode
+                            ? Colors.white.withOpacity(0.3)
+                            : Colors.black.withOpacity(0.1),
                         width: 1.5.w,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withOpacity(0.02),
                           blurRadius: 10.r,
                           offset: Offset(0, 4),
                         ),
@@ -265,7 +281,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                           style: GoogleFonts.cairo(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
-                            color: isDarkMode ? Colors.white : Colors.white,
+                            color: isDarkMode ? Colors.white : Colors.black,
                           ),
                         ),
                         GestureDetector(

@@ -71,7 +71,7 @@ class ProductDetailsPage extends StatelessWidget {
                             ? product.image
                             : 'https://lightwidget.com/wp-content/uploads/localhost-file-not-found.jpg',
                       ),
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),

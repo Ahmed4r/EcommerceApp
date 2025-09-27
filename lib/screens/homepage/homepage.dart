@@ -9,8 +9,8 @@ import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/widgets/homepage_headers.dart';
 import 'package:shop/widgets/product_card.dart';
 import 'package:carousel_slider_plus/carousel_slider_plus.dart';
-import 'homepage_cubit.dart';
-import 'homepage_state.dart';
+import 'cubit/homepage_cubit.dart';
+import 'cubit/homepage_state.dart';
 
 class Homepage extends StatefulWidget {
   static const String routeName = 'home';

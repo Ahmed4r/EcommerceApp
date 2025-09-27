@@ -6,7 +6,7 @@ import 'package:shop/auth_gate.dart';
 import 'package:shop/firebase_options.dart';
 import 'package:shop/screens/cart/cart_screen.dart';
 import 'package:shop/screens/cart/checkout_screen.dart';
-import 'package:shop/screens/homepage/cubit/homepage.dart';
+import 'package:shop/screens/homepage/homepage.dart';
 import 'package:shop/screens/homepage/cubit/homepage_cubit.dart';
 import 'package:shop/screens/login/cubit/login_cubit.dart';
 import 'package:shop/screens/location/address_details_Screen.dart';
@@ -17,7 +17,7 @@ import 'package:shop/screens/onboarding/onboarding_screen.dart';
 import 'package:shop/screens/orders/orders_screen.dart';
 import 'package:shop/screens/profile/cubit/profile_cubit.dart';
 import 'package:shop/screens/register/cubit/signup_cubit.dart';
-import 'package:shop/screens/splash/welcome_screen.dart';
+import 'package:shop/screens/splash/splash_screen.dart';
 import 'package:shop/screens/profile/profile.dart';
 import 'package:shop/screens/homepage/products_screen.dart';
 import 'package:shop/screens/register/signup.dart';
@@ -68,7 +68,7 @@ class ShopApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeState.themeMode,
-            home: AuthGate(),
+            home: SplashScreen(),
             routes: {
               Homepage.routeName: (context) => Homepage(),
               ShowProductspage.routeName: (context) => ShowProductspage(),
@@ -82,7 +82,7 @@ class ShopApp extends StatelessWidget {
               ForgotPassword.routeName: (context) => ForgotPassword(),
               Navigationbar.routeName: (context) => Navigationbar(),
               OnboardingScreen.routeName: (context) => OnboardingScreen(),
-              WelcomeScreen.routeName: (context) => const WelcomeScreen(),
+              SplashScreen.routeName: (context) => const SplashScreen(),
               CheckoutScreen.routeName: (context) => CheckoutScreen(),
               OrdersScreen.routeName: (context) => const OrdersScreen(),
               AdminPage.routeName: (context) => const AdminPage(),
