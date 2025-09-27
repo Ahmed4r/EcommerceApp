@@ -9,6 +9,9 @@ class FirebaseAuthService {
     scopes: ['email', 'profile'],
     // Force account picker and add client ID for better compatibility
     forceCodeForRefreshToken: true,
+    // iOS client ID for better iOS compatibility
+    clientId:
+        '209723495727-mli0o70tjcii4hlj3trkure966bkii16.apps.googleusercontent.com',
   );
 
   //sign out
