@@ -156,7 +156,7 @@ class _ProductItemCardState extends State<ProductItemCard>
             ),
             fit: BoxFit.contain,
             colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.02),
+              Colors.black.withOpacity(0.05),
               BlendMode.darken,
             ),
             onError: (error, stackTrace) {
@@ -219,13 +219,13 @@ class _ProductItemCardState extends State<ProductItemCard>
                           children: [
                             Icon(
                               Icons.star_border_rounded,
-                              color: isDarkMode ? Colors.white : Colors.black,
+                              color: isDarkMode ? Colors.blue : Colors.black,
                               size: 18.sp,
                             ),
                             Text(
                               widget.product.rate.toString(),
                               style: GoogleFonts.cairo(
-                                color: isDarkMode ? Colors.white : Colors.black,
+                                color: isDarkMode ? Colors.blue : Colors.black,
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -270,7 +270,7 @@ class _ProductItemCardState extends State<ProductItemCard>
                           style: GoogleFonts.cairo(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
-                            color: isDarkMode ? Colors.white : Colors.black,
+                            color: isDarkMode ? Colors.blue : Colors.black,
                           ),
                         ),
                         GestureDetector(
