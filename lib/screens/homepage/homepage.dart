@@ -1,10 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:shared_preferences/shared_preferences.dart'; // Unused import
-
 import 'package:shop/screens/cart/cart_Screen.dart';
 import 'package:shop/widgets/homepage_headers.dart';
 import 'package:shop/widgets/product_card.dart';
@@ -72,7 +71,7 @@ class _HomepageState extends State<Homepage> {
       builder: (context, state) {
         if (state is HomepageLoading) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: Center(child: CircularProgressIndicator.adaptive()),
           );
         }
         if (state is HomepageFailure) {
@@ -115,21 +114,22 @@ class _HomepageState extends State<Homepage> {
             backgroundColor: Theme.of(context).colorScheme.background,
             appBar: AppBar(
               elevation: 0,
-              excludeHeaderSemantics: true,
-              // forceMaterialTransparency: true,
               backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
               centerTitle: false,
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Hi Welcome', style: GoogleFonts.cairo(fontSize: 20.sp)),
-                  Text(
-                    userName != null && userName.isNotEmpty
-                        ? 'Mr. $userName'
-                        : 'Welcome Guest',
-                    style: GoogleFonts.cairo(fontSize: 16.sp),
-                  ),
-                ],
+              title: Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Welcome', style: GoogleFonts.cairo(fontSize: 20.sp)),
+                    Text(
+                      userName != null && userName.isNotEmpty
+                          ? 'Mr. $userName'
+                          : 'Welcome Guest',
+                      style: GoogleFonts.cairo(fontSize: 16.sp),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 Row(

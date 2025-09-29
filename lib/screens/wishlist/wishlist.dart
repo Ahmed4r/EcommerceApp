@@ -121,12 +121,10 @@ class WishlistPage extends StatelessWidget {
                                     child: Hero(
                                       tag: "wishlist_${product.name}_$index",
                                       child: ClipRRect(
-                                        
                                         borderRadius: BorderRadius.vertical(
                                           top: Radius.circular(12.r),
                                         ),
                                         child: Image.network(
-                                      
                                           product.image.isNotEmpty
                                               ? product.image
                                               : 'https://lightwidget.com/wp-content/uploads/localhost-file-not-found.jpg',
@@ -185,7 +183,7 @@ class WishlistPage extends StatelessWidget {
                                 backgroundColor: Colors.red.withOpacity(0.9),
                                 child: FaIcon(
                                   FontAwesomeIcons.heart,
-                                  color: Theme.of(context).colorScheme.onError,
+                                  color: Colors.white,
                                   size: 12.sp,
                                 ),
                               ),

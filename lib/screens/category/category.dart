@@ -21,7 +21,6 @@ class Category extends StatefulWidget {
 
 class _CategoryState extends State<Category> {
   final TextEditingController searchController = TextEditingController();
-  // Remove local cubit instance - use the one from BlocProvider
 
   int selectedIndex = 0; // Start with "All" selected
   List<Product> filteredProducts = [];

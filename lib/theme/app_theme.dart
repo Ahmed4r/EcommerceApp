@@ -14,6 +14,7 @@ class AppTheme {
   static const Color _lightOnBackground = Color(0xFF000000);
   static const Color _lightOnSurface = Color(0xFF000000);
   static const Color _lightOnError = Color(0xFFFFFFFF);
+  static const Color appBarBackGroundLightColor = Color(0xFF2C2C2C);
 
   // Dark theme colors
   static const Color _darkPrimary = Color(0xFF90CAF9);
@@ -27,6 +28,7 @@ class AppTheme {
   static const Color _darkOnBackground = Color(0xFFFFFFFF);
   static const Color _darkOnSurface = Color(0xFFFFFFFF);
   static const Color _darkOnError = Color(0xFF000000);
+  static const Color appBarBackGroundDarkColor = Color(0xFF2C2C2C);
 
   // Card colors
   static const Color _lightCardColor = Color(0xFFFFFFFF);
@@ -58,7 +60,8 @@ class AppTheme {
 
       // Color scheme
       colorScheme: const ColorScheme.light(
-        primary: Color.fromARGB(255, 61, 61, 61),
+        primary: _lightOnBackground,
+        // primary: Color.fromARGB(255, 61, 61, 61),
         primaryContainer: Color.fromARGB(255, 61, 61, 61),
         secondary: _lightSecondary,
         surface: _lightSurface,
@@ -71,7 +74,7 @@ class AppTheme {
 
       // AppBar theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color.fromARGB(255, 61, 61, 61),
+        backgroundColor: appBarBackGroundLightColor,
         foregroundColor: _lightOnPrimary,
         elevation: 4,
         toolbarHeight: 70,

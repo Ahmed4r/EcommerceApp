@@ -50,7 +50,7 @@ class _NavigationbarState extends State<Navigationbar> {
         curve: Curves.bounceOut,
         currentIndex: _selectedIndex,
 
-        unselectedItemColor: Colors.white,
+        unselectedItemColor: Colors.grey,
         backgroundColor: Colors.black.withValues(alpha: 0.1),
 
         borderWidth: 2,

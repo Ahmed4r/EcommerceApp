@@ -1,13 +1,11 @@
 import 'dart:developer';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:redacted/redacted.dart';
-
 import 'package:shop/model/product_model.dart';
 import 'package:shop/screens/cart/cart_screen.dart';
 import 'package:shop/screens/homepage/product_details.dart';
@@ -179,19 +177,10 @@ class _ProductItemCardState extends State<ProductItemCard>
                   Expanded(
                     child: Text(
                       widget.product.name,
-                      style: GoogleFonts.notoSansRejang(
+                      style: GoogleFonts.cairo(
                         fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black,
+                        color: isDarkMode ? Colors.blue : Colors.black,
                         fontSize: 12.sp,
-                        shadows: [
-                          Shadow(
-                            color: isDarkMode
-                                ? Colors.black.withOpacity(1)
-                                : Colors.black.withOpacity(0.1),
-                            offset: Offset(0, 1),
-                            blurRadius: 2,
-                          ),
-                        ],
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
