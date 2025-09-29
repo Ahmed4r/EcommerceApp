@@ -20,9 +20,9 @@ class ShowProductspage extends StatelessWidget {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back_ios),
+          icon: Icon(Icons.arrow_back_ios, color: Colors.grey),
         ),
-        forceMaterialTransparency: true,
+        // forceMaterialTransparency: true,
         title: Text("Products"),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       ),
