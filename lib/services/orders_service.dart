@@ -65,39 +65,7 @@ class OrdersService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchAllOrders() async {
-    try {
-      final snapshot = await _firestore
-          .collection('orders')
-          .orderBy('createdAt', descending: true)
-          .get();
-
-      List<Map<String, dynamic>> orders = [];
-
-      for (var doc in snapshot.docs) {
-        final orderData = doc.data();
-        orderData['id'] = doc.id;
-
-        // Fetch order items
-        final itemsSnapshot = await _firestore
-            .collection('orders')
-            .doc(doc.id)
-            .collection('items')
-            .get();
-
-        orderData['items'] = itemsSnapshot.docs
-            .map((itemDoc) => {'id': itemDoc.id, ...itemDoc.data()})
-            .toList();
-
-        orders.add(orderData);
-      }
-
-      return orders;
-    } catch (e) {
-      print('Error fetching all orders: $e');
-      return [];
-    }
-  }
+  
 
   Future<List<Map<String, dynamic>>> fetchMyOrders() async {
     final userId = _auth.currentUser?.uid;

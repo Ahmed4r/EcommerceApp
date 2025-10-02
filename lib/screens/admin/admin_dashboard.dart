@@ -1,9 +1,15 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shop/model/product_model.dart';
+import 'package:shop/screens/admin/orders_management.dart';
+import 'package:shop/screens/admin/user_management.dart';
 import 'package:shop/screens/login/login.dart';
 import 'package:shop/services/auth/auth_service.dart';
+import 'package:shop/services/store/firestore_service.dart';
 
 class AdminPage extends StatefulWidget {
   static const String routeName = '/admin_dashboard';
@@ -16,6 +22,137 @@ class AdminPage extends StatefulWidget {
 class _AdminPageState extends State<AdminPage> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   final authService = FirebaseAuthService();
+  final firestoreService = FirestoreService();
+  List<Product> products = [];
+  bool isLoading = true;
+  String productsCount = '0';
+  int ordersCount = 0;
+  int usersCount = 0;
+  double totalRevenue = 0.0;
+  Map<String, double> revenueStats = {};
+
+  Future<void> _ensureAdminRole() async {
+    try {
+      // Check if current user has admin role in Firestore
+      final userDoc = await firestoreService.firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+
+      if (!userDoc.exists) {
+        log(
+          'Admin Dashboard: User document does not exist, creating admin user...',
+        );
+        // Create admin user document
+        await firestoreService.firestore
+            .collection('users')
+            .doc(currentUser.uid)
+            .set({
+              'uid': currentUser.uid,
+              'email': currentUser.email,
+              'displayName': currentUser.displayName ?? 'Admin',
+              'role': 'admin', // Set as admin
+              'createdAt': DateTime.now().toIso8601String(),
+            });
+        log('Admin Dashboard: Created admin user document');
+      } else {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        if (userData['role'] != 'admin') {
+          log('Admin Dashboard: Updating user role to admin...');
+          // Update user role to admin
+          await firestoreService.firestore
+              .collection('users')
+              .doc(currentUser.uid)
+              .update({'role': 'admin'});
+          log('Admin Dashboard: Updated user role to admin');
+        }
+      }
+    } catch (e) {
+      log('Admin Dashboard: Error ensuring admin role: $e');
+      throw e;
+    }
+  }
+
+  void _fetchStats() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      log('Admin Dashboard: Ensuring admin role...');
+      await _ensureAdminRole();
+
+      log('Admin Dashboard: Debugging orders data...');
+      await firestoreService.debugOrdersData();
+
+      log('Admin Dashboard: Fetching stats from Firestore...');
+
+      // Fetch all stats concurrently
+      final results = await Future.wait([
+        firestoreService.getProducts(),
+        firestoreService.getOrdersCount(),
+        firestoreService.getTotalUsers(),
+        firestoreService.getTotalRevenue(),
+        firestoreService.getRevenueStats(),
+      ]);
+
+      final products = results[0] as List<Product>;
+      final ordersCount = results[1] as int;
+      final usersCount = results[2] as int;
+      final totalRevenue = results[3] as double;
+      final revenueStats = results[4] as Map<String, double>;
+
+      log(
+        'Admin Dashboard: Found ${products.length} products, $ordersCount orders, $usersCount users, \$${totalRevenue.toStringAsFixed(2)} revenue',
+      );
+
+      setState(() {
+        this.products = products;
+        this.productsCount = products.length.toString();
+        this.ordersCount = ordersCount;
+        this.usersCount = usersCount;
+        this.totalRevenue = totalRevenue;
+        this.revenueStats = revenueStats;
+        isLoading = false;
+      });
+    } catch (e) {
+      log('Admin Dashboard: Error fetching stats: $e');
+      setState(() {
+        isLoading = false;
+      });
+
+      // Show detailed error to user
+      String errorMessage = 'Error loading dashboard stats';
+      if (e.toString().contains('PERMISSION_DENIED')) {
+        errorMessage =
+            'Permission denied. Please ensure you have admin access and try again.';
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$errorMessage\n\nTap refresh to retry.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Refresh',
+              textColor: Colors.white,
+              onPressed: _fetchStats,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch stats after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchStats();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +169,11 @@ class _AdminPageState extends State<AdminPage> {
           ),
         ),
         centerTitle: true,
+        leading: Icon(
+          Icons.admin_panel_settings,
+          color: Colors.brown,
+          size: 30,
+        ),
         actions: [
           IconButton(
             onPressed: () async {
@@ -100,13 +242,19 @@ class _AdminPageState extends State<AdminPage> {
             SizedBox(height: 24),
 
             // Quick Stats
-            Text(
-              'Quick Stats',
-              style: GoogleFonts.sen(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.titleMedium?.color,
-              ),
+            Row(
+              children: [
+                Text(
+                  'Quick Stats',
+                  style: GoogleFonts.sen(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.titleMedium?.color,
+                  ),
+                ),
+                Spacer(),
+                IconButton(onPressed: _fetchStats, icon: Icon(Icons.refresh)),
+              ],
             ),
             SizedBox(height: 12),
 
@@ -116,7 +264,7 @@ class _AdminPageState extends State<AdminPage> {
                   child: _buildStatCard(
                     context,
                     'Products',
-                    '0',
+                    productsCount,
                     Icons.inventory,
                     Colors.blue,
                   ),
@@ -126,7 +274,9 @@ class _AdminPageState extends State<AdminPage> {
                   child: _buildStatCard(
                     context,
                     'Orders',
-                    '0',
+                    isLoading
+                        ? '...'
+                        : (ordersCount == -1 ? 'N/A' : ordersCount.toString()),
                     Icons.shopping_cart,
                     Colors.green,
                   ),
@@ -134,7 +284,7 @@ class _AdminPageState extends State<AdminPage> {
               ],
             ),
 
-            SizedBox(height: 12),
+            SizedBox(height: 12.h),
 
             Row(
               children: [
@@ -142,19 +292,24 @@ class _AdminPageState extends State<AdminPage> {
                   child: _buildStatCard(
                     context,
                     'Users',
-                    '0',
+                    isLoading ? '...' : usersCount.toString(),
                     Icons.people,
                     Colors.orange,
                   ),
                 ),
                 SizedBox(width: 12),
                 Expanded(
-                  child: _buildStatCard(
-                    context,
-                    'Revenue',
-                    '\$0',
-                    Icons.attach_money,
-                    Colors.purple,
+                  child: GestureDetector(
+                    onTap: () => _showRevenueDetails(),
+                    child: _buildStatCard(
+                      context,
+                      'Revenue',
+                      isLoading
+                          ? '...'
+                          : '\$${totalRevenue.toStringAsFixed(2)}',
+                      Icons.attach_money,
+                      Colors.purple,
+                    ),
                   ),
                 ),
               ],
@@ -195,8 +350,11 @@ class _AdminPageState extends State<AdminPage> {
               Colors.green,
               () {
                 // Navigate to orders management
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Orders management coming soon!')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const OrdersManagementPage(),
+                  ),
                 );
               },
             ),
@@ -209,8 +367,11 @@ class _AdminPageState extends State<AdminPage> {
               Colors.orange,
               () {
                 // Navigate to user management
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('User management coming soon!')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const UserManagementPage(),
+                  ),
                 );
               },
             ),
@@ -310,6 +471,97 @@ class _AdminPageState extends State<AdminPage> {
           color: Theme.of(context).iconTheme.color,
         ),
       ),
+    );
+  }
+
+  void _showRevenueDetails() {
+    if (revenueStats.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Revenue data not available yet')),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Revenue Breakdown',
+            style: GoogleFonts.sen(
+              fontWeight: FontWeight.bold,
+              fontSize: 18.sp,
+            ),
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildRevenueDetailRow(
+                  'Total Revenue',
+                  '\$${(revenueStats['total'] ?? 0.0).toStringAsFixed(2)}',
+                  Colors.green,
+                ),
+                const SizedBox(height: 8),
+                _buildRevenueDetailRow(
+                  'Today\'s Revenue',
+                  '\$${(revenueStats['today'] ?? 0.0).toStringAsFixed(2)}',
+                  Colors.blue,
+                ),
+                const SizedBox(height: 8),
+                _buildRevenueDetailRow(
+                  'Monthly Revenue',
+                  '\$${(revenueStats['monthly'] ?? 0.0).toStringAsFixed(2)}',
+                  Colors.orange,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Note: Only completed/delivered orders are included',
+                  style: GoogleFonts.sen(
+                    fontSize: 12.sp,
+                    color: Colors.grey[600],
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Close',
+                style: GoogleFonts.sen(color: Theme.of(context).primaryColor),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildRevenueDetailRow(String label, String value, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(label, style: GoogleFonts.sen(fontSize: 14.sp)),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.sen(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
     );
   }
 }

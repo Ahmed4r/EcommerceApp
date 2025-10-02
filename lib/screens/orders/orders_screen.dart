@@ -72,66 +72,8 @@ class _OrdersScreenState extends State<OrdersScreen>
     );
   }
 
-  // Debug method to create test orders
-  Future<void> _createTestOrder() async {
-    try {
-      print('🔧 Creating test order...');
-      final orderId = await OrdersService.instance.createOrder(
-        address: null, // Using null for testing
-        paymentMethod: 'Test Payment',
-        total: 99.99,
-        items: [], // Empty items for testing
-      );
-      print('✅ Test order created with ID: $orderId');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Test order created: $orderId'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-
-      // Refresh orders list
-      _loadOrders();
-    } catch (e) {
-      print('❌ Failed to create test order: $e');
-      _showErrorSnackBar('Failed to create test order: $e');
-    }
-  }
-
-  // Debug method to directly query Firestore
-  Future<void> _debugFirestore() async {
-    try {
-      print('🔧 Debug: Checking Firestore directly...');
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        print('❌ No current user');
-        return;
-      }
-
-      // Direct Firestore query
-      final snapshot = await FirebaseFirestore.instance
-          .collection('orders')
-          .get();
-
-      print('📊 Total orders in collection: ${snapshot.docs.length}');
-
-      final userOrders = await FirebaseFirestore.instance
-          .collection('orders')
-          .where('userId', isEqualTo: currentUser.uid)
-          .get();
-
-      print('👤 User orders: ${userOrders.docs.length}');
-
-      for (var doc in userOrders.docs) {
-        print('📋 Order: ${doc.id} - ${doc.data()}');
-      }
-    } catch (e) {
-      print('❌ Debug error: $e');
-    }
-  }
-
+ 
   List<Map<String, dynamic>> get _filteredOrders {
     if (_selectedFilter == 'all') return _orders;
     return _orders
@@ -167,7 +109,6 @@ class _OrdersScreenState extends State<OrdersScreen>
         actions: [
           GestureDetector(
             onTap: _loadOrders,
-            onLongPress: _debugFirestore, // Long press for debug
             child: Container(
               padding: EdgeInsets.all(8.w),
               child: FaIcon(
