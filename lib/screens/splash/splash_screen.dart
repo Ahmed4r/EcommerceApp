@@ -112,7 +112,9 @@ class _SplashScreenState extends State<SplashScreen>
                   animatedTexts: [
                     ScaleAnimatedText(
                       'Carti',
-                      textStyle: Theme.of(context).textTheme.displayLarge,
+                      textStyle: Theme.of(
+                        context,
+                      ).textTheme.displayMedium!.copyWith(color: Colors.blue),
                     ),
                   ],
                 ),

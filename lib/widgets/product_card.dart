@@ -1,14 +1,13 @@
 import 'dart:developer';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:redacted/redacted.dart';
 import 'package:shop/model/product_model.dart';
 import 'package:shop/screens/cart/cart_screen.dart';
 import 'package:shop/screens/homepage/product_details.dart';
+import 'package:shop/screens/wishlist/cubit/wishlist_cubit.dart';
+import 'package:shop/screens/wishlist/cubit/wishlist_state.dart';
 
 class ProductItemCard extends StatefulWidget {
   final Product product;
@@ -25,6 +24,8 @@ class _ProductItemCardState extends State<ProductItemCard>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   bool _isAddingToCart = false;
+  bool _isInWishlist = false;
+  bool _isTogglingWishlist = false;
   // Only rebuild the small cart badge when quantity changes for this product
   late final ValueNotifier<int> _quantityNotifier;
 
@@ -40,6 +41,11 @@ class _ProductItemCardState extends State<ProductItemCard>
     );
     _quantityNotifier = ValueNotifier<int>(_getQuantityFor(widget.product.id));
     _cartManager.addListener(_onCartChanged);
+
+    // Load wishlist state after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadWishlistState();
+    });
   }
 
   @override
@@ -114,26 +120,174 @@ class _ProductItemCardState extends State<ProductItemCard>
     return cartItem.quantity;
   }
 
+  // Load wishlist state from WishlistCubit
+  void _loadWishlistState() {
+    try {
+      final wishlistCubit = context.read<WishlistCubit>();
+      setState(() {
+        _isInWishlist = wishlistCubit.isFavorite(widget.product);
+      });
+    } catch (e) {
+      log('Error loading wishlist state: $e');
+      setState(() {
+        _isInWishlist = false;
+      });
+    }
+  }
+
+  // Toggle wishlist state using WishlistCubit
+  Future<void> _toggleWishlist() async {
+    if (_isTogglingWishlist) return;
+
+    setState(() {
+      _isTogglingWishlist = true;
+    });
+
+    try {
+      HapticFeedback.lightImpact();
+
+      final wishlistCubit = context.read<WishlistCubit>();
+
+      // Use WishlistCubit to toggle favorite
+      await wishlistCubit.toggleFavorite(widget.product);
+
+      // Update local state to match cubit state
+      setState(() {
+        _isInWishlist = wishlistCubit.isFavorite(widget.product);
+      });
+
+      if (_isInWishlist) {
+        // Animate the heart for adding
+        _animationController.forward().then((_) {
+          _animationController.reverse();
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.favorite, color: Colors.red),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Added to wishlist',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+              duration: Duration(seconds: 1),
+              backgroundColor: Colors.black87,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.heart_broken, color: Colors.red),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Removed from wishlist',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+              duration: Duration(seconds: 1),
+              backgroundColor: Colors.black87,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      log('Error toggling wishlist: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating wishlist'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isTogglingWishlist = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Get screen dimensions for responsive sizing
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isTablet = screenWidth > 600;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    // Responsive card dimensions - fine-tuned to prevent overflow
+    double cardWidth = isTablet
+        ? (isLandscape ? screenWidth * 0.22 : screenWidth * 0.3)
+        : screenWidth * 0.43;
+    double cardHeight = isTablet
+        ? (isLandscape ? screenHeight * 0.38 : screenHeight * 0.28)
+        : screenHeight * 0.23; // Further reduced to 0.23
+
+    // Ensure minimum dimensions - fine-tuned
+    cardWidth = cardWidth.clamp(150.0, 220.0);
+    cardHeight = cardHeight.clamp(175.0, 235.0); // Reduced by 5px
+
+    // Responsive spacing and sizes - optimized
+    final margin = isTablet ? 12.0 : 7.0; // Reduced margin
+    final padding = isTablet ? 15.0 : 10.0; // Reduced padding
+    final borderRadius = isTablet ? 24.0 : 20.0;
+    final imageBorderRadius = isTablet ? 20.0 : 16.0;
+
     // Add validation for required product fields
     if (widget.product.id.isEmpty || widget.product.name.isEmpty) {
       return Container(
-        width: 150.w,
-        height: 200.h,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.r)),
+        width: cardWidth,
+        height: cardHeight,
+        margin: EdgeInsets.all(margin),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(borderRadius),
+          color: Colors.grey[300],
+        ),
         child: Center(
           child: Text(
             'Product data incomplete',
-            style: GoogleFonts.cairo(fontSize: 12.sp, color: Colors.grey[600]),
+            style: GoogleFonts.sen(
+              fontSize: isTablet ? 14 : 12,
+              color: Colors.grey[600],
+            ),
           ),
         ),
       );
     }
 
+    // Calculate discount
+    final hasDiscount =
+        widget.product.oldPrice != null &&
+        widget.product.oldPrice! > widget.product.price;
+    final discountPercent = hasDiscount
+        ? ((widget.product.oldPrice! - widget.product.price) /
+                  widget.product.oldPrice! *
+                  100)
+              .round()
+        : 0;
+
     return GestureDetector(
       onTap: () {
+        HapticFeedback.selectionClick();
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -145,159 +299,370 @@ class _ProductItemCardState extends State<ProductItemCard>
         );
       },
       child: Container(
-        width: 150.w,
-        height: 200.h,
+        width: cardWidth,
+        height: cardHeight,
+        margin: EdgeInsets.all(margin),
         decoration: BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage(
-              widget.product.image.isNotEmpty
-                  ? widget.product.image
-                  : 'https://lightwidget.com/wp-content/uploads/localhost-file-not-found.jpg',
+          color: isDarkMode ? Colors.grey[900] : Colors.white,
+          borderRadius: BorderRadius.circular(borderRadius),
+          boxShadow: [
+            BoxShadow(
+              color: isDarkMode
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.grey.withOpacity(0.1),
+              blurRadius: isTablet ? 20 : 15,
+              offset: Offset(0, isTablet ? 8 : 5),
+              spreadRadius: 0,
             ),
-            fit: BoxFit.contain,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.05),
-              BlendMode.darken,
-            ),
-            onError: (error, stackTrace) {
-              // Handle image loading error silently
-            },
-          ),
-          borderRadius: BorderRadius.circular(20.r),
+          ],
         ),
-        child: Padding(
-          padding: EdgeInsets.all(10.0).r,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Top Row: Name + Rating
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Section with Discount Badge
+            Expanded(
+              flex: isLandscape ? 4 : 3,
+              child: Stack(
                 children: [
-                  Expanded(
-                    child: Text(
-                      widget.product.name,
-                      style: GoogleFonts.cairo(
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.blue : Colors.black,
-                        fontSize: 12.sp,
+                  // Product Image
+                  Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.all(padding),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(imageBorderRadius),
+                      color: Colors.grey[100],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(imageBorderRadius),
+                      child: Hero(
+                        tag: "product_${widget.product.id}",
+                        child: Image.network(
+                          widget.product.image.isNotEmpty
+                              ? widget.product.image
+                              : 'https://lightwidget.com/wp-content/uploads/localhost-file-not-found.jpg',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[200],
+                              child: Icon(
+                                Icons.image_not_supported_outlined,
+                                size: isTablet ? 50 : 40,
+                                color: Colors.grey[400],
+                              ),
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: Colors.grey[200],
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SizedBox(width: 5.w),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20.r),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10.r, sigmaY: 10.r),
+
+                  // Discount Badge
+                  if (hasDiscount)
+                    Positioned(
+                      top: isTablet ? 12 : 8,
+                      right: isTablet ? 12 : 8,
                       child: Container(
-                        width: 60.w,
-                        height: 40.h,
-                        decoration: BoxDecoration(
-                          color: isDarkMode
-                              ? Colors.white.withOpacity(0.2)
-                              : Colors.black.withOpacity(0.02),
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(
-                            color: isDarkMode
-                                ? Colors.white.withOpacity(0.3)
-                                : Colors.black.withOpacity(0.02),
-                            width: 1.5.w,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isDarkMode
-                                  ? Colors.white.withOpacity(0.2)
-                                  : Colors.black.withOpacity(0.02),
-                              blurRadius: 10.r,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 10 : 8,
+                          vertical: isTablet ? 6 : 4,
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Icon(
-                              Icons.star_border_rounded,
-                              color: isDarkMode ? Colors.blue : Colors.black,
-                              size: 18.sp,
-                            ),
-                            Text(
-                              widget.product.rate.toString(),
-                              style: GoogleFonts.cairo(
-                                color: isDarkMode ? Colors.blue : Colors.black,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(
+                            isTablet ? 16 : 12,
+                          ),
+                        ),
+                        child: Text(
+                          '-$discountPercent%',
+                          style: GoogleFonts.sen(
+                            color: Colors.white,
+                            fontSize: isTablet ? 12 : 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  // Interactive Wishlist Button
+                  Positioned(
+                    top: isTablet ? 12 : 8,
+                    left: isTablet ? 12 : 8,
+                    child: BlocListener<WishlistCubit, WishlistState>(
+                      listener: (context, state) {
+                        // Update local state when wishlist changes from other parts of the app
+                        final newState = context
+                            .read<WishlistCubit>()
+                            .isFavorite(widget.product);
+                        if (newState != _isInWishlist && mounted) {
+                          setState(() {
+                            _isInWishlist = newState;
+                          });
+                        }
+                      },
+                      child: GestureDetector(
+                        onTap: _toggleWishlist,
+                        child: AnimatedBuilder(
+                          animation: _scaleAnimation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _isInWishlist
+                                  ? _scaleAnimation.value
+                                  : 1.0,
+                              child: Container(
+                                width: isTablet ? 40 : 32,
+                                height: isTablet ? 40 : 32,
+                                decoration: BoxDecoration(
+                                  color: _isInWishlist
+                                      ? Colors.red.withOpacity(0.1)
+                                      : Colors.white.withOpacity(0.9),
+                                  shape: BoxShape.circle,
+                                  border: _isInWishlist
+                                      ? Border.all(
+                                          color: Colors.red.withOpacity(0.3),
+                                          width: 1,
+                                        )
+                                      : null,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: isTablet ? 6 : 4,
+                                      offset: Offset(0, isTablet ? 3 : 2),
+                                    ),
+                                  ],
+                                ),
+                                child: _isTogglingWishlist
+                                    ? SizedBox(
+                                        width: isTablet ? 16 : 12,
+                                        height: isTablet ? 16 : 12,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1.5,
+                                          color: Colors.red,
+                                        ),
+                                      )
+                                    : Icon(
+                                        _isInWishlist
+                                            ? Icons.favorite_rounded
+                                            : Icons.favorite_border_rounded,
+                                        size: isTablet ? 22 : 18,
+                                        color: _isInWishlist
+                                            ? Colors.red
+                                            : Colors.grey[600],
+                                      ),
                               ),
-                            ),
-                          ],
+                            );
+                          },
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
+            ),
 
-              // Bottom Row: Price + Add to Cart
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20.r),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    width: 140.w,
-                    height: 40.h,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isDarkMode
-                            ? Colors.white.withOpacity(0.3)
-                            : Colors.black.withOpacity(0.1),
-                        width: 1.5.w,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.02),
-                          blurRadius: 10.r,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text(
-                          "\$ ${widget.product.price.toString()}",
-                          style: GoogleFonts.cairo(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            color: isDarkMode ? Colors.blue : Colors.black,
+            // Product Info Section - Optimized layout
+            Expanded(
+              flex: isLandscape ? 3 : 2,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  padding,
+                  0,
+                  padding,
+                  padding * 0.6,
+                ), // Further reduced bottom padding
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min, // Added to prevent overflow
+                  children: [
+                    // Product Name and Rating - Compact layout
+                    Flexible(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            widget.product.name,
+                            style: GoogleFonts.sen(
+                              fontSize: isTablet ? 15 : 13, // Slightly reduced
+                              fontWeight: FontWeight.w600,
+                              color: isDarkMode ? Colors.white : Colors.black87,
+                            ),
+                            maxLines: 1, // Always 1 line to save space
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: _addToCart,
-                          child: AnimatedBuilder(
-                            animation: _scaleAnimation,
-                            builder: (context, child) {
-                              return Transform.scale(
-                                scale: _scaleAnimation.value,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.black,
+                          SizedBox(
+                            height: isTablet ? 1 : 0.5,
+                          ), // Minimal spacing
+                          Text(
+                            widget.product.brand,
+                            style: GoogleFonts.sen(
+                              fontSize: isTablet ? 11 : 9, // Further reduced
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w400,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: isTablet ? 3 : 1), // Minimal spacing
+                          // Enhanced Rating Display
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isTablet ? 6 : 4, // Reduced padding
+                              vertical: isTablet ? 3 : 2, // Reduced padding
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(
+                                isTablet ? 12 : 10,
+                              ),
+                              border: Border.all(
+                                color: Colors.amber.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.star_rounded,
+                                  size: isTablet ? 16 : 14,
+                                  color: Colors.amber[700],
+                                ),
+                                SizedBox(width: isTablet ? 4 : 3),
+                                Text(
+                                  widget.product.rate.toStringAsFixed(1),
+                                  style: GoogleFonts.sen(
+                                    fontSize: isTablet ? 13 : 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.amber[800],
                                   ),
-                                  child: CircleAvatar(
-                                    backgroundColor: Colors.transparent,
-                                    radius: 15.r,
+                                ),
+                                SizedBox(width: isTablet ? 4 : 3),
+                                Text(
+                                  '(${widget.product.reviewsCount})',
+                                  style: GoogleFonts.sen(
+                                    fontSize: isTablet ? 11 : 9,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: isTablet ? 2 : 1), // Minimal spacing
+                    // Price and Cart Section - Compact layout
+                    Flexible(
+                      flex: 1,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment:
+                            CrossAxisAlignment.center, // Changed to center
+                        children: [
+                          // Price Column
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    '\$${widget.product.price.toStringAsFixed(2)}',
+                                    style: GoogleFonts.sen(
+                                      fontSize: isTablet
+                                          ? 16
+                                          : 14, // Slightly reduced
+                                      fontWeight: FontWeight.bold,
+                                      color: isDarkMode
+                                          ? Colors.white
+                                          : Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                                if (hasDiscount)
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      '\$${widget.product.oldPrice!.toStringAsFixed(2)}',
+                                      style: GoogleFonts.sen(
+                                        fontSize: isTablet ? 12 : 10, // Reduced
+                                        color: Colors.grey[500],
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(width: 6), // Reduced spacing
+                          // Add to Cart Button - Smaller to fit better
+                          GestureDetector(
+                            onTap: _addToCart,
+                            child: AnimatedBuilder(
+                              animation: _scaleAnimation,
+                              builder: (context, child) {
+                                return Transform.scale(
+                                  scale: _scaleAnimation.value,
+                                  child: Container(
+                                    width: isTablet ? 46 : 38, // Reduced size
+                                    height: isTablet ? 46 : 38,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          Theme.of(context).primaryColor,
+                                          Theme.of(
+                                            context,
+                                          ).primaryColor.withOpacity(0.8),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        isTablet ? 16 : 12,
+                                      ), // Reduced
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Theme.of(context).primaryColor
+                                              .withOpacity(
+                                                0.2,
+                                              ), // Reduced shadow
+                                          blurRadius: isTablet ? 8 : 6,
+                                          offset: Offset(0, isTablet ? 4 : 3),
+                                        ),
+                                      ],
+                                    ),
                                     child: _isAddingToCart
-                                        ? SizedBox(
-                                            width: 12.w,
-                                            height: 12.h,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                    Colors.white,
-                                                  ),
+                                        ? Center(
+                                            child: SizedBox(
+                                              width: isTablet ? 20 : 16,
+                                              height: isTablet ? 20 : 16,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(Colors.white),
+                                              ),
                                             ),
                                           )
                                         : ValueListenableBuilder<int>(
@@ -306,35 +671,53 @@ class _ProductItemCardState extends State<ProductItemCard>
                                               return Stack(
                                                 alignment: Alignment.center,
                                                 children: [
-                                                  FaIcon(
-                                                    FontAwesomeIcons
-                                                        .bagShopping,
+                                                  Icon(
+                                                    Icons
+                                                        .add_shopping_cart_rounded,
                                                     color: Colors.white,
-                                                    size: 16.sp,
+                                                    size: isTablet
+                                                        ? 20
+                                                        : 16, // Reduced
                                                   ),
                                                   if (qty > 0)
                                                     Positioned(
-                                                      top: -2.h,
-                                                      right: -2.w,
+                                                      top: isTablet ? 6 : 4,
+                                                      right: isTablet ? 6 : 4,
                                                       child: Container(
-                                                        width: 10.w,
-                                                        height: 10.h,
+                                                        width: isTablet
+                                                            ? 18
+                                                            : 14, // Reduced
+                                                        height: isTablet
+                                                            ? 18
+                                                            : 14,
                                                         decoration:
-                                                            const BoxDecoration(
+                                                            BoxDecoration(
                                                               color: Colors.red,
                                                               shape: BoxShape
                                                                   .circle,
+                                                              border: Border.all(
+                                                                color: Colors
+                                                                    .white,
+                                                                width: 1,
+                                                              ),
                                                             ),
                                                         child: Center(
-                                                          child: Text(
-                                                            qty.toString(),
-                                                            style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontSize: 8.sp,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
+                                                          child: FittedBox(
+                                                            child: Text(
+                                                              qty > 9
+                                                                  ? '9+'
+                                                                  : qty.toString(),
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize:
+                                                                    isTablet
+                                                                    ? 9
+                                                                    : 7, // Reduced
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
@@ -345,25 +728,19 @@ class _ProductItemCardState extends State<ProductItemCard>
                                             },
                                           ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ),
-    ).redacted(
-      context: context,
-      redact: true,
-      configuration: RedactedConfiguration(
-        animationDuration: const Duration(milliseconds: 800), //default
       ),
     );
   }
