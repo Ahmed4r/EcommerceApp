@@ -231,8 +231,8 @@ class _HomepageState extends State<Homepage> {
                     SizedBox(height: 24.h),
 
                     // Categories Section
-                    _buildCategoriesSection(context),
-                    SizedBox(height: 24.h),
+                    // _buildCategoriesSection(context),
+                    // SizedBox(height: 24.h),
 
                     // Featured Deals Section
                     _buildDealsSection(state.products),
