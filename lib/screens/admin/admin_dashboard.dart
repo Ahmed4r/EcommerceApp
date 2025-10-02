@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop/model/product_model.dart';
 import 'package:shop/screens/admin/orders_management.dart';
+import 'package:shop/screens/admin/products_management.dart';
 import 'package:shop/screens/admin/user_management.dart';
 import 'package:shop/screens/login/login.dart';
 import 'package:shop/services/auth/auth_service.dart';
@@ -336,8 +337,11 @@ class _AdminPageState extends State<AdminPage> {
               Colors.blue,
               () {
                 // Navigate to product management
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Product management coming soon!')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProductsManagementPage(),
+                  ),
                 );
               },
             ),

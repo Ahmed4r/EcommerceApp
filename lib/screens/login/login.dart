@@ -82,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                 style: GoogleFonts.sen(
                   fontSize: 30.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.brown,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
               ),
               centerTitle: true,

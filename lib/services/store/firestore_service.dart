@@ -489,4 +489,147 @@ class FirestoreService {
       log('Error debugging orders data: $e');
     }
   }
+
+  // Product Management Methods
+
+  // Add a new product
+  Future<void> addProduct(Product product) async {
+    try {
+      await productsCollection.doc(product.id).set(product.toJson());
+      log('Product added successfully: ${product.name}');
+    } catch (e) {
+      log('Error adding product: $e');
+      throw Exception('Failed to add product: $e');
+    }
+  }
+
+  // Update an existing product
+  Future<void> updateProduct(Product product) async {
+    try {
+      await productsCollection.doc(product.id).update(product.toJson());
+      log('Product updated successfully: ${product.name}');
+    } catch (e) {
+      log('Error updating product: $e');
+      throw Exception('Failed to update product: $e');
+    }
+  }
+
+  // Delete a product
+  Future<void> deleteProduct(String productId) async {
+    try {
+      await productsCollection.doc(productId).delete();
+      log('Product deleted successfully: $productId');
+    } catch (e) {
+      log('Error deleting product: $e');
+      throw Exception('Failed to delete product: $e');
+    }
+  }
+
+  // Update product stock status
+  Future<void> updateProductStock(String productId, bool inStock) async {
+    try {
+      await productsCollection.doc(productId).update({
+        'inStock': inStock,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+      log('Product stock updated: $productId -> inStock: $inStock');
+    } catch (e) {
+      log('Error updating product stock: $e');
+      throw Exception('Failed to update product stock: $e');
+    }
+  }
+
+  // Get a single product by ID
+  Future<Product?> getProductById(String productId) async {
+    try {
+      final doc = await productsCollection.doc(productId).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Product.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      log('Error getting product by ID: $e');
+      return null;
+    }
+  }
+
+  // Search products by name or description
+  Future<List<Product>> searchProducts(String query) async {
+    try {
+      // Firestore doesn't support full-text search, so we'll get all products
+      // and filter them. For better performance, consider using Algolia or ElasticSearch
+      final allProducts = await getProducts();
+
+      final filteredProducts = allProducts.where((product) {
+        return product.name.toLowerCase().contains(query.toLowerCase()) ||
+            product.description.toLowerCase().contains(query.toLowerCase()) ||
+            product.category.toLowerCase().contains(query.toLowerCase()) ||
+            product.brand.toLowerCase().contains(query.toLowerCase()) ||
+            product.tags.any(
+              (tag) => tag.toLowerCase().contains(query.toLowerCase()),
+            );
+      }).toList();
+
+      return filteredProducts;
+    } catch (e) {
+      log('Error searching products: $e');
+      return [];
+    }
+  }
+
+  // Get products by category
+  Future<List<Product>> getProductsByCategory(String category) async {
+    try {
+      final querySnapshot = await productsCollection
+          .where('category', isEqualTo: category)
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Product.fromJson(data);
+      }).toList();
+    } catch (e) {
+      log('Error getting products by category: $e');
+      return [];
+    }
+  }
+
+  // Get products by brand
+  Future<List<Product>> getProductsByBrand(String brand) async {
+    try {
+      final querySnapshot = await productsCollection
+          .where('brand', isEqualTo: brand)
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Product.fromJson(data);
+      }).toList();
+    } catch (e) {
+      log('Error getting products by brand: $e');
+      return [];
+    }
+  }
+
+  // Get out of stock products
+  Future<List<Product>> getOutOfStockProducts() async {
+    try {
+      final querySnapshot = await productsCollection
+          .where('inStock', isEqualTo: false)
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Product.fromJson(data);
+      }).toList();
+    } catch (e) {
+      log('Error getting out of stock products: $e');
+      return [];
+    }
+  }
 }
