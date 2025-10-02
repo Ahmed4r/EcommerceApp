@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -83,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                 style: GoogleFonts.sen(
                   fontSize: 30.sp,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).appBarTheme.titleTextStyle?.color,
+                  color: Colors.brown,
                 ),
               ),
               centerTitle: true,

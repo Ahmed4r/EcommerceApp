@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shop/model/user_model.dart';
 import 'package:shop/screens/login/cubit/login_state.dart';
 import 'package:shop/services/auth/auth_service.dart';
+import 'package:shop/services/store/firestore_service.dart';
 import 'package:shop/services/user_service.dart';
 
 class LoginCubit extends Cubit<LoginState> {
@@ -67,20 +68,47 @@ class LoginCubit extends Cubit<LoginState> {
     emit(LoginLoadingState());
     try {
       // Use the auth service to handle Google Sign-In
-      await authService.signInWithGoogle();
+      final userCredential = await authService.signInWithGoogle();
       log('User signed in with Google successfully');
 
-      // Get the current user and emit success
-      final user = FirebaseAuth.instance.currentUser;
+      // Get the current user
+      final user = userCredential.user;
       if (user != null) {
-        // Get user data from Firestore with role information
+        // Check if this is a new user or existing user
         UserModel? userModel = await UserService.getCurrentUserWithData();
 
+        // If user doesn't exist in Firestore, create them
+        if (userModel == null &&
+            userCredential.additionalUserInfo?.isNewUser == true) {
+          log('Creating new Google user in Firestore');
+          try {
+            final firestoreService = FirestoreService();
+            await firestoreService.addUser({
+              'uid': user.uid,
+              'email': user.email ?? '',
+              'displayName':
+                  user.displayName ?? user.email?.split('@')[0] ?? 'User',
+              'role': 'user', // Default role for Google sign-in users
+              'createdAt': DateTime.now().toIso8601String(),
+              'photoUrl': user.photoURL,
+            });
+            // Retry getting user data after creation
+            userModel = await UserService.getCurrentUserWithData();
+          } catch (createError) {
+            log('Error creating user in Firestore: $createError');
+          }
+        }
+
         if (userModel == null) {
-          emit(
-            LoginFailureState("Failed to get user data after Google sign-in"),
+          // Fallback: create a basic UserModel from Firebase user
+          userModel = UserModel(
+            uid: user.uid,
+            email: user.email ?? '',
+            displayName:
+                user.displayName ?? user.email?.split('@')[0] ?? 'User',
+            photoUrl: user.photoURL,
+            role: 'user',
           );
-          return;
         }
 
         emit(LoginSuccessState(userModel, userModel.role));

@@ -7,11 +7,8 @@ class FirebaseAuthService {
   // Configure Google Sign-In
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
-    // Force account picker and add client ID for better compatibility
+    // Force account picker for better compatibility
     forceCodeForRefreshToken: true,
-    // iOS client ID for better iOS compatibility
-    clientId:
-        '209723495727-mli0o70tjcii4hlj3trkure966bkii16.apps.googleusercontent.com',
   );
 
   //sign out
@@ -69,7 +66,7 @@ class FirebaseAuthService {
 
   Future<UserCredential> signInWithGoogle() async {
     try {
-      // Sign out any previous Google account first
+      // Clear any previous Google sign-in session
       await _googleSignIn.signOut();
 
       // Trigger the authentication flow
@@ -95,14 +92,40 @@ class FirebaseAuthService {
       );
 
       // Sign in to Firebase with the Google credential
-      return await authService.signInWithCredential(credential);
+      final UserCredential userCredential = await authService
+          .signInWithCredential(credential);
+
+      // Update display name if not set
+      if (userCredential.user != null &&
+          userCredential.user!.displayName == null) {
+        await userCredential.user!.updateDisplayName(
+          googleUser.displayName ?? googleUser.email.split('@')[0],
+        );
+        await userCredential.user!.reload();
+      }
+
+      return userCredential;
     } on FirebaseAuthException catch (e) {
+      if (e.code == 'network-request-failed') {
+        throw Exception(
+          'Network error. Please check your internet connection.',
+        );
+      } else if (e.code == 'too-many-requests') {
+        throw Exception('Too many sign-in attempts. Please try again later.');
+      }
       throw Exception('Firebase Auth Error: ${e.code} - ${e.message}');
     } catch (e) {
       // Handle specific Google Sign-In errors
-      if (e.toString().contains('12500')) {
+      final errorMessage = e.toString();
+      if (errorMessage.contains('12500') ||
+          errorMessage.contains('DEVELOPER_ERROR')) {
         throw Exception(
           'Google Sign-In configuration error. Please check your SHA-1 fingerprint and OAuth client setup.',
+        );
+      } else if (errorMessage.contains('7') ||
+          errorMessage.contains('NETWORK_ERROR')) {
+        throw Exception(
+          'Network error. Please check your internet connection.',
         );
       }
       throw Exception('Google sign-in failed: $e');
