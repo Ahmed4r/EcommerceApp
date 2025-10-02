@@ -223,8 +223,8 @@ class _HomepageState extends State<Homepage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Search Bar Section
-                    _buildSearchBar(context),
-                    SizedBox(height: 24.h),
+                    // _buildSearchBar(context),
+                    // SizedBox(height: 24.h),
 
                     // Banner Carousel
                     _buildBannerSection(),
