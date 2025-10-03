@@ -71,9 +71,7 @@ class _HomepageState extends State<Homepage> {
     return BlocBuilder<HomepageCubit, HomepageState>(
       builder: (context, state) {
         if (state is HomepageLoading) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator.adaptive()),
-          );
+          return Center(child: CircularProgressIndicator.adaptive());
         }
         if (state is HomepageFailure) {
           return Scaffold(
@@ -150,7 +148,7 @@ class _HomepageState extends State<Homepage> {
                                 ? userName
                                 : 'Guest User',
                             style: GoogleFonts.sen(
-                              fontSize: 18.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -184,7 +182,11 @@ class _HomepageState extends State<Homepage> {
                         SnackBar(content: Text('Notifications coming soon!')),
                       );
                     },
-                    icon: Icon(Icons.notifications_outlined, size: 18.r),
+                    icon: Icon(
+                      Icons.notifications_outlined,
+                      color: Theme.of(context).primaryColor,
+                      size: 18.r,
+                    ),
                     padding: EdgeInsets.zero,
                   ),
                 ),
@@ -207,7 +209,11 @@ class _HomepageState extends State<Homepage> {
                   child: IconButton(
                     onPressed: () =>
                         Navigator.pushNamed(context, CartScreen.routeName),
-                    icon: Icon(Icons.shopping_bag_outlined, size: 18.r),
+                    icon: Icon(
+                      Icons.shopping_bag_outlined,
+                      color: Theme.of(context).primaryColor,
+                      size: 18.r,
+                    ),
                     padding: EdgeInsets.zero,
                   ),
                 ),
