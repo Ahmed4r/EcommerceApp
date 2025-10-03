@@ -45,7 +45,7 @@ class ShowProductspage extends StatelessWidget {
               itemCount: products.length,
               itemBuilder: (context, index) {
                 if (index < products.length) {
-                  return buildItemCard(context, products[index]);
+                  return ProductItemCard(product: products[index]);
                 }
                 return const SizedBox.shrink();
               },

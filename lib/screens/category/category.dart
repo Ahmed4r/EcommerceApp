@@ -349,9 +349,8 @@ class _CategoryState extends State<Category> {
                           itemCount: productsToShow.length,
                           itemBuilder: (context, index) {
                             if (index < productsToShow.length) {
-                              return buildItemCard(
-                                context,
-                                productsToShow[index],
+                              return ProductItemCard(
+                                product: productsToShow[index],
                               );
                             }
                             return const SizedBox.shrink();
